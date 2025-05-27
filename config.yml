@@ -1,0 +1,99 @@
+## 配置文件
+
+# Webhook地址
+# "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=338f6d2c-3457-4b48-b7d2-fd60f4db98f4"   奖励池名单发布
+# "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=a9d5a3ce-9091-4f99-94f1-c80832238c1a"   看板自动发布
+# "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=833b098e-d8b8-43ea-bfdf-cade0d040fb6"   报错提醒
+# "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=ee57f939-0e4e-4707-beba-422dae91538e"   测试Bot
+
+
+# excel_path: "C:/Users/EDY/Desktop/BOT_TEST/excel文件/奖励池名单.xlsx"     # 截图文件路径
+# file_path: "C:/Users/EDY/Desktop/BOT_TEST/excel文件/奖励池名单.xlsx"      # 发送文件路径
+# webhook_url: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=ee57f939-0e4e-4707-beba-422dae91538e" #测试Bot
+# upload_url: "https://qyapi.weixin.qq.com/cgi-bin/webhook/upload_media?key=ee57f939-0e4e-4707-beba-422dae91538e&type=file" #测试Bot
+
+
+
+tasks:
+
+
+  - excel_path: "C:/Users/EDY/Desktop/BOT_TEST/excel文件/奖励池名单.xlsx"
+    schedule:
+      times: ["01:30", "02:30", "03:30", "04:30", "05:30", "06:30", "07:30", "08:30", "09:30", "10:30", "11:30", "12:30", "13:30", "14:30", "15:30", "16:30", "17:30", "18:30", "19:30", "20:30", "21:30", "22:30"]
+      webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=ee57f939-0e4e-4707-beba-422dae91538e"
+    capture_configs:
+      - sheet_name: "入池名单"
+        range: A1:D33
+        name: "奖励池名单"
+      - sheet_name: "日期校验"
+        range: "B1:E3"
+        name: "校验"
+    send_file_enable: 1
+    upload_url: "https://qyapi.weixin.qq.com/cgi-bin/webhook/upload_media?key=ee57f939-0e4e-4707-beba-422dae91538e&type=file"
+    file_path: "C:/Users/EDY/Desktop/BOT_TEST/excel文件/奖励池名单.xlsx"
+
+    data_check_enable: 1
+    data_check:
+      check_range: "D4"
+      check_frequency: 2
+      warning_webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=833b098e-d8b8-43ea-bfdf-cade0d040fb6" 
+      notify_message: "数据日期校验失败，请检查数据"
+      notify_users: ["zhufuzhe"]
+
+      
+  - excel_path: "C:/Users/EDY/Desktop/BOT_TEST/excel文件/5月自动播报.xlsx"
+    schedule:
+      times: ["02:00", "03:00", "04:00", "05:00", "06:00", "07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00"]
+      webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=ee57f939-0e4e-4707-beba-422dae91538e"
+    capture_configs:
+      - sheet_name: "业绩进度排名-报表"
+        range: A1:X25
+        name: "海外销售部-新签进度排名-实时追踪表"
+      - sheet_name: "往期专项追踪-报表"
+        range: "A1:P25"
+        name: "往期专项追踪表"
+    
+    
+  
+    
+
+
+# v1.0.0 版本更新日志
+# 1. 定时任务功能，可以设置每天的定时发送时间点
+# 2. 多区域截图功能，可以设置多个截图区域，并分别命名(当前仅支持一个sheet)
+# 3. 发送消息的功能，可以将截图通过bot发送到指定的微信群聊（当前仅支持一个bot）
+# 4. 支持打开Excel文件时自动刷新数据
+
+# 2025.5.14
+# 截图区域：支持多个sheet截图，支持多个区域截图
+# 发送消息：支持多种消息格式（文本、图片、文件等）
+
+# 2025.5.22
+# 数据日期校验，如果数据日期不在范围内，则不发送消息，并且@指定人员，等待下次发送
+# 发送文件时可自定义文件名
+
+# 2025.5.25
+# 数据校验重试机制
+# 刷新超时：如果刷新数据超时，自动重试3次
+# 多个文件：支持多个文件同时使用，支持不同的文件路径
+# 支持多个机器人：支持多个机器人同时使用，支持不同的微信群聊
+# 发送文件时可自定义文件名
+# 发送失败重试：如果发送失败，自动重试3次
+
+# 更新计划:
+# 日志：记录机器人推送消息记录，包括时间、发布群聊、消息内容等，保存到本地文件
+# 内存管理：优化内存管理，避免内存泄漏长时间运行
+# 程序自动重启：如果程序崩溃，自动重启程序
+
+# 权限控制：限制机器人仅限特定群聊使用，其他群聊无法使用
+# @机器人发送一次日报
+
+
+#报错
+#'NoneType' object has no attribute 'RefreshAll'
+#[错误] Excel操作异常：This COM object can not automate the makepy process - please run makepy manually for this object
+
+
+
+#已解决
+# module 'win32com.gen_py.00020813-0000-0000-C000-000000000046x0x1x9' has no attribute 'CLSIDToClassMap'

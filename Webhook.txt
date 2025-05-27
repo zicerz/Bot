@@ -1,0 +1,43 @@
+https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=a9d5a3ce-9091-4f99-94f1-c80832238c1a
+
+图片类型
+{
+    "msgtype": "image",
+    "image": {
+        "base64": "DATA",
+		"md5": "MD5"
+    }
+}
+参数	是否必填	说明
+msgtype	是	消息类型，此时固定为image
+base64	是	图片内容的base64编码
+md5	是	图片内容（base64编码前）的md5值
+注：图片（base64编码前）最大不能超过2M，支持JPG,PNG格式
+
+文件上传接口
+素材上传得到media_id，该media_id仅三天内有效
+media_id只能是对应上传文件的机器人可以使用
+请求方式：POST（HTTPS）
+请求地址：https://qyapi.weixin.qq.com/cgi-bin/webhook/upload_media?key=ee57f939-0e4e-4707-beba-422dae91538e&type=file
+
+使用multipart/form-data POST上传文件或语音， 文件标识名为"media"
+参数说明：
+
+参数	必须	说明
+key	是	调用接口凭证, 机器人webhookurl中的key参数
+type	是	文件类型，分别有语音(voice)和普通文件(file)
+POST的请求包中，form-data中媒体文件标识，应包含有 filename、filelength、content-type等信息
+
+filename标识文件展示的名称。比如，使用该media_id发消息时，展示的文件名由该字段控制
+请求示例：
+
+POST https://qyapi.weixin.qq.com/cgi-bin/webhook/upload_media?key=693a91f6-7xxx-4bc4-97a0-0ec2sifa5aaa&type=file HTTP/1.1
+Content-Type: multipart/form-data; boundary=-------------------------acebdf13572468
+Content-Length: 220
+
+---------------------------acebdf13572468
+Content-Disposition: form-data; name="media";filename="wework.txt"; filelength=6
+Content-Type: application/octet-stream
+
+mytext
+---------------------------acebdf13572468--
