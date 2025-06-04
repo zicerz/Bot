@@ -62,8 +62,7 @@ class ExcelProcessor:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """保证资源释放"""
-        self._safe_shutdown()
-
+        # self._safe_shutdown()
     def _safe_shutdown(self):
         """安全关闭 Excel 进程"""
         try:
@@ -128,7 +127,12 @@ class ExcelProcessor:
                     logger.debug(f"生成截图：{os.path.basename(output_path)}")
             except Exception as e:
                 logger.error(f"截图失败 [{cfg['name']}]：{str(e)}")
+            
+            finally:
+                self._safe_shutdown()
+
         return screenshots
+    
 
     def _capture_range(self, sheet, range_addr: str, output_path: str) -> bool:
         """执行区域截图"""
@@ -231,10 +235,9 @@ class ReportTask:
         finally:
             logger.info(f"任务耗时：{time.time() - start_time:.2f}s")
 
+
     def _deliver_results(self, screenshots: list):
         """结果交付（图片+文件）"""
-
-        
 
         # 发送截图
         for img_path in screenshots:
@@ -261,6 +264,8 @@ class ReportTask:
             return
             
         try:
+            
+            
             with open(file_path, "rb") as f:
                 media_id = self._upload_file(f)
                 if media_id:
@@ -423,6 +428,5 @@ def main():
     except Exception as e:
         logger.error(f"系统异常：{str(e)}", exc_info=args.debug)
         exit(1)
-
 if __name__ == "__main__":
     main()
