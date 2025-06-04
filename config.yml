@@ -7,7 +7,7 @@
 # "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=ee57f939-0e4e-4707-beba-422dae91538e"   测试Bot
 
 
-
+#######
 tasks:
 #-----------------------------------------   task 0 奖励池名单自动发布   -----------------------------------------
   - excel_path: "C:/Users/EDY/OneDrive - PPLINGO PTE LTD/自动播报文件/奖励池名单.xlsx"
@@ -31,7 +31,7 @@ tasks:
       notify_message: "数据日期校验失败，请检查数据"
       notify_users: ["zhufuzhe"]
 
-      
+#-----------------------------------------   task 1 业绩进度排名   -----------------------------------------
   - excel_path: "C:/Users/EDY/OneDrive - PPLINGO PTE LTD/自动播报文件/6月自动播报.xlsx"
     schedule:
       times: ["09:00", "11:00", "13:00", "15:00", "17:00", "19:00", "21:00", "23:50"]
