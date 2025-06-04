@@ -16,11 +16,13 @@ tasks:
       webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=ee57f939-0e4e-4707-beba-422dae91538e"
     capture_configs:
       - sheet_name: "入池名单"
-        range: A1:E51
+        range: A1
         name: "奖励池名单"
+    # 发送文件
     send_file_enable: 1
     upload_url: "https://qyapi.weixin.qq.com/cgi-bin/webhook/upload_media?key=ee57f939-0e4e-4707-beba-422dae91538e&type=file"
     file_path: "C:/Users/EDY/OneDrive - PPLINGO PTE LTD/自动播报文件/奖励池名单.xlsx"
+    # 数据校验
     data_check_enable: 0
     data_check:
       check_range: "D3"
@@ -30,14 +32,14 @@ tasks:
       notify_users: ["zhufuzhe"]
 
       
-  # - excel_path: "C:/Users/EDY/OneDrive - PPLINGO PTE LTD/自动播报文件/6月自动播报.xlsx"
-  #   schedule:
-  #     times: ["09:00", "11:00", "13:00", "15:00", "17:00", "19:00", "21:00", "23:50"]
-  #     webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=ee57f939-0e4e-4707-beba-422dae91538e"
-  #   capture_configs:
-  #     - sheet_name: "业绩进度排名-报表"
-  #       range: A1:X25
-  #       name: "新签进度排名"
+  - excel_path: "C:/Users/EDY/OneDrive - PPLINGO PTE LTD/自动播报文件/6月自动播报.xlsx"
+    schedule:
+      times: ["09:00", "11:00", "13:00", "15:00", "17:00", "19:00", "21:00", "23:50"]
+      webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=ee57f939-0e4e-4707-beba-422dae91538e"
+    capture_configs:
+      - sheet_name: "业绩进度排名-报表"
+        range: A1:X25
+        name: "新签进度排名"
     
     
   
@@ -65,11 +67,14 @@ tasks:
 # 支持多个机器人：支持多个机器人同时使用，支持不同的微信群聊
 # 发送失败重试：如果发送失败，自动重试3次
 
+# 2025.6.4
+# 动态范围截图
+# 
+
 # 更新计划:
 # 文件每日备份
 # 发送文件重试
 # 截图文件可独立发送
-# 动态范围截图
 # 日志：记录机器人推送消息记录，包括时间、发布群聊、消息内容等，保存到本地文件
 # 内存管理：优化内存管理，避免内存泄漏长时间运行
 # 程序自动重启：如果程序崩溃，自动重启程序

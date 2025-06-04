@@ -62,7 +62,7 @@ class ExcelProcessor:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """保证资源释放"""
-        # self._safe_shutdown()
+        self._safe_shutdown()
     def _safe_shutdown(self):
         """安全关闭 Excel 进程"""
         try:
@@ -128,24 +128,71 @@ class ExcelProcessor:
             except Exception as e:
                 logger.error(f"截图失败 [{cfg['name']}]：{str(e)}")
             
-            finally:
-                self._safe_shutdown()
+       
 
         return screenshots
     
 
     def _capture_range(self, sheet, range_addr: str, output_path: str) -> bool:
         """执行区域截图"""
+        
+        
+        
+            # # 以range_addr为起点，自动扩展到有数据的最大区域
+            # start_cell = sheet.Range(range_addr.split(":")[0])
+            # data_region = start_cell.CurrentRegion
+            # # 生成动态区域地址
+            # dynamic_range_addr = data_region.Address.replace("$", "")
+            # logger.info(f"动态截图区域：{dynamic_range_addr}")
+
+            # data_region.CopyPicture(Format=1)  # xlBitmap
+
+            # left = data_region.Left
+            # top = data_region.Top
+            # width = data_region.Width
+            # height = data_region.Height
+
+            # chart_obj = sheet.ChartObjects().Add(left, top, width, height)
+            # chart = chart_obj.Chart
+            # chart_obj.Activate()
+            # chart.Paste()
+            # chart.Export(output_path)
+            # chart_obj.Delete()
+            
+            
+            
+
         try:
-            range_obj = sheet.Range(range_addr)
-            range_obj.CopyPicture(Format=1)  # xlBitmap
-            
-            chart = sheet.ChartObjects().Add(0, 0, range_obj.Width, range_obj.Height)
-            chart.Activate()
-            self.excel.ActiveChart.Paste()
-            chart.Chart.Export(output_path)
-            chart.Delete()  # 清理临时图表对象
-            
+            if ":" in range_addr:
+                range_obj = sheet.Range(range_addr)
+                range_obj.CopyPicture(Format=1)  # xlBitmap
+                
+                chart = sheet.ChartObjects().Add(0, 0, range_obj.Width, range_obj.Height)
+                chart.Activate()
+                self.excel.ActiveChart.Paste()
+                chart.Chart.Export(output_path)
+                chart.Delete()  # 清理临时图表对象
+            else:
+                # 以range_addr为起点，自动扩展到有数据的最大区域
+                data_region = sheet.Range(range_addr).CurrentRegion
+                # 生成动态区域地址
+                dynamic_range_addr = data_region.Address.replace("$", "")
+                logger.info(f"动态截图区域：{dynamic_range_addr}")
+
+                data_region.CopyPicture(Format=1)  # xlBitmap
+
+                left = data_region.Left
+                top = data_region.Top
+                width = data_region.Width
+                height = data_region.Height
+
+                chart_obj = sheet.ChartObjects().Add(left, top, width, height)
+                chart = chart_obj.Chart
+                chart_obj.Activate()
+                chart.Paste()
+                chart.Export(output_path)
+                chart_obj.Delete()
+                
             return os.path.exists(output_path)
         except Exception as e:
             logger.error(f"截图异常：{str(e)}")
@@ -229,12 +276,12 @@ class ReportTask:
                         return
                 
                 screenshots = excel.capture_screenshots(self.config["capture_configs"])
-                self._deliver_results(screenshots)
+            self._deliver_results(screenshots)
+
         except Exception as e:
             logger.error(f"任务异常：{str(e)}", exc_info=debug_mode)
         finally:
             logger.info(f"任务耗时：{time.time() - start_time:.2f}s")
-
 
     def _deliver_results(self, screenshots: list):
         """结果交付（图片+文件）"""
@@ -251,8 +298,6 @@ class ReportTask:
         # 发送文件
         if self.config.get("send_file_enable", False):
             self._send_attachment()
-
-        
         # 清理临时文件
         self._cleanup(screenshots)
 
@@ -262,10 +307,7 @@ class ReportTask:
         if not file_path or not os.path.exists(file_path):
             logger.warning("无效的文件路径，跳过发送")
             return
-            
         try:
-            
-            
             with open(file_path, "rb") as f:
                 media_id = self._upload_file(f)
                 if media_id:
