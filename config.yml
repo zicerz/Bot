@@ -7,7 +7,6 @@
 # "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=ee57f939-0e4e-4707-beba-422dae91538e"   测试Bot
 
 
-#######
 tasks:
 #-----------------------------------------   task 0 奖励池名单自动发布   -----------------------------------------
   - excel_path: "C:/Users/EDY/OneDrive - PPLINGO PTE LTD/自动播报文件/奖励池名单.xlsx"
