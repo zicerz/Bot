@@ -135,43 +135,18 @@ class ExcelProcessor:
 
     def _capture_range(self, sheet, range_addr: str, output_path: str) -> bool:
         """执行区域截图"""
-        
-        
-        
-            # # 以range_addr为起点，自动扩展到有数据的最大区域
-            # start_cell = sheet.Range(range_addr.split(":")[0])
-            # data_region = start_cell.CurrentRegion
-            # # 生成动态区域地址
-            # dynamic_range_addr = data_region.Address.replace("$", "")
-            # logger.info(f"动态截图区域：{dynamic_range_addr}")
-
-            # data_region.CopyPicture(Format=1)  # xlBitmap
-
-            # left = data_region.Left
-            # top = data_region.Top
-            # width = data_region.Width
-            # height = data_region.Height
-
-            # chart_obj = sheet.ChartObjects().Add(left, top, width, height)
-            # chart = chart_obj.Chart
-            # chart_obj.Activate()
-            # chart.Paste()
-            # chart.Export(output_path)
-            # chart_obj.Delete()
-            
-            
-            
-
         try:
             if ":" in range_addr:
                 range_obj = sheet.Range(range_addr)
                 range_obj.CopyPicture(Format=1)  # xlBitmap
-                
-                chart = sheet.ChartObjects().Add(0, 0, range_obj.Width, range_obj.Height)
-                chart.Activate()
-                self.excel.ActiveChart.Paste()
-                chart.Chart.Export(output_path)
-                chart.Delete()  # 清理临时图表对象
+
+                chart_obj = sheet.ChartObjects().Add(0, 0, range_obj.Width, range_obj.Height)
+                chart = chart_obj.Chart
+                chart_obj.Activate()
+                time.sleep(0.2)  # 等待剪贴板准备好
+                chart.Paste()
+                chart.Export(output_path)
+                chart_obj.Delete()  # 清理临时图表对象
             else:
                 # 以range_addr为起点，自动扩展到有数据的最大区域
                 data_region = sheet.Range(range_addr).CurrentRegion
