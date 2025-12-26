@@ -1,120 +1,85 @@
 ## 配置文件
 
-# Webhook地址
-# "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=338f6d2c-3457-4b48-b7d2-fd60f4db98f4"   奖励池名单发布
-# "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=a9d5a3ce-9091-4f99-94f1-c80832238c1a"   看板自动发布
-# "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=833b098e-d8b8-43ea-bfdf-cade0d040fb6"   报错提醒
-# "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=ee57f939-0e4e-4707-beba-422dae91538e"   测试Bot
+
+# "C:/Users/z/OneDrive - PPLINGO PTE LTD/自动播报文件/"  文件地址
+# "C:/Users/z/Desktop/BOT/excel文件"  文件地址
+
+# 机器人配置列表
+webhooks:
+  奖励池名单发布:    "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=338f6d2c-3457-4b48-b7d2-fd60f4db98f4"
+  看板自动发布:      "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=a9d5a3ce-9091-4f99-94f1-c80832238c1a"
+  运营转化数据播报:   "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=fa2847ba-1291-49c9-ae5d-0acd9712c220"
+  激励播报（内部）:   "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=3b052688-8964-446a-bd5f-12c5716ca152"
+  激励播报:          "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=7ad929e6-8953-43fd-bead-c13d90d32740"
+  续航组看板播报:     "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=a6cb134d-7167-4dfa-b49b-04fb4e77d544"
+  澳新数据看板:       "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=57b436ca-c037-4b8d-9136-5f7580efdc7f"
+  澳新激励发布:       "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=778808a4-2ffc-44ad-aed2-0bfee021bd80"
+  AP&研学数据播报:    "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=686ad22f-8943-462c-8be8-4a1160df0af5"
+  约课数据看板:      "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=3afd2ff7-8d7c-42c8-8a47-1bfe86c68a2d"
 
 
-tasks:
-#-----------------------------------------   task 0 奖励池名单自动发布   -----------------------------------------
-  - excel_path: "C:/Users/EDY/OneDrive - PPLINGO PTE LTD/自动播报文件/奖励池名单.xlsx"
-    schedule:
-      times: ["18:54"]
-      webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=ee57f939-0e4e-4707-beba-422dae91538e"
-    capture_configs:
-      - sheet_name: "入池名单"
-        range: A1
-        name: "奖励池名单"
-    # 发送文件
-    send_file_enable: 1
-    upload_url: "https://qyapi.weixin.qq.com/cgi-bin/webhook/upload_media?key=ee57f939-0e4e-4707-beba-422dae91538e&type=file"
-    file_path: "C:/Users/EDY/OneDrive - PPLINGO PTE LTD/自动播报文件/奖励池名单.xlsx"
-    # 数据校验
-    data_check_enable: 0
-    data_check:
-      check_range: "D3"
-      check_frequency: 3
-      warning_webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=ee57f939-0e4e-4707-beba-422dae91538e" 
-      notify_message: "数据日期校验失败，请检查数据"
-      notify_users: ["zhufuzhe"]
 
-#-----------------------------------------   task 1 业绩进度排名   -----------------------------------------
-  - excel_path: "C:/Users/EDY/OneDrive - PPLINGO PTE LTD/6月自动播报测试.xlsx"
-    schedule:
-      # times: ["09:00", "09:10", "09:20", "09:30", "09:40", "09:50", "10:00", "10:10", "10:20", "10:30", "10:40", "10:50", "11:00", "11:10", "11:20", "11:30", "11:40", "11:50", 
-      #         "12:00", "12:10", "12:20", "12:30", "12:40", "12:50", "13:00", "13:10", "13:20", "13:30", "13:40", "13:50", "14:00", "14:10", "14:20", "14:30", "14:40", "14:50", 
-      #         "15:00", "15:10", "15:20", "15:30", "15:40", "15:50", "16:00", "16:10", "16:20", "16:30", "16:40", "16:50", "17:00", "17:10", "17:20", "17:30", "17:40", "17:50", 
-      #         "18:00", "18:10", "18:20", "18:30", "18:40", "18:50", "19:00", "19:10", "19:20", "19:30", "19:40", "19:50", "20:00", "20:10", "20:20", "20:30", "20:40", "20:50",
-      #         "21:00", "21:10", "21:20", "21:30", "21:40", "21:50", "22:00", "22:10", "22:20", "22:30", "22:40", "22:50", "23:00", "23:10", "23:20", "23:30", "23:40", "23:50",
-      #         "00:00", "00:10", "00:20", "00:30", "00:40", "00:50", "01:00", "01:10", "01:20", "01:30", "01:40", "01:50", "02:00", "02:10", "02:20", "02:30", "02:40", "02:50",
-      #         "03:00", "03:10", "03:20", "03:30", "03:40", "03:50", "04:00", "04:10", "04:20", "04:30", "04:40", "04:50", "05:00", "05:10", "05:20", "05:30", "05:40", "05:50",
-      #         "06:00", "06:10", "06:20", "06:30", "06:40", "06:50", "07:00", "07:10", "07:20", "07:30", "07:40", "07:50", "08:00", "08:10", "08:20", "08:30", "08:40", "08:50"]
-      times: ["18:54"]
-      webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=ee57f939-0e4e-4707-beba-422dae91538e"
-    capture_configs:
-      - sheet_name: "业绩进度排名-报表"
-        range: A1:X25
-        name: "新签进度排名"
-    warning_webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=ee57f939-0e4e-4707-beba-422dae91538e"
-    
-#-----------------------------------------   task 2 激励名单  ------------------------------------   
-  - excel_path: "C:/Users/EDY/OneDrive - PPLINGO PTE LTD/自动播报文件/6月激励.xlsx"
-    schedule:
-      times: ["18:54"]
-      # webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=3b052688-8964-446a-bd5f-12c5716ca152"
-      webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=ee57f939-0e4e-4707-beba-422dae91538e"
-    capture_configs:
-      - sheet_name: "新签达成by阶段"
-        range: A1
-        name: "团队新签激励进度表+彩蛋"
-      - sheet_name: "新签达成by阶段"
-        range: B30:Q34
-        name: "小班区彩蛋"
-      - sheet_name: "续费单双月达成618"
-        range: A1
-        name: "续费单双月达成进度表"
-      - sheet_name: "全月单日达成by顾问"
-        range: A1
-        name: "单日新签续费达成进度表"
-      - sheet_name: "个人新签"
-        range: A1
-        name: "个人新签激励进度表"
-      - sheet_name: "大区&团队-新签"
-        range: A1
-        name: "单日增速激励进度表"
-      - sheet_name: "大区&团队-全月开单"
-        range: A1
-        name: "开单进度表"
-      
+  报错提醒:         "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=833b098e-d8b8-43ea-bfdf-cade0d040fb6"
+  测试Bot:          "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=ee57f939-0e4e-4707-beba-422dae91538e"
   
-    
+
+# 文件列表
+files:
+  奖励池名单:    "C:/Users/z/Desktop/BOT/excel文件/奖励池名单.xlsx"
+  6月自动播报:   "C:/Users/z/Desktop/BOT/excel文件/6月自动播报.xlsx"
+  运营转化数据:  "C:/Users/z/Desktop/BOT/excel文件/运营转化数据 - 2506.xlsx"
+  6月激励:      "C:/Users/z/Desktop/BOT/excel文件/6月激励.xlsx"
+
+# 检查事项
+#  - 检查Excel文件路径
+#  - 检查时间安排
+#  - 检查Webhook地址
+#  - 检查截图区域配置
+tasks:
+
+#-----------------------------------------   task 0  --------------------------------------     
+  - excel_path: "C:/Users/EDY/OneDrive - PPLINGO PTE LTD/CN-CC Management Team-08-中文业绩数据（内部） - 文档/数据看板/线索-工作簿2025-当月往期+顺次1.xlsx"
+    schedule:
+      times: ["08:35","10:35", "12:35", "14:35", "16:35", "18:35", "20:35", "22:00"]
+      # webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=3a23f004-1e6c-42f5-a96d-8f4092d6b463"
+      webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=ee57f939-0e4e-4707-beba-422dae91538e"
+    capture_configs:
+      - sheet_name: "总览页面"
+        range: AD1
+        name: "test"
+
+    # 发送文件
+    send_file_enable: 0
+    upload_url: "https://qyapi.weixin.qq.com/cgi-bin/webhook/upload_media?key=ee57f939-0e4e-4707-beba-422dae91538e&type=file"
+    file_path: "C:/Users/EDY/OneDrive - PPLINGO PTE LTD/自动播报文件/新生交接时效T-1-202512.xlsx"
+    # 数据校验
+    data_check:
+      check_sheet: "团队"
+      check_range: "L5"
+      check_frequency: 3
+      notify_message: "数据校验失败，请检查"
+      notify_users: ["hezhengsong","zhufuzhe"]
+      warning_webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=833b098e-d8b8-43ea-bfdf-cade0d040fb6"
 
 
-# v1.0.0 版本更新日志
-# 1. 定时任务功能，可以设置每天的定时发送时间点
-# 2. 多区域截图功能，可以设置多个截图区域，并分别命名(当前仅支持一个sheet)
-# 3. 发送消息的功能，可以将截图通过bot发送到指定的微信群聊（当前仅支持一个bot）
-# 4. 支持打开Excel文件时自动刷新数据
-
-# 2025.5.14
-# 截图区域：支持多个sheet截图，支持多个区域截图
-# 发送消息：支持多种消息格式（文本、图片、文件等）
-
-# 2025.5.22
-# 数据日期校验，如果数据日期不在范围内，则不发送消息，并且@指定人员，等待下次发送
-# 发送文件时可自定义文件名
-
-# 2025.5.25
-# 数据校验重试机制
-# 刷新超时：如果刷新数据超时，自动重试3次
-# 多个文件：支持多个文件同时使用，支持不同的文件路径
-# 支持多个机器人：支持多个机器人同时使用，支持不同的微信群聊
-# 发送失败重试：如果发送失败，自动重试3次
-
-# 2025.6.4
-# 动态范围截图
-
-# 更新计划:
-# 时间冲突
-# 文件每日备份
-# 发送文件重试
-# 截图文件可独立发送
-# 日志：记录机器人推送消息记录，包括时间、发布群聊、消息内容等，保存到本地文件
-# 内存管理：优化内存管理，避免内存泄漏长时间运行
-# 程序自动重启：如果程序崩溃，自动重启程序
-# 权限控制：限制机器人仅限特定群聊使用，其他群聊无法使用
-# @机器人发送一次日报
+#-----------------------------------------   task 1  -------------------------------------- 
+  - excel_path: "C:/Users/EDY/OneDrive - PPLINGO PTE LTD/CN-CC Management Team-08-中文业绩数据（内部） - 文档/01频道日报/业绩自动播报T-1-202512.xlsx"
+    schedule:
+      times: ["08:35","10:35", "12:35", "14:35", "16:35", "18:35", "20:35", "22:00"]
+      webhook: "https://pplingo.webhook.office.com/webhookb2/d232db86-e8c6-4295-9754-0c9971a30fe0@fd56dea9-97eb-4158-a08b-b11b570ecc07/IncomingWebhook/3fbc05443250448291a9bcac0af2fddb/ba3ca897-23a2-4e5b-888d-3f7986371bf4/V22Svk5XKDAsyYYtCxhaXfVAw7SJY5hptl_VoDl4PPBl41"
+    capture_configs:
+      - sheet_name: "业绩进度-报表"
+        range: A1
+        name: "test"
 
 
+# 当前程序只能保证excel端刷新完成，如果数仓数据未处理完，无法判断
+# 需要发送文件的任务截图失败重新截图，不单独发送文件
+
+
+# 每发送一次都将文件备份一次，文件名称为：文件名_日期_时间.xlsx
+# 命令行设置一个参数，用于设置是否发送到测试群
+#截图失败发送通知，发送失败发送通知，发送文件失败发送通知，
+# 每次刷新失败重试时都发发送通知，三次刷新失败后发送通知，并在10分钟后再次开始此任务，并发送通知，时间可配置   高优先级
+# 刷新与发送分离 父项目为刷新配置，子项目为发送配置，可独立配置发送文本，图片，文件与发送的webhook，新增teams配置，可配置发送的群聊
+#命令行任务列表与完成情况展示，任务列表。命令行发送测试参数

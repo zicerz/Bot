@@ -1,13 +1,3 @@
-"""
-Excel 自动化报表系统
-功能：多文件定时刷新、智能校验、区域截图、微信推送
-特性：
-1. 多任务独立配置，支持不同触发时间和接收群组
-2. 智能重试机制（数据刷新+消息发送）
-3. 可视化调试模式
-4. 完善的异常处理和资源管理
-"""
-
 import win32com.client as win32
 import yaml
 import os
@@ -18,7 +8,6 @@ import base64
 import hashlib
 from datetime import datetime
 import logging
-import threading
 import argparse
 import pythoncom
 from PIL import Image
@@ -36,7 +25,7 @@ logger = logging.getLogger("ExcelBot")
 class ExcelProcessor:
     """Excel 操作引擎"""
     
-    def __init__(self, file_path: str, visible=False):
+    def __init__(self, file_path: str, visible=True):
         """
         初始化处理器
         :param file_path: Excel 文件绝对路径
@@ -44,10 +33,10 @@ class ExcelProcessor:
         """
     
         self.file_path = os.path.abspath(file_path)
-        self.visible = True
+        self.visible = True  # 可视化调试模式
         self.excel = None
         self.workbook = None
-        self._refresh_timeout = 120  # 数据刷新超时时间（秒）
+        self._refresh_timeout = 500  # 数据刷新超时时间（秒）
 
     def __enter__(self):
         """安全启动 Excel 实例"""
@@ -56,7 +45,6 @@ class ExcelProcessor:
             self.excel.Visible = self.visible
             self.excel.DisplayAlerts = False
             self.workbook = self.excel.Workbooks.Open(self.file_path)
-
             # 自动设置所有工作表的缩放比例为220%
             for sheet in self.workbook.Worksheets:
                 try:
@@ -64,9 +52,6 @@ class ExcelProcessor:
                     sheet.Application.ActiveWindow.Zoom = 220
                 except Exception as e:
                     logger.debug(f"设置缩放失败：{str(e)}")
-
-
-
             logger.debug(f"成功打开文件：{os.path.basename(self.file_path)}")
             return self
         except Exception as e:
@@ -74,8 +59,10 @@ class ExcelProcessor:
             raise RuntimeError(f"Excel 启动失败：{str(e)}")
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        """保证资源释放"""
+        """确保资源释放"""
         self._safe_shutdown()
+
+
     def _safe_shutdown(self):
         """安全关闭 Excel 进程"""
         try:
@@ -92,16 +79,202 @@ class ExcelProcessor:
         logger.info("开始刷新数据...")
         start_time = time.time()
         
+        
         try:
-            self.workbook.RefreshAll()
-            self.excel.CalculateUntilAsyncQueriesDone()
+            # 刷新之前，判断哪些表是链接了数据源的表格
+            linked_tables = []
+            for sheet in self.workbook.Worksheets:
+                try:
+                    # 检查工作表中的表格（ListObjects）
+                    list_objects = sheet.ListObjects
+                    for i in range(1, list_objects.Count + 1):
+                        table = list_objects.Item(i)
+                        try:
+                            # 检查表格是否有查询表（QueryTable），这表示链接了外部数据源
+                            if hasattr(table, 'QueryTable') and table.QueryTable is not None:
+                                # 获取表格的范围
+                                table_range = table.Range.Address if hasattr(table, 'Range') else "未知"
+                                linked_tables.append({
+                                    'sheet': sheet.Name,
+                                    'table': table.Name,
+                                    'range': table_range,
+                                    'table_obj': table,
+                                    'query_table': table.QueryTable
+                                })
+                                logger.debug(f"发现链接数据源的表格：工作表 [{sheet.Name}] - 查询 [{table.Name}] - 范围 [{table_range}]")
+                        except Exception as e:
+                            # logger.debug(f"检查工作表 [{sheet.Name}] 的表格 [{table.Name if hasattr(table, 'Name') else 'Unknown'}] 时出错：{e}")
+                            logger.debug(f"工作表 [{sheet.Name}] 的表格 [{table.Name if hasattr(table, 'Name') else 'Unknown'}] 未连接数据源")
+                except Exception as e:
+                    logger.debug(f"检查工作表 [{sheet.Name}] 时出错：{e}")
             
-            # 轮询检查计算状态
-            while time.time() - start_time < self._refresh_timeout:
-                if self.excel.CalculationState == 0:  # 0 表示计算完成
-                    logger.info(f"数据刷新完成（耗时 {time.time()-start_time:.1f}s）")
+            if linked_tables:
+                logger.info(f"共发现 {len(linked_tables)} 个链接了数据源的表格")
+                for item in linked_tables:
+                    logger.info(f"  - 工作表 [{item['sheet']}] - 查询 [{item['table']}] - 范围 [{item['range']}]")
+            else:
+                logger.info("未发现链接了数据源的表格")
+
+            # 在发现了数据源的表格中查询是否设置了全部刷新时刷新此连接
+            refresh_tables = []
+            if linked_tables:
+                logger.info("检查数据连接属性：")
+                for item in linked_tables:
+                    try:
+                        query_table = item['query_table']
+                        
+                        if query_table is not None:
+                            # 检查各种刷新属性
+                            will_refresh_on_refresh_all = False
+                            # 通过QueryTable直接访问WorkbookConnection
+                            try:
+                                # 通过QueryTable的WorkbookConnection属性
+                                workbook_conn = query_table.WorkbookConnection
+                                if workbook_conn:
+                                    # 检查RefreshWithRefreshAll属性（如果存在）
+                                    try:
+                                        if hasattr(workbook_conn, 'RefreshWithRefreshAll'):
+                                            will_refresh_on_refresh_all = workbook_conn.RefreshWithRefreshAll
+                                    except:
+                                        pass
+                            except Exception as conn_e:
+                                logger.debug(f"检查连接对象时出错: {conn_e}")
+                            
+                            status = "✓ 已设置" if will_refresh_on_refresh_all else "✗ 未设置"
+                            logger.info(f"  工作表 [{item['sheet']}] - 查询 [{item['table']}]:")
+                            logger.info(f"    - 全部刷新时刷新此连接: {status}")
+                            
+                            # 如果设置了全部刷新时刷新此连接，打印表格范围
+                            if will_refresh_on_refresh_all:
+                                logger.info(f"    - 数据源表格范围: {item['range']}")
+                                # 添加到需要设置单元格值的工作表列表
+                                refresh_tables.append(item)
+                
+                    except Exception as e:
+                        logger.warning(f"检查表格 [{item['sheet']}] - [{item['table']}] 的连接属性时出错: {e}")
+            
+            # 将每个链接了数据源并设置了全部刷新时刷新此连接的表格所在工作表的左上角单元格值设置为1
+            if refresh_tables:
+                logger.info(f"在 {len(refresh_tables)} 个工作表中设置左上角单元格值为1")
+                for item in refresh_tables:
+                    # print('--------------------------------------------------------------------------------------------')
+                    # print(item['range'])
+                    #将range转换为左上角单元格
+                    range_start = item['range'].split(':')[0]
+                    # print(range_start)
+                    try:
+                        sheet = self.workbook.Worksheets(item['sheet'])
+                        # 设置表格范围的左上角单元格值为1
+                        sheet.Range(range_start).Value = 1
+                        logger.info(f"  工作表 [{item['sheet']}] - 已将 {range_start} 单元格值设置为 1")
+                    except Exception as e:
+                        logger.warning(f"设置工作表 [{item['sheet']}] 的 {range_start} 单元格值时出错: {e}")
+
+            time.sleep(10)
+            
+            # 执行刷新并验证，最多重试3次
+            max_retries = 3
+            failed_tables = []  # 保存失败的表格列表
+            
+            for retry_count in range(max_retries + 1):
+                if retry_count == 0:
+                    # 第一次：执行全部刷新
+                    logger.info("执行全部刷新...")
+                    self.workbook.RefreshAll()
+                    self.excel.CalculateUntilAsyncQueriesDone()
+                else:
+                    # 重试：只刷新失败的表格
+                    if not failed_tables:
+                        # 如果没有失败的表格，说明已经全部成功，退出循环
+                        break
+                    
+                    logger.warning(f"第 {retry_count} 次重试刷新，发现 {len(failed_tables)} 个表格刷新失败")
+                    for item in failed_tables:
+                        logger.warning(f"  重试刷新：工作表 [{item['sheet']}] - 查询 [{item['table']}]")
+                        try:
+                            
+                            # 刷新单个表格
+                            if item['query_table']:
+                                item['query_table'].Refresh()
+                        except Exception as e:
+                            logger.error(f"重试刷新表格 [{item['sheet']}] - [{item['table']}] 时出错: {e}")
+                    
+                    self.excel.CalculateUntilAsyncQueriesDone()
+                
+                # 轮询检查计算状态
+                calculation_timeout = 300  # 5分钟超时
+                calculation_start = time.time()
+                while time.time() - calculation_start < calculation_timeout:
+                    if self.excel.CalculationState == 0:  # 0 表示计算完成
+                        break
+                    time.sleep(5)
+                else:
+                    logger.warning("计算状态检查超时，继续验证单元格值")
+                
+                # 检查刷新结果：验证所有表格的左上角单元格值
+                if refresh_tables:
+                    failed_tables = []  # 重置失败列表
+                    for item in refresh_tables:
+                        range_start = item['range'].split(':')[0]
+                        try:
+                            sheet = self.workbook.Worksheets(item['sheet'])
+                            cell_value = sheet.Range(range_start).Value
+                            print(item['sheet'])
+                            print(item['table'])
+                            print(range_start)
+                            print(cell_value)
+                            # 修正判断逻辑：单元格值为1表示刷新失败
+                            # 考虑不同数据类型的情况，将单元格值转为字符串后与'1'比较，以避免由于数值/文本/其他类型造成的判断失误
+                            if str(cell_value).strip() != '1':
+                                logger.info(f"工作表 [{item['sheet']}] - 查询 [{item['table']}] 的 {range_start} 单元格值已更新，刷新成功")
+                            else:
+                                failed_tables.append(item)
+                                logger.warning(f"工作表 [{item['sheet']}] - 查询 [{item['table']}] 的 {range_start} 单元格值仍为1，刷新失败")
+                        except Exception as e:
+                            logger.warning(f"检查工作表 [{item['sheet']}] 的 {range_start} 单元格值时出错: {e}")
+                            failed_tables.append(item)
+                    
+                    if not failed_tables:
+                        logger.info("所有表格刷新成功！")
+                        # 刷新后重新应用所有表格的筛选和排序，并刷新所有的数据透视表
+                        for sheet in self.workbook.Worksheets:
+                            try:
+                                if sheet.AutoFilter is not None:
+                                    # 重新应用筛选
+                                    sheet.AutoFilter.ApplyFilter()
+                                    logger.debug(f"重新应用筛选：{sheet.Name}")
+                            except Exception as e:
+                                logger.debug(f"应用筛选/排序失败：{sheet.Name} - {e}")
+                        # 刷新所有的数据透视表
+                        for sheet in self.workbook.Worksheets:
+                            try:
+                                # 遍历工作表中的所有数据透视表（PivotTables 为集合）
+                                if hasattr(sheet, "PivotTables"):
+                                    for i in range(1, sheet.PivotTables().Count + 1):
+                                        pt = sheet.PivotTables(i)
+                                        pt.RefreshTable()
+                                        logger.debug(f"刷新数据透视表：{sheet.Name} - {pt.Name}")
+                                        time.sleep(20)
+                            except Exception as e:
+                                logger.debug(f"刷新数据透视表失败：{sheet.Name} - {e}")
+                               
 
 
+                                
+                        return True
+                    else:
+                        if retry_count < max_retries:
+                            logger.warning(f"发现 {len(failed_tables)} 个表格刷新失败，准备重试（剩余 {max_retries - retry_count} 次）")
+                            time.sleep(5)  # 等待一段时间后重试
+                        else:
+                            # 达到最大重试次数，仍有失败的表格
+                            logger.error(f"达到最大重试次数（{max_retries}次），仍有 {len(failed_tables)} 个表格刷新失败")
+                            for item in failed_tables:
+                                logger.error(f"  失败表格：工作表 [{item['sheet']}] - 查询 [{item['table']}]")
+                            return False
+                else:
+                    # 没有需要验证的表格，直接返回成功
+                    logger.info("没有需要验证的表格，刷新完成")
                     # 刷新后重新应用所有表格的筛选和排序
                     for sheet in self.workbook.Worksheets:
                         try:
@@ -109,29 +282,25 @@ class ExcelProcessor:
                                 # 重新应用筛选
                                 sheet.AutoFilter.ApplyFilter()
                                 logger.debug(f"重新应用筛选：{sheet.Name}")
-                            # 如有排序需求，可在此补充排序逻辑
                         except Exception as e:
                             logger.debug(f"应用筛选/排序失败：{sheet.Name} - {e}")
-
-
-
-
                     return True
-                time.sleep(5)
             
-            logger.error("数据刷新超时！")
+            # 如果循环正常结束（理论上不应该到这里，因为所有情况都应该有return）
+            logger.warning("刷新循环异常结束")
             return False
         except Exception as e:
             logger.error(f"刷新异常：{str(e)}")
             return False
 
-    def validate_date(self, check_range, check_frequency) -> bool:
-        """带重试的日期校验"""
+    def validate_date(self, check_sheet, check_range, check_frequency) -> bool:
+        """带重试的数据校验"""
         for attempt in range(1, check_frequency+1):
             try:
-                sheet = self.workbook.Worksheets("日期校验")
-                valid = sheet.Range(check_range).Value == 1
-                logger.info(f"日期校验 {'通过' if valid else '失败'}（第 {attempt} 次尝试）共{check_frequency}次")
+                logger.debug(f"校验数据：工作表 [{check_sheet}] 区域 [{check_range}]")
+                sheet = self.workbook.Worksheets(check_sheet)
+                valid = sheet.Range(check_range).Value != 0
+                logger.info(f"数据校验 {'通过' if valid else '失败'}（第 {attempt} 次尝试）共{check_frequency}次")
         
                 if valid:
                     return True
@@ -261,24 +430,25 @@ class ReportTask:
                 # 刷新数据
                 if not excel.refresh_data():
                     logger.warning("数据刷新失败，发送通知并终止任务")
-                    #发送异常通知
+                    # 发送异常通知
                     self._send_wechat(
                         type="text",
-                        data={"content": "数据刷新失败，请检查网络！",
+                        data={
+                            "content": f"数据刷新失败（超时或重试3次后仍有表格未刷新成功），请检查文件：{os.path.basename(self.config['excel_path'])}",
                             "mentioned_list": ["zhufuzhe"]
                         },
                         description="数据刷新失败通知",
-                        webhook = self.config["data_check"]["warning_webhook"]
-
+                        webhook="https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=833b098e-d8b8-43ea-bfdf-cade0d040fb6"
                     )
                     return
 
-                # 日期校验
+                # 数据校验
                 if self.config.get("data_check_enable", False):
+                    check_sheet = self.config["data_check"]["check_sheet"]
                     check_range = self.config["data_check"]["check_range"]
                     check_frequency = self.config["data_check"]["check_frequency"]
-                    if not excel.validate_date(check_range, check_frequency):
-                        logger.warning("数据日期校验未通过，发送通知并终止任务")
+                    if not excel.validate_date(check_sheet, check_range, check_frequency):
+                        logger.warning("数据校验未通过，发送通知并终止任务")
                         #发送异常通知
                         self._send_wechat(
                             type="text",
@@ -297,6 +467,7 @@ class ReportTask:
             logger.error(f"任务异常：{str(e)}", exc_info=debug_mode)
         finally:
             logger.info(f"任务耗时：{time.time() - start_time:.2f}s")
+            print("#" * 100)
 
     def _deliver_results(self, screenshots: list):
         """结果交付（图片+文件）"""
@@ -338,7 +509,7 @@ class ReportTask:
     def _upload_file(self, file_obj) -> str:
         """上传文件到临时素材"""
         try:
-            print(f"正在上传文件：{file_obj.name}")
+            logger.debug(f"正在上传文件：{file_obj.name}")
             #文件路径改为文件名
             filename = os.path.basename(file_obj.name)
             name, ext = os.path.splitext(filename)
@@ -469,19 +640,12 @@ class TaskScheduler:
                 logger.info(f"已安排任务：{trigger_time} → {os.path.basename(task.config['excel_path'])}")
 
     def _run_task(self, task: ReportTask):
-        def thread_func():
-            pythoncom.CoInitialize()  # 关键：初始化COM
-            try:
-                task.execute(self.debug_mode)
-            finally:
-                pythoncom.CoUninitialize()
-        """线程执行任务"""
-        thread = threading.Thread(
-            target=thread_func,
-            name=f"Task-{os.path.basename(task.config['excel_path'])}",
-            daemon=True
-        )
-        thread.start()
+        """串行执行任务"""
+        pythoncom.CoInitialize()
+        try:
+            task.execute(self.debug_mode)
+        finally:
+            pythoncom.CoUninitialize()
 
     def run_now(self, task_id: int = None):
         """立即执行任务（调试）"""
@@ -498,7 +662,7 @@ class TaskScheduler:
 # ---------------------------- 主程序 ----------------------------
 def main():
     """命令行入口"""
-    parser = argparse.ArgumentParser(description="Excel 自动化报表系统")
+    parser = argparse.ArgumentParser(description="Excel 自动化")
     parser.add_argument("--run-all", action="store_true", help="立即执行所有任务")
     parser.add_argument("--task", type=int, help="执行指定序号的任务")
     parser.add_argument("--debug", action="store_true", help="开启调试模式")
