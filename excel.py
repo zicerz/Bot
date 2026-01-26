@@ -14,12 +14,44 @@ from PIL import Image
 import io
 
 # ---------------------------- 日志配置 ----------------------------
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-    handlers=[logging.StreamHandler()]
-)
-logger = logging.getLogger("ExcelBot")
+def setup_logging():
+    """配置日志系统：按年/月分级目录，每日独立日志文件"""
+    # 获取当前脚本所在目录
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    
+    # 创建日志目录结构：logs/年/月/
+    now = datetime.now()
+    log_dir = os.path.join(base_dir, "logs", str(now.year), f"{now.month:02d}")
+    os.makedirs(log_dir, exist_ok=True)
+    
+    # 生成日志文件名：年-月-日.log
+    log_filename = now.strftime("%Y-%m-%d.log")
+    log_path = os.path.join(log_dir, log_filename)
+    
+    # 配置日志格式
+    log_format = "%(asctime)s [%(levelname)s] %(message)s"
+    date_format = "%Y-%m-%d %H:%M:%S"
+    
+    # 创建处理器：控制台输出 + 文件输出（追加模式）
+    handlers = [
+        logging.StreamHandler(),  # 控制台输出
+        logging.FileHandler(log_path, mode='a', encoding='utf-8')  # 文件输出（追加模式）
+    ]
+    
+    # 配置日志
+    logging.basicConfig(
+        level=logging.INFO,
+        format=log_format,
+        datefmt=date_format,
+        handlers=handlers,
+        force=True  # 强制重新配置，避免重复配置问题
+    )
+    
+    logger = logging.getLogger("ExcelBot")
+    logger.info(f"日志系统已初始化，日志文件：{log_path}")
+    return logger
+
+logger = setup_logging()
 
 # ---------------------------- Excel 处理器 ----------------------------
 class ExcelProcessor:
@@ -417,7 +449,11 @@ class ReportTask:
 
     def execute(self, debug_mode=False):
         """执行任务流程"""
+        # 任务开始分割线
+        separator = "=" * 100
+        logger.info(separator)
         logger.info(f"启动任务：{os.path.basename(self.config['excel_path'])}")
+        logger.info(separator)
         start_time = time.time()
         
         try:
@@ -466,8 +502,12 @@ class ReportTask:
         except Exception as e:
             logger.error(f"任务异常：{str(e)}", exc_info=debug_mode)
         finally:
-            logger.info(f"任务耗时：{time.time() - start_time:.2f}s")
-            print("#" * 100)
+            elapsed_time = time.time() - start_time
+            logger.info(f"任务耗时：{elapsed_time:.2f}s")
+            # 任务结束分割线
+            separator = "=" * 100
+            logger.info(separator)
+            print(separator)  # 同时输出到控制台
 
     def _deliver_results(self, screenshots: list):
         """结果交付（图片+文件）"""
@@ -643,6 +683,11 @@ class TaskScheduler:
         """串行执行任务"""
         pythoncom.CoInitialize()
         try:
+            # 定时任务执行时添加分割线
+            separator = "=" * 100
+            logger.info("")
+            logger.info(f"定时任务触发 - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+            logger.info(separator)
             task.execute(self.debug_mode)
         finally:
             pythoncom.CoUninitialize()
@@ -652,9 +697,14 @@ class TaskScheduler:
         logger.info("进入调试模式...")
         targets = self.tasks if task_id is None else [self.tasks[task_id]]
         
-        for task in targets:
+        for idx, task in enumerate(targets, 1):
             try:
-                logger.info(f"立即执行：{os.path.basename(task.config['excel_path'])}")
+                # 多个任务之间添加分割线
+                if len(targets) > 1:
+                    separator = "=" * 100
+                    logger.info("")
+                    logger.info(f"任务 {idx}/{len(targets)}")
+                    logger.info(separator)
                 task.execute(self.debug_mode)
             except Exception as e:
                 logger.error(f"执行异常：{str(e)}")

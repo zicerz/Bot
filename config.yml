@@ -38,39 +38,31 @@ files:
 tasks:
 
 #-----------------------------------------   task 0  --------------------------------------     
-  - excel_path: "C:/Users/EDY/OneDrive - PPLINGO PTE LTD/CN-CC Management Team-08-中文业绩数据（内部） - 文档/数据看板/线索-工作簿2025-当月往期+顺次1.xlsx"
+  - excel_path: "C:/Users/EDY/OneDrive - PPLINGO PTE LTD/CN-CC Management Team-08-中文业绩数据（内部） - 文档/01频道日报/业绩自动播报T-1-202512.xlsx"
     schedule:
       times: ["08:35","10:35", "12:35", "14:35", "16:35", "18:35", "20:35", "22:00"]
       # webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=3a23f004-1e6c-42f5-a96d-8f4092d6b463"
       webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=ee57f939-0e4e-4707-beba-422dae91538e"
     capture_configs:
-      - sheet_name: "总览页面"
-        range: AD1
-        name: "test"
-
-    # 发送文件
-    send_file_enable: 0
-    upload_url: "https://qyapi.weixin.qq.com/cgi-bin/webhook/upload_media?key=ee57f939-0e4e-4707-beba-422dae91538e&type=file"
-    file_path: "C:/Users/EDY/OneDrive - PPLINGO PTE LTD/自动播报文件/新生交接时效T-1-202512.xlsx"
-    # 数据校验
-    data_check:
-      check_sheet: "团队"
-      check_range: "L5"
-      check_frequency: 3
-      notify_message: "数据校验失败，请检查"
-      notify_users: ["hezhengsong","zhufuzhe"]
-      warning_webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=833b098e-d8b8-43ea-bfdf-cade0d040fb6"
-
-
-#-----------------------------------------   task 1  -------------------------------------- 
-  - excel_path: "C:/Users/EDY/OneDrive - PPLINGO PTE LTD/CN-CC Management Team-08-中文业绩数据（内部） - 文档/01频道日报/业绩自动播报T-1-202512.xlsx"
-    schedule:
-      times: ["08:35","10:35", "12:35", "14:35", "16:35", "18:35", "20:35", "22:00"]
-      webhook: "https://pplingo.webhook.office.com/webhookb2/d232db86-e8c6-4295-9754-0c9971a30fe0@fd56dea9-97eb-4158-a08b-b11b570ecc07/IncomingWebhook/3fbc05443250448291a9bcac0af2fddb/ba3ca897-23a2-4e5b-888d-3f7986371bf4/V22Svk5XKDAsyYYtCxhaXfVAw7SJY5hptl_VoDl4PPBl41"
-    capture_configs:
       - sheet_name: "业绩进度-报表"
         range: A1
         name: "test"
+
+    # # 发送文件
+    # send_file_enable: 0
+    # upload_url: "https://qyapi.weixin.qq.com/cgi-bin/webhook/upload_media?key=ee57f939-0e4e-4707-beba-422dae91538e&type=file"
+    # file_path: "C:/Users/EDY/OneDrive - PPLINGO PTE LTD/自动播报文件/新生交接时效T-1-202512.xlsx"
+    # # 数据校验
+    # data_check:
+    #   check_sheet: "团队"
+    #   check_range: "L5"
+    #   check_frequency: 3
+    #   notify_message: "数据校验失败，请检查"
+    #   notify_users: ["hezhengsong","zhufuzhe"]
+    #   warning_webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=833b098e-d8b8-43ea-bfdf-cade0d040fb6"
+
+
+
 
 
 # 当前程序只能保证excel端刷新完成，如果数仓数据未处理完，无法判断
