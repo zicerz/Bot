@@ -12,6 +12,13 @@ import argparse
 import pythoncom
 from PIL import Image
 import io
+import threading
+
+try:
+    # UI Automation (UIA) for blocking Excel dialogs
+    from pywinauto import Desktop
+except Exception:
+    Desktop = None
 
 # ---------------------------- 日志配置 ----------------------------
 def setup_logging():
@@ -69,6 +76,7 @@ class ExcelProcessor:
         self.excel = None
         self.workbook = None
         self._refresh_timeout = 500  # 数据刷新超时时间（秒）
+        self._dialog_watchdog_stop = threading.Event()
 
     def __enter__(self):
         """安全启动 Excel 实例"""
@@ -94,10 +102,70 @@ class ExcelProcessor:
         """确保资源释放"""
         self._safe_shutdown()
 
+    def _start_dialog_watchdog(self, timeout_s: float = 90.0):
+        """
+        启动 UIA 弹窗守护线程，避免 COM 调用被模态弹窗阻塞。
+        目前覆盖：共享冲突弹窗“其他人也在更改” → 点击“查看所有人的内容(E)”
+        """
+        if Desktop is None:
+            logger.debug("未安装 pywinauto，跳过 UIA 弹窗守护")
+            return
+
+        self._dialog_watchdog_stop.clear()
+
+        def _run():
+            end_at = time.time() + float(timeout_s)
+            while not self._dialog_watchdog_stop.is_set() and time.time() < end_at:
+                try:
+                    self._dismiss_other_people_editing_dialog()
+                except Exception:
+                    pass
+                time.sleep(0.25)
+
+        threading.Thread(target=_run, daemon=True).start()
+
+    def _stop_dialog_watchdog(self):
+        try:
+            self._dialog_watchdog_stop.set()
+        except Exception:
+            pass
+
+    def _dismiss_other_people_editing_dialog(self) -> bool:
+        """
+        处理弹窗：
+        标题：其他人也在更改
+        按钮：查看所有人的内容(E) / 仅查看我的内容(M)
+        """
+        if Desktop is None:
+            return False
+
+        dlg_title = "其他人也在更改"
+        try:
+            windows = Desktop(backend="uia").windows(title=dlg_title, control_type="Window", visible_only=True)
+        except Exception:
+            return False
+
+        for w in windows:
+            try:
+                dlg = w
+                # 优先按“按钮文本前缀”查找，避免热键括号差异导致匹配失败
+                btn = dlg.child_window(title_re=r"^查看所有人的内容.*", control_type="Button")
+                if btn.exists(timeout=0.1):
+                    try:
+                        btn.invoke()
+                    except Exception:
+                        btn.click_input()
+                    logger.info("检测到弹窗“其他人也在更改”，已自动选择【查看所有人的内容】")
+                    return True
+            except Exception:
+                continue
+        return False
+
 
     def _safe_shutdown(self):
         """安全关闭 Excel 进程"""
         try:
+            self._stop_dialog_watchdog()
             if self.workbook:
                 self.workbook.Close(SaveChanges=True)
             if self.excel:
@@ -113,6 +181,9 @@ class ExcelProcessor:
         
         
         try:
+            # 启动弹窗守护，防止共享冲突弹窗导致阻塞
+            self._start_dialog_watchdog(timeout_s=self._refresh_timeout + 120)
+
             # 刷新之前，判断哪些表是链接了数据源的表格
             linked_tables = []
             for sheet in self.workbook.Worksheets:
@@ -269,6 +340,8 @@ class ExcelProcessor:
                     if not failed_tables:
                         logger.info("所有表格刷新成功！")
                         # 刷新后重新应用所有表格的筛选和排序，并刷新所有的数据透视表
+                        # 重新应用筛选时最容易触发“其他人也在更改”弹窗，提前再起一轮短守护
+                        self._start_dialog_watchdog(timeout_s=90)
                         for sheet in self.workbook.Worksheets:
                             try:
                                 if sheet.AutoFilter is not None:
@@ -278,6 +351,7 @@ class ExcelProcessor:
                             except Exception as e:
                                 logger.debug(f"应用筛选/排序失败：{sheet.Name} - {e}")
                         # 刷新所有的数据透视表
+                        self._start_dialog_watchdog(timeout_s=180)
                         for sheet in self.workbook.Worksheets:
                             try:
                                 # 遍历工作表中的所有数据透视表（PivotTables 为集合）
@@ -308,6 +382,7 @@ class ExcelProcessor:
                     # 没有需要验证的表格，直接返回成功
                     logger.info("没有需要验证的表格，刷新完成")
                     # 刷新后重新应用所有表格的筛选和排序
+                    self._start_dialog_watchdog(timeout_s=90)
                     for sheet in self.workbook.Worksheets:
                         try:
                             if sheet.AutoFilter is not None:
@@ -324,6 +399,9 @@ class ExcelProcessor:
         except Exception as e:
             logger.error(f"刷新异常：{str(e)}")
             return False
+        finally:
+            # 尽量停止守护线程（daemon 不会阻塞退出，这里只是减少无意义轮询）
+            self._stop_dialog_watchdog()
 
     def validate_date(self, check_sheet, check_range, check_frequency) -> bool:
         """带重试的数据校验"""

@@ -38,13 +38,13 @@ files:
 tasks:
 
 #-----------------------------------------   task 0  --------------------------------------     
-  - excel_path: "C:/Users/EDY/OneDrive - PPLINGO PTE LTD/CN-CC Management Team-08-中文业绩数据（内部） - 文档/01频道日报/业绩自动播报T-1-202512.xlsx"
+  - excel_path: "C:/Users/EDY/OneDrive - PPLINGO PTE LTD/自动播报文件/学员明细备份.xlsx"
     schedule:
       times: ["08:35","10:35", "12:35", "14:35", "16:35", "18:35", "20:35", "22:00"]
       # webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=3a23f004-1e6c-42f5-a96d-8f4092d6b463"
       webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=ee57f939-0e4e-4707-beba-422dae91538e"
     capture_configs:
-      - sheet_name: "业绩进度-报表"
+      - sheet_name: "sheet1"
         range: A1
         name: "test"
 
@@ -71,7 +71,8 @@ tasks:
 
 # 每发送一次都将文件备份一次，文件名称为：文件名_日期_时间.xlsx
 # 命令行设置一个参数，用于设置是否发送到测试群
-#截图失败发送通知，发送失败发送通知，发送文件失败发送通知，
+#截图失败发送通知，发送失败发送通知，发送文件失败发送通知，打开文件失败发送通知
 # 每次刷新失败重试时都发发送通知，三次刷新失败后发送通知，并在10分钟后再次开始此任务，并发送通知，时间可配置   高优先级
 # 刷新与发送分离 父项目为刷新配置，子项目为发送配置，可独立配置发送文本，图片，文件与发送的webhook，新增teams配置，可配置发送的群聊
 #命令行任务列表与完成情况展示，任务列表。命令行发送测试参数
+# 刷新失败后将表格恢复到100%大小
