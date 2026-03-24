@@ -86,7 +86,7 @@ class ExcelProcessor:
             self.excel.DisplayAlerts = False
             self.workbook = self.excel.Workbooks.Open(self.file_path)
             # 自动设置所有工作表的缩放比例为220%
-            for sheet in self.workbook.Worksheets:
+            for sheet in self._iter_worksheets():
                 try:
                     sheet.Activate()
                     sheet.Application.ActiveWindow.Zoom = 220
@@ -101,6 +101,13 @@ class ExcelProcessor:
     def __exit__(self, exc_type, exc_val, exc_tb):
         """确保资源释放"""
         self._safe_shutdown()
+
+    def _iter_worksheets(self):
+        """兼容遍历：部分环境不支持直接枚举 Worksheets。"""
+        if not self.workbook:
+            return []
+        sheets = self.workbook.Worksheets
+        return [sheets.Item(i) for i in range(1, sheets.Count + 1)]
 
     def _start_dialog_watchdog(self, timeout_s: float = 90.0):
         """
@@ -186,7 +193,7 @@ class ExcelProcessor:
 
             # 刷新之前，判断哪些表是链接了数据源的表格
             linked_tables = []
-            for sheet in self.workbook.Worksheets:
+            for sheet in self._iter_worksheets():
                 try:
                     # 检查工作表中的表格（ListObjects）
                     list_objects = sheet.ListObjects
@@ -342,7 +349,7 @@ class ExcelProcessor:
                         # 刷新后重新应用所有表格的筛选和排序，并刷新所有的数据透视表
                         # 重新应用筛选时最容易触发“其他人也在更改”弹窗，提前再起一轮短守护
                         self._start_dialog_watchdog(timeout_s=90)
-                        for sheet in self.workbook.Worksheets:
+                        for sheet in self._iter_worksheets():
                             try:
                                 if sheet.AutoFilter is not None:
                                     # 重新应用筛选
@@ -352,7 +359,7 @@ class ExcelProcessor:
                                 logger.debug(f"应用筛选/排序失败：{sheet.Name} - {e}")
                         # 刷新所有的数据透视表
                         self._start_dialog_watchdog(timeout_s=180)
-                        for sheet in self.workbook.Worksheets:
+                        for sheet in self._iter_worksheets():
                             try:
                                 # 遍历工作表中的所有数据透视表（PivotTables 为集合）
                                 if hasattr(sheet, "PivotTables"):
@@ -383,7 +390,7 @@ class ExcelProcessor:
                     logger.info("没有需要验证的表格，刷新完成")
                     # 刷新后重新应用所有表格的筛选和排序
                     self._start_dialog_watchdog(timeout_s=90)
-                    for sheet in self.workbook.Worksheets:
+                    for sheet in self._iter_worksheets():
                         try:
                             if sheet.AutoFilter is not None:
                                 # 重新应用筛选
@@ -422,32 +429,62 @@ class ExcelProcessor:
                 logger.error(f"校验异常：{str(e)}")
         return False
 
-    def capture_screenshots(self, configs: list) -> list:
-        """批量截图（自动清理临时图表）"""
+    def capture_screenshots(self, configs: list, retry_times: int = 3):
+        """
+        批量截图（失败区域重试），返回：
+        - screenshots: 成功截图路径列表
+        - failed_configs: 重试后仍失败的配置列表
+        """
         screenshots = []
-        for cfg in configs:
-            try:
-                sheet = self.workbook.Worksheets(cfg["sheet_name"])
-                output_path = self._generate_path(cfg["name"])
-                
-                if self._capture_range(sheet, cfg["range"], output_path):
-                    screenshots.append(output_path)
-                    logger.debug(f"生成截图：{os.path.basename(output_path)}")
-            except Exception as e:
-                logger.error(f"截图失败 [{cfg['name']}]：{str(e)}")
+        pending_configs = list(configs)
+        total_attempts = retry_times + 1  # 首次 + 重试次数
 
-
-        # 截图完成后，将所有工作表缩放比例恢复为100%
         try:
-            for sheet in self.workbook.Worksheets:
-                sheet.Activate()
-                sheet.Application.ActiveWindow.Zoom = 100
-            logger.debug("已将所有工作表缩放比例恢复为100%")
-        except Exception as e:
-            logger.warning(f"恢复缩放比例失败：{str(e)}")
-       
+            for attempt in range(1, total_attempts + 1):
+                if not pending_configs:
+                    break
 
-        return screenshots
+                if attempt == 1:
+                    logger.info(f"开始截图，共 {len(pending_configs)} 个区域")
+                else:
+                    logger.warning(
+                        f"截图重试第 {attempt - 1}/{retry_times} 次，待重试区域 {len(pending_configs)} 个"
+                    )
+
+                next_pending = []
+                for cfg in pending_configs:
+                    try:
+                        sheet = self.workbook.Worksheets(cfg["sheet_name"])
+                        output_path = self._generate_path(cfg["name"])
+
+                        if self._capture_range(sheet, cfg["range"], output_path):
+                            screenshots.append(output_path)
+                            logger.info(
+                                f"截图成功：[{cfg['name']}] 工作表[{cfg['sheet_name']}] 区域[{cfg['range']}]"
+                            )
+                        else:
+                            next_pending.append(cfg)
+                            logger.warning(
+                                f"截图失败：[{cfg['name']}] 工作表[{cfg['sheet_name']}] 区域[{cfg['range']}]"
+                            )
+                    except Exception as e:
+                        next_pending.append(cfg)
+                        logger.error(f"截图异常 [{cfg['name']}]：{str(e)}")
+
+                pending_configs = next_pending
+                if pending_configs and attempt < total_attempts:
+                    time.sleep(2)
+        finally:
+            # 截图完成后，将所有工作表缩放比例恢复为100%
+            try:
+                for sheet in self._iter_worksheets():
+                    sheet.Activate()
+                    sheet.Application.ActiveWindow.Zoom = 100
+                logger.debug("已将所有工作表缩放比例恢复为100%")
+            except Exception as e:
+                logger.warning(f"恢复缩放比例失败：{str(e)}")
+
+        return screenshots, pending_configs
     
 
     def _capture_range(self, sheet, range_addr: str, output_path: str) -> bool:
@@ -574,7 +611,39 @@ class ReportTask:
                         )
                         return
                 
-                screenshots = excel.capture_screenshots(self.config["capture_configs"])
+                screenshots, failed_capture_configs = excel.capture_screenshots(
+                    self.config["capture_configs"],
+                    retry_times=3
+                )
+
+                if failed_capture_configs:
+                    failed_regions_text = "；".join(
+                        [
+                            f"{item.get('name', '未命名')}({item.get('sheet_name', '未知工作表')}:{item.get('range', '未知区域')})"
+                            for item in failed_capture_configs
+                        ]
+                    )
+                    logger.error(
+                        f"截图在重试 3 次后仍失败，共 {len(failed_capture_configs)} 个区域：{failed_regions_text}"
+                    )
+
+                    # 截图最终失败：不发送图片/文件，清理已生成的临时截图并发送失败通知
+                    if screenshots:
+                        self._cleanup(screenshots)
+                    self._send_wechat(
+                        type="text",
+                        data={
+                            "content": (
+                                f"截图失败：重试3次后仍有 {len(failed_capture_configs)} 个区域未成功截图，"
+                                f"任务已终止。文件：{os.path.basename(self.config['excel_path'])}。"
+                                f"失败区域：{failed_regions_text}"
+                            )
+                        },
+                        description="截图失败通知",
+                        webhook=self.config["schedule"]["webhook"]
+                    )
+                    return
+
             self._deliver_results(screenshots)
 
         except Exception as e:
