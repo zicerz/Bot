@@ -1,0 +1,99 @@
+2026-03-24 10:24:08 [INFO] 日志系统已初始化，日志文件：c:\Users\EDY\Desktop\BOT_TEST\logs\2026\03\2026-03-24.log
+2026-03-24 10:24:08 [INFO] 成功加载 1 个任务
+2026-03-24 10:24:08 [INFO] 进入调试模式...
+2026-03-24 10:24:08 [INFO] ====================================================================================================
+2026-03-24 10:24:08 [INFO] 启动任务：学员明细备份.xlsx
+2026-03-24 10:24:08 [INFO] ====================================================================================================
+2026-03-24 10:24:11 [DEBUG] 成功打开文件：学员明细备份.xlsx
+2026-03-24 10:24:11 [INFO] 开始刷新数据...
+2026-03-24 10:24:11 [DEBUG] 发现链接数据源的表格：工作表 [昨日课量备份] - 查询 [昨日课量备份] - 范围 [$A$1:$B$59147]
+2026-03-24 10:24:11 [INFO] 共发现 1 个链接了数据源的表格
+2026-03-24 10:24:11 [INFO]   - 工作表 [昨日课量备份] - 查询 [昨日课量备份] - 范围 [$A$1:$B$59147]
+2026-03-24 10:24:11 [INFO] 检查数据连接属性：
+2026-03-24 10:24:11 [INFO]   工作表 [昨日课量备份] - 查询 [昨日课量备份]:
+2026-03-24 10:24:11 [INFO]     - 全部刷新时刷新此连接: ✓ 已设置
+2026-03-24 10:24:11 [INFO]     - 数据源表格范围: $A$1:$B$59147
+2026-03-24 10:24:11 [INFO] 在 1 个工作表中设置左上角单元格值为1
+2026-03-24 10:24:11 [INFO]   工作表 [昨日课量备份] - 已将 $A$1 单元格值设置为 1
+2026-03-24 10:24:21 [INFO] 执行全部刷新...
+2026-03-24 10:26:20 [INFO] 工作表 [昨日课量备份] - 查询 [昨日课量备份] 的 $A$1 单元格值已更新，刷新成功
+2026-03-24 10:26:20 [INFO] 所有表格刷新成功！
+2026-03-24 10:26:20 [INFO] 开始截图，共 1 个区域
+2026-03-24 10:26:20 [DEBUG] 截图区域地址: $A$1
+2026-03-24 10:26:22 [ERROR] 截图异常：(-2147352567, '发生意外。', (0, 'Microsoft Excel', '类 Range 的 CopyPicture 方法无效', 'xlmain11.chm', 0, -2146827284), None)
+Traceback (most recent call last):
+  File "c:\Users\EDY\Desktop\BOT_TEST\excel.py", line 499, in _capture_range
+    range_obj.CopyPicture(Format=1)
+  File "<COMObject <unknown>>", line 2, in CopyPicture
+  File "D:\Program\python39\lib\site-packages\win32com\client\dynamic.py", line 356, in _ApplyTypes_
+    result = self._oleobj_.InvokeTypes(
+pywintypes.com_error: (-2147352567, '发生意外。', (0, 'Microsoft Excel', '类 Range 的 CopyPicture 方法无效', 'xlmain11.chm', 0, -2146827284), None)
+2026-03-24 10:26:22 [WARNING] 截图失败：[test] 工作表[sheet1] 区域[A1]
+2026-03-24 10:26:24 [WARNING] 截图重试第 1/3 次，待重试区域 1 个
+2026-03-24 10:26:24 [DEBUG] 截图区域地址: $A$1
+2026-03-24 10:26:26 [ERROR] 截图异常：(-2147352567, '发生意外。', (0, 'Microsoft Excel', '类 Range 的 CopyPicture 方法无效', 'xlmain11.chm', 0, -2146827284), None)
+Traceback (most recent call last):
+  File "c:\Users\EDY\Desktop\BOT_TEST\excel.py", line 499, in _capture_range
+    range_obj.CopyPicture(Format=1)
+  File "<COMObject <unknown>>", line 2, in CopyPicture
+  File "D:\Program\python39\lib\site-packages\win32com\client\dynamic.py", line 356, in _ApplyTypes_
+    result = self._oleobj_.InvokeTypes(
+pywintypes.com_error: (-2147352567, '发生意外。', (0, 'Microsoft Excel', '类 Range 的 CopyPicture 方法无效', 'xlmain11.chm', 0, -2146827284), None)
+2026-03-24 10:26:26 [WARNING] 截图失败：[test] 工作表[sheet1] 区域[A1]
+2026-03-24 10:26:28 [WARNING] 截图重试第 2/3 次，待重试区域 1 个
+2026-03-24 10:26:28 [DEBUG] 截图区域地址: $A$1
+2026-03-24 10:26:30 [ERROR] 截图异常：(-2147352567, '发生意外。', (0, 'Microsoft Excel', '类 Range 的 CopyPicture 方法无效', 'xlmain11.chm', 0, -2146827284), None)
+Traceback (most recent call last):
+  File "c:\Users\EDY\Desktop\BOT_TEST\excel.py", line 499, in _capture_range
+    range_obj.CopyPicture(Format=1)
+  File "<COMObject <unknown>>", line 2, in CopyPicture
+  File "D:\Program\python39\lib\site-packages\win32com\client\dynamic.py", line 356, in _ApplyTypes_
+    result = self._oleobj_.InvokeTypes(
+pywintypes.com_error: (-2147352567, '发生意外。', (0, 'Microsoft Excel', '类 Range 的 CopyPicture 方法无效', 'xlmain11.chm', 0, -2146827284), None)
+2026-03-24 10:26:30 [WARNING] 截图失败：[test] 工作表[sheet1] 区域[A1]
+2026-03-24 10:26:32 [WARNING] 截图重试第 3/3 次，待重试区域 1 个
+2026-03-24 10:26:32 [DEBUG] 截图区域地址: $A$1
+2026-03-24 10:26:34 [ERROR] 截图异常：(-2147352567, '发生意外。', (0, 'Microsoft Excel', '类 Range 的 CopyPicture 方法无效', 'xlmain11.chm', 0, -2146827284), None)
+Traceback (most recent call last):
+  File "c:\Users\EDY\Desktop\BOT_TEST\excel.py", line 499, in _capture_range
+    range_obj.CopyPicture(Format=1)
+  File "<COMObject <unknown>>", line 2, in CopyPicture
+  File "D:\Program\python39\lib\site-packages\win32com\client\dynamic.py", line 356, in _ApplyTypes_
+    result = self._oleobj_.InvokeTypes(
+pywintypes.com_error: (-2147352567, '发生意外。', (0, 'Microsoft Excel', '类 Range 的 CopyPicture 方法无效', 'xlmain11.chm', 0, -2146827284), None)
+2026-03-24 10:26:34 [WARNING] 截图失败：[test] 工作表[sheet1] 区域[A1]
+2026-03-24 10:26:34 [DEBUG] 已将所有工作表缩放比例恢复为100%
+2026-03-24 10:26:34 [ERROR] 截图在重试 3 次后仍失败，共 1 个区域：test(sheet1:A1)
+2026-03-24 10:26:34 [INFO] 发送成功：截图失败通知
+2026-03-24 10:26:35 [DEBUG] Excel 进程已释放
+2026-03-24 10:26:35 [INFO] 任务耗时：147.15s
+2026-03-24 10:26:35 [INFO] ====================================================================================================
+2026-03-24 10:32:02 [INFO] 日志系统已初始化，日志文件：c:\Users\EDY\Desktop\BOT_TEST\logs\2026\03\2026-03-24.log
+2026-03-24 10:32:02 [INFO] 成功加载 1 个任务
+2026-03-24 10:32:02 [INFO] 进入调试模式...
+2026-03-24 10:32:02 [INFO] ====================================================================================================
+2026-03-24 10:32:02 [INFO] 启动任务：学员明细备份.xlsx
+2026-03-24 10:32:02 [INFO] ====================================================================================================
+2026-03-24 10:32:03 [DEBUG] 成功打开文件：学员明细备份.xlsx
+2026-03-24 10:32:03 [INFO] 开始刷新数据...
+2026-03-24 10:32:03 [DEBUG] 发现链接数据源的表格：工作表 [昨日课量备份] - 查询 [昨日课量备份] - 范围 [$A$1:$B$59147]
+2026-03-24 10:32:03 [INFO] 共发现 1 个链接了数据源的表格
+2026-03-24 10:32:03 [INFO]   - 工作表 [昨日课量备份] - 查询 [昨日课量备份] - 范围 [$A$1:$B$59147]
+2026-03-24 10:32:03 [INFO] 检查数据连接属性：
+2026-03-24 10:32:03 [INFO]   工作表 [昨日课量备份] - 查询 [昨日课量备份]:
+2026-03-24 10:32:03 [INFO]     - 全部刷新时刷新此连接: ✓ 已设置
+2026-03-24 10:32:03 [INFO]     - 数据源表格范围: $A$1:$B$59147
+2026-03-24 10:32:03 [INFO] 在 1 个工作表中设置左上角单元格值为1
+2026-03-24 10:32:03 [INFO]   工作表 [昨日课量备份] - 已将 $A$1 单元格值设置为 1
+2026-03-24 10:32:13 [INFO] 执行全部刷新...
+2026-03-24 10:34:31 [INFO] 工作表 [昨日课量备份] - 查询 [昨日课量备份] 的 $A$1 单元格值已更新，刷新成功
+2026-03-24 10:34:31 [INFO] 所有表格刷新成功！
+2026-03-24 10:34:31 [INFO] 开始截图，共 1 个区域
+2026-03-24 10:34:31 [DEBUG] 截图区域地址: $A$1
+2026-03-24 10:34:32 [INFO] 截图成功：[test] 工作表[sheet1] 区域[A1]
+2026-03-24 10:34:32 [DEBUG] 已将所有工作表缩放比例恢复为100%
+2026-03-24 10:34:35 [DEBUG] Excel 进程已释放
+2026-03-24 10:34:35 [INFO] 发送成功：截图 学员明细备份_test_20260324_103431_193940.png
+2026-03-24 10:34:35 [DEBUG] 清理临时文件：学员明细备份_test_20260324_103431_193940.png
+2026-03-24 10:34:35 [INFO] 任务耗时：153.85s
+2026-03-24 10:34:35 [INFO] ====================================================================================================
