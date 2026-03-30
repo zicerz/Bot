@@ -80,23 +80,41 @@ class ExcelProcessor:
 
     def __enter__(self):
         """安全启动 Excel 实例"""
-        try:
-            self.excel = win32.Dispatch("Excel.Application")
-            self.excel.Visible = self.visible
-            self.excel.DisplayAlerts = False
-            self.workbook = self.excel.Workbooks.Open(self.file_path)
-            # 自动设置所有工作表的缩放比例为220%
-            for sheet in self._iter_worksheets():
-                try:
-                    sheet.Activate()
-                    sheet.Application.ActiveWindow.Zoom = 220
-                except Exception as e:
-                    logger.debug(f"设置缩放失败：{str(e)}")
-            logger.debug(f"成功打开文件：{os.path.basename(self.file_path)}")
-            return self
-        except Exception as e:
-            self._safe_shutdown()
-            raise RuntimeError(f"Excel 启动失败：{str(e)}")
+        max_retries = 3
+        retry_delay = 2
+        
+        # 确保COM初始化（移到循环外部，只初始化一次）
+        pythoncom.CoInitialize()
+        
+        for attempt in range(max_retries + 1):
+            try:
+                self.excel = win32.Dispatch("Excel.Application")
+                self.excel.Visible = self.visible
+                self.excel.DisplayAlerts = False
+                self.workbook = self.excel.Workbooks.Open(self.file_path)
+                
+                # 等待Excel就绪
+                time.sleep(1)
+                
+                # 自动设置所有工作表的缩放比例为220%
+                for sheet in self._iter_worksheets():
+                    try:
+                        sheet.Activate()
+                        sheet.Application.ActiveWindow.Zoom = 220
+                    except Exception as e:
+                        logger.debug(f"设置缩放失败：{str(e)}")
+                logger.debug(f"成功打开文件：{os.path.basename(self.file_path)}")
+                return self
+            except Exception as e:
+                error_str = str(e)
+                if "消息筛选器显示应用程序正在使用中" in error_str and attempt < max_retries:
+                    logger.warning(f"Excel 忙，第 {attempt + 1}/{max_retries} 次重试...")
+                    self._safe_shutdown()
+                    time.sleep(retry_delay)
+                    retry_delay *= 2  # 指数退避
+                else:
+                    self._safe_shutdown()
+                    raise RuntimeError(f"Excel 启动失败：{str(e)}")
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """确保资源释放"""
@@ -171,15 +189,31 @@ class ExcelProcessor:
 
     def _safe_shutdown(self):
         """安全关闭 Excel 进程"""
-        try:
-            self._stop_dialog_watchdog()
-            if self.workbook:
+        self._stop_dialog_watchdog()
+
+        # 分步清理，避免某一步异常影响后续释放
+        if self.workbook is not None:
+            try:
                 self.workbook.Close(SaveChanges=True)
-            if self.excel:
+            except Exception as e:
+                logger.warning(f"关闭工作簿异常：{str(e)}")
+            finally:
+                self.workbook = None
+
+        if self.excel is not None:
+            try:
                 self.excel.Quit()
-            logger.debug("Excel 进程已释放")
+            except Exception as e:
+                logger.warning(f"关闭 Excel 进程异常：{str(e)}")
+            finally:
+                self.excel = None
+
+        try:
+            pythoncom.CoUninitialize()
         except Exception as e:
-            logger.warning(f"资源释放异常：{str(e)}")
+            logger.debug(f"COM 反初始化异常：{str(e)}")
+
+        logger.debug("Excel 进程已释放")
 
     def refresh_data(self) -> bool:
         """带超时检测的数据刷新"""
@@ -544,6 +578,7 @@ class ReportTask:
     def __init__(self, config: dict):
         self.config = self._validate_config(config)
         self.retry_limit = 3  # 微信发送重试次数
+        self.error_webhook = "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=833b098e-d8b8-43ea-bfdf-cade0d040fb6"
 
     def _validate_config(self, config: dict) -> dict:
         """配置完整性检查"""
@@ -647,7 +682,22 @@ class ReportTask:
             self._deliver_results(screenshots)
 
         except Exception as e:
-            logger.error(f"任务异常：{str(e)}", exc_info=debug_mode)
+            error_text = str(e)
+            logger.error(f"任务异常：{error_text}", exc_info=debug_mode)
+            # 启动阶段失败也要有告警，便于第一时间排查（如 Excel COM/文件占用/权限问题）
+            if "Excel 启动失败" in error_text:
+                self._send_wechat(
+                    type="text",
+                    data={
+                        "content": (
+                            f"任务启动失败：{os.path.basename(self.config['excel_path'])}\n"
+                            f"错误信息：{error_text}"
+                        ),
+                        "mentioned_list": ["zhufuzhe"]
+                    },
+                    description="任务启动失败通知",
+                    webhook=self.error_webhook
+                )
         finally:
             elapsed_time = time.time() - start_time
             logger.info(f"任务耗时：{elapsed_time:.2f}s")
@@ -845,6 +895,7 @@ class TaskScheduler:
         targets = self.tasks if task_id is None else [self.tasks[task_id]]
         
         for idx, task in enumerate(targets, 1):
+            pythoncom.CoInitialize()
             try:
                 # 多个任务之间添加分割线
                 if len(targets) > 1:
@@ -855,6 +906,8 @@ class TaskScheduler:
                 task.execute(self.debug_mode)
             except Exception as e:
                 logger.error(f"执行异常：{str(e)}")
+            finally:
+                pythoncom.CoUninitialize()
 
 # ---------------------------- 主程序 ----------------------------
 def main():
