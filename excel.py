@@ -574,11 +574,12 @@ class ExcelProcessor:
 # ---------------------------- 任务处理器 ----------------------------
 class ReportTask:
     """报表任务实例"""
-    
-    def __init__(self, config: dict):
+
+    def __init__(self, config: dict, test_webhook: str = None, error_webhook: str = None):
         self.config = self._validate_config(config)
         self.retry_limit = 3  # 微信发送重试次数
-        self.error_webhook = "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=833b098e-d8b8-43ea-bfdf-cade0d040fb6"
+        self.error_webhook = error_webhook or "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=833b098e-d8b8-43ea-bfdf-cade0d040fb6"
+        self.test_webhook = test_webhook
 
     def _validate_config(self, config: dict) -> dict:
         """配置完整性检查"""
@@ -594,8 +595,12 @@ class ReportTask:
 
         if not os.path.exists(config["excel_path"]):
             raise FileNotFoundError(config["excel_path"])
-            
+
         return config
+
+    def _get_webhook(self) -> str:
+        """获取实际使用的webhook"""
+        return self.test_webhook if self.test_webhook else self.config["schedule"]["webhook"]
 
     def execute(self, debug_mode=False):
         """执行任务流程"""
@@ -675,7 +680,7 @@ class ReportTask:
                             )
                         },
                         description="截图失败通知",
-                        webhook=self.config["schedule"]["webhook"]
+                        webhook=self._get_webhook()
                     )
                     return
 
@@ -715,9 +720,9 @@ class ReportTask:
                 type="image",
                 data=self._prepare_image(img_path),
                 description=f"截图 {os.path.basename(img_path)}",
-                webhook = self.config["schedule"]["webhook"]
+                webhook = self._get_webhook()
             )
-        
+
         # 发送文件
         if self.config.get("send_file_enable", False):
             self._send_attachment()
@@ -738,7 +743,7 @@ class ReportTask:
                         type="file",
                         data={"media_id": media_id},
                         description=f"文件 {os.path.basename(file_path)}",
-                        webhook = self.config["schedule"]["webhook"]
+                        webhook = self._get_webhook()
                     )
         except Exception as e:
             logger.error(f"文件发送失败：{str(e)}")
@@ -834,23 +839,31 @@ class ReportTask:
 # ---------------------------- 任务调度器 ----------------------------
 class TaskScheduler:
     """多任务调度引擎"""
-    
-    def __init__(self, config_path: str, debug=False):
-        self.tasks = self._load_tasks(config_path)
+
+    def __init__(self, config_path: str, debug=False, test_webhook=None, error_webhook=None):
+        self.tasks = self._load_tasks(config_path, test_webhook, error_webhook)
         self.debug_mode = debug
         logger.setLevel(logging.DEBUG if debug else logging.INFO)
 
-    def _load_tasks(self, config_path: str) -> list:
+    def _load_tasks(self, config_path: str, test_webhook=None, error_webhook=None) -> list:
         """加载配置文件"""
         try:
             with open(config_path, "r", encoding="utf-8") as f:
                 config = yaml.safe_load(f)
-                
+
             if not isinstance(config.get("tasks"), list):
                 raise ValueError("配置文件格式错误")
-                
+
+            # 获取测试webhook配置
+            if test_webhook is None and config.get("test_webhook"):
+                test_webhook = config["test_webhook"]
+
+            # 获取错误webhook配置
+            if error_webhook is None and config.get("error_webhook"):
+                error_webhook = config["error_webhook"]
+
             logger.info(f"成功加载 {len(config['tasks'])} 个任务")
-            return [ReportTask(task) for task in config["tasks"]]
+            return [ReportTask(task, test_webhook, error_webhook) for task in config["tasks"]]
         except Exception as e:
             logger.error(f"配置加载失败：{str(e)}")
             raise
@@ -916,11 +929,16 @@ def main():
     parser.add_argument("--run-all", action="store_true", help="立即执行所有任务")
     parser.add_argument("--task", type=int, help="执行指定序号的任务")
     parser.add_argument("--debug", action="store_true", help="开启调试模式")
+    parser.add_argument("--test", action="store_true", help="启用测试webhook，发送到测试群")
     args = parser.parse_args()
 
+    test_webhook = None
+    if args.test:
+        logger.info("已启用测试webhook模式")
+
     try:
-        scheduler = TaskScheduler("config.yml", debug=args.debug)
-        
+        scheduler = TaskScheduler("config.yml", debug=args.debug, test_webhook=test_webhook)
+
         if args.run_all or args.task is not None:
             scheduler.run_now(args.task)
         else:
