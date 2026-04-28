@@ -1,0 +1,1345 @@
+2026-04-28 13:12:10 [INFO] 日志系统已初始化，日志文件：c:\Users\EDY\Desktop\BOT_TEST\logs\2026\04\2026-04-28.log
+2026-04-28 13:12:10 [INFO] 成功加载 1 个任务
+2026-04-28 13:12:10 [INFO] 启动任务调度器...
+2026-04-28 13:12:10 [INFO] 已安排任务：08:35 → 学员明细备份.xlsx
+2026-04-28 13:12:10 [INFO] 已安排任务：10:35 → 学员明细备份.xlsx
+2026-04-28 13:12:10 [INFO] 已安排任务：12:35 → 学员明细备份.xlsx
+2026-04-28 13:12:10 [INFO] 已安排任务：14:35 → 学员明细备份.xlsx
+2026-04-28 13:12:10 [INFO] 已安排任务：16:35 → 学员明细备份.xlsx
+2026-04-28 13:12:10 [INFO] 已安排任务：18:35 → 学员明细备份.xlsx
+2026-04-28 13:12:10 [INFO] 已安排任务：20:35 → 学员明细备份.xlsx
+2026-04-28 13:12:10 [INFO] 已安排任务：22:00 → 学员明细备份.xlsx
+2026-04-28 13:12:13 [INFO] 正在关闭调度器...
+2026-04-28 13:12:43 [INFO] 日志系统已初始化，日志文件：c:\Users\EDY\Desktop\BOT_TEST\logs\2026\04\2026-04-28.log
+2026-04-28 13:12:43 [INFO] 已启用测试webhook模式
+2026-04-28 13:12:43 [INFO] 成功加载 1 个任务
+2026-04-28 13:12:43 [INFO] 进入调试模式...
+2026-04-28 13:12:43 [INFO] ====================================================================================================
+2026-04-28 13:12:43 [INFO] 启动任务：学员明细备份.xlsx
+2026-04-28 13:12:43 [INFO] ====================================================================================================
+2026-04-28 13:12:44 [DEBUG] 成功创建 Excel 实例
+2026-04-28 13:12:44 [DEBUG] 成功设置 Excel 可见性: True
+2026-04-28 13:12:44 [DEBUG] 成功设置 DisplayAlerts = False
+2026-04-28 13:12:46 [DEBUG] 成功打开文件：学员明细备份.xlsx
+2026-04-28 13:12:46 [INFO] 开始刷新数据...
+2026-04-28 13:12:46 [DEBUG] 未安装 pyautogui，跳过弹窗守护
+2026-04-28 13:12:46 [DEBUG] 发现链接数据源的表格：工作表 [昨日课量备份] - 查询 [昨日课量备份] - 范围 [$A$1:$B$59147]
+2026-04-28 13:12:46 [INFO] 共发现 1 个链接了数据源的表格
+2026-04-28 13:12:46 [INFO]   - 工作表 [昨日课量备份] - 查询 [昨日课量备份] - 范围 [$A$1:$B$59147]
+2026-04-28 13:12:46 [INFO] 检查数据连接属性：
+2026-04-28 13:12:46 [INFO]   工作表 [昨日课量备份] - 查询 [昨日课量备份]:
+2026-04-28 13:12:46 [INFO]     - 全部刷新时刷新此连接: ✗ 未设置
+2026-04-28 13:12:56 [INFO] 执行全部刷新...
+2026-04-28 13:13:00 [INFO] 没有需要验证的表格，刷新完成
+2026-04-28 13:13:00 [DEBUG] 未安装 pyautogui，跳过弹窗守护
+2026-04-28 13:13:00 [DEBUG] 重新应用筛选：昨日课量备份
+2026-04-28 13:13:00 [INFO] 开始截图，共 1 个区域
+2026-04-28 13:13:00 [DEBUG] 截图区域地址: $A$1:$A$2
+2026-04-28 13:13:01 [INFO] 截图成功：[test] 工作表[sheet1] 区域[A1]
+2026-04-28 13:13:02 [DEBUG] 已将所有工作表缩放比例恢复为100%
+2026-04-28 13:13:05 [DEBUG] Excel 进程已释放
+2026-04-28 13:13:06 [INFO] 发送成功：截图 学员明细备份_test_20260428_131300_545714.png
+2026-04-28 13:13:06 [DEBUG] 清理临时文件：学员明细备份_test_20260428_131300_545714.png
+2026-04-28 13:13:06 [INFO] 任务耗时：22.27s
+2026-04-28 13:13:06 [INFO] ====================================================================================================
+2026-04-28 13:16:35 [INFO] 日志系统已初始化，日志文件：c:\Users\EDY\Desktop\BOT_TEST\logs\2026\04\2026-04-28.log
+2026-04-28 13:16:35 [INFO] 成功加载 1 个任务
+2026-04-28 13:16:35 [INFO] 启动任务调度器...
+2026-04-28 13:16:35 [INFO] 已安排任务：08:35 → 学员明细备份.xlsx
+2026-04-28 13:16:35 [INFO] 已安排任务：10:35 → 学员明细备份.xlsx
+2026-04-28 13:16:35 [INFO] 已安排任务：12:35 → 学员明细备份.xlsx
+2026-04-28 13:16:35 [INFO] 已安排任务：14:35 → 学员明细备份.xlsx
+2026-04-28 13:16:35 [INFO] 已安排任务：16:35 → 学员明细备份.xlsx
+2026-04-28 13:16:35 [INFO] 已安排任务：18:35 → 学员明细备份.xlsx
+2026-04-28 13:16:35 [INFO] 已安排任务：20:35 → 学员明细备份.xlsx
+2026-04-28 13:16:35 [INFO] 已安排任务：22:00 → 学员明细备份.xlsx
+2026-04-28 13:16:40 [INFO] 正在关闭调度器...
+2026-04-28 13:16:43 [INFO] 日志系统已初始化，日志文件：c:\Users\EDY\Desktop\BOT_TEST\logs\2026\04\2026-04-28.log
+2026-04-28 13:16:43 [INFO] 已启用测试webhook模式
+2026-04-28 13:16:43 [INFO] 成功加载 1 个任务
+2026-04-28 13:16:43 [INFO] 进入调试模式...
+2026-04-28 13:16:43 [INFO] ====================================================================================================
+2026-04-28 13:16:43 [INFO] 启动任务：学员明细备份.xlsx
+2026-04-28 13:16:43 [INFO] ====================================================================================================
+2026-04-28 13:16:44 [DEBUG] 成功创建 Excel 实例
+2026-04-28 13:16:44 [DEBUG] 成功设置 Excel 可见性: True
+2026-04-28 13:16:44 [DEBUG] 成功设置 DisplayAlerts = False
+2026-04-28 13:16:46 [DEBUG] 成功打开文件：学员明细备份.xlsx
+2026-04-28 13:16:46 [INFO] 开始刷新数据...
+2026-04-28 13:16:46 [DEBUG] 未安装 pyautogui，跳过弹窗守护
+2026-04-28 13:16:46 [DEBUG] 发现链接数据源的表格：工作表 [昨日课量备份] - 查询 [昨日课量备份] - 范围 [$A$1:$B$59147]
+2026-04-28 13:16:46 [INFO] 共发现 1 个链接了数据源的表格
+2026-04-28 13:16:46 [INFO]   - 工作表 [昨日课量备份] - 查询 [昨日课量备份] - 范围 [$A$1:$B$59147]
+2026-04-28 13:16:46 [INFO] 检查数据连接属性：
+2026-04-28 13:16:46 [INFO]   工作表 [昨日课量备份] - 查询 [昨日课量备份]:
+2026-04-28 13:16:46 [INFO]     - 全部刷新时刷新此连接: ✗ 未设置
+2026-04-28 13:16:56 [INFO] 执行全部刷新...
+2026-04-28 13:16:57 [INFO] 没有需要验证的表格，刷新完成
+2026-04-28 13:16:57 [DEBUG] 未安装 pyautogui，跳过弹窗守护
+2026-04-28 13:17:00 [DEBUG] 应用筛选/排序失败：昨日课量备份 - (-2147352567, '发生意外。', (0, None, None, None, 0, -2146827284), None)
+2026-04-28 13:17:00 [INFO] 开始截图，共 1 个区域
+2026-04-28 13:17:00 [DEBUG] 截图区域地址: $A$1:$A$2
+2026-04-28 13:17:01 [INFO] 截图成功：[test] 工作表[sheet1] 区域[A1]
+2026-04-28 13:17:01 [DEBUG] 已将所有工作表缩放比例恢复为100%
+2026-04-28 13:17:10 [DEBUG] Excel 进程已释放
+2026-04-28 13:17:10 [INFO] 发送成功：截图 学员明细备份_test_20260428_131700_463784.png
+2026-04-28 13:17:10 [DEBUG] 清理临时文件：学员明细备份_test_20260428_131700_463784.png
+2026-04-28 13:17:10 [INFO] 任务耗时：26.91s
+2026-04-28 13:17:10 [INFO] ====================================================================================================
+2026-04-28 13:23:22 [INFO] 日志系统已初始化，日志文件：c:\Users\EDY\Desktop\BOT_TEST\logs\2026\04\2026-04-28.log
+2026-04-28 13:23:22 [INFO] 成功加载 1 个任务
+2026-04-28 13:23:22 [INFO] 启动任务调度器...
+2026-04-28 13:23:22 [INFO] 已安排任务：08:35 → 学员明细备份.xlsx
+2026-04-28 13:23:22 [INFO] 已安排任务：10:35 → 学员明细备份.xlsx
+2026-04-28 13:23:22 [INFO] 已安排任务：12:35 → 学员明细备份.xlsx
+2026-04-28 13:23:22 [INFO] 已安排任务：14:35 → 学员明细备份.xlsx
+2026-04-28 13:23:22 [INFO] 已安排任务：16:35 → 学员明细备份.xlsx
+2026-04-28 13:23:22 [INFO] 已安排任务：18:35 → 学员明细备份.xlsx
+2026-04-28 13:23:22 [INFO] 已安排任务：20:35 → 学员明细备份.xlsx
+2026-04-28 13:23:22 [INFO] 已安排任务：22:00 → 学员明细备份.xlsx
+2026-04-28 13:23:25 [INFO] 正在关闭调度器...
+2026-04-28 13:24:04 [INFO] 日志系统已初始化，日志文件：c:\Users\EDY\Desktop\BOT_TEST\logs\2026\04\2026-04-28.log
+2026-04-28 13:24:04 [INFO] 已启用测试webhook模式
+2026-04-28 13:24:04 [INFO] 成功加载 1 个任务
+2026-04-28 13:24:04 [INFO] 进入调试模式...
+2026-04-28 13:24:04 [INFO] ====================================================================================================
+2026-04-28 13:24:04 [INFO] 启动任务：学员明细备份.xlsx
+2026-04-28 13:24:04 [INFO] ====================================================================================================
+2026-04-28 13:24:05 [DEBUG] 成功创建 Excel 实例
+2026-04-28 13:24:05 [DEBUG] 成功设置 Excel 可见性: True
+2026-04-28 13:24:05 [DEBUG] 成功设置 DisplayAlerts = False
+2026-04-28 13:24:07 [DEBUG] 成功打开文件：学员明细备份.xlsx
+2026-04-28 13:24:07 [INFO] 开始刷新数据...
+2026-04-28 13:24:07 [DEBUG] 未安装 pyautogui，跳过弹窗守护
+2026-04-28 13:24:07 [DEBUG] 发现链接数据源的表格：工作表 [昨日课量备份] - 查询 [昨日课量备份] - 范围 [$A$1:$B$59147]
+2026-04-28 13:24:07 [INFO] 共发现 1 个链接了数据源的表格
+2026-04-28 13:24:07 [INFO]   - 工作表 [昨日课量备份] - 查询 [昨日课量备份] - 范围 [$A$1:$B$59147]
+2026-04-28 13:24:07 [INFO] 检查数据连接属性：
+2026-04-28 13:24:07 [INFO]   工作表 [昨日课量备份] - 查询 [昨日课量备份]:
+2026-04-28 13:24:07 [INFO]     - 全部刷新时刷新此连接: ✗ 未设置
+2026-04-28 13:24:17 [INFO] 执行全部刷新...
+2026-04-28 13:24:19 [INFO] 没有需要验证的表格，刷新完成
+2026-04-28 13:24:19 [DEBUG] 未安装 pyautogui，跳过弹窗守护
+2026-04-28 13:24:24 [DEBUG] 应用筛选/排序失败：昨日课量备份 - (-2147352567, '发生意外。', (0, None, None, None, 0, -2146827284), None)
+2026-04-28 13:24:24 [INFO] 开始截图，共 1 个区域
+2026-04-28 13:24:24 [DEBUG] 截图区域地址: $A$1:$A$2
+2026-04-28 13:24:26 [INFO] 截图成功：[test] 工作表[sheet1] 区域[A1]
+2026-04-28 13:24:26 [DEBUG] 已将所有工作表缩放比例恢复为100%
+2026-04-28 13:24:33 [DEBUG] Excel 进程已释放
+2026-04-28 13:24:33 [INFO] 发送成功：截图 学员明细备份_test_20260428_132424_901989.png
+2026-04-28 13:24:33 [DEBUG] 清理临时文件：学员明细备份_test_20260428_132424_901989.png
+2026-04-28 13:24:33 [INFO] 任务耗时：28.94s
+2026-04-28 13:24:33 [INFO] ====================================================================================================
+2026-04-28 13:25:35 [INFO] 日志系统已初始化，日志文件：C:\Users\EDY\Desktop\BOT_TEST\logs\2026\04\2026-04-28.log
+2026-04-28 13:25:35 [INFO] 成功加载 1 个任务
+2026-04-28 13:25:35 [INFO] 进入调试模式...
+2026-04-28 13:25:35 [INFO] ====================================================================================================
+2026-04-28 13:25:35 [INFO] 启动任务：学员明细备份.xlsx
+2026-04-28 13:25:35 [INFO] ====================================================================================================
+2026-04-28 13:25:35 [DEBUG] 成功创建 Excel 实例
+2026-04-28 13:25:35 [DEBUG] 成功设置 Excel 可见性: True
+2026-04-28 13:25:35 [DEBUG] 成功设置 DisplayAlerts = False
+2026-04-28 13:25:37 [DEBUG] 成功打开文件：学员明细备份.xlsx
+2026-04-28 13:25:37 [INFO] 开始刷新数据...
+2026-04-28 13:25:37 [INFO] 启动弹窗守护线程，超时时间：620秒
+2026-04-28 13:25:37 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:37 [DEBUG] 发现链接数据源的表格：工作表 [昨日课量备份] - 查询 [昨日课量备份] - 范围 [$A$1:$B$59147]
+2026-04-28 13:25:37 [INFO] 共发现 1 个链接了数据源的表格
+2026-04-28 13:25:37 [INFO]   - 工作表 [昨日课量备份] - 查询 [昨日课量备份] - 范围 [$A$1:$B$59147]
+2026-04-28 13:25:37 [INFO] 检查数据连接属性：
+2026-04-28 13:25:37 [INFO]   工作表 [昨日课量备份] - 查询 [昨日课量备份]:
+2026-04-28 13:25:37 [INFO]     - 全部刷新时刷新此连接: ✗ 未设置
+2026-04-28 13:25:37 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:38 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:38 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:38 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:38 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:38 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:38 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:38 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:39 [DEBUG] 弹窗守护线程运行中，已检查 10 次
+2026-04-28 13:25:39 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:39 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:39 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:39 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:39 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:39 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:39 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:40 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:40 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:40 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:40 [DEBUG] 弹窗守护线程运行中，已检查 20 次
+2026-04-28 13:25:40 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:40 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:40 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:40 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:41 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:41 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:41 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:41 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:41 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:41 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:41 [DEBUG] 弹窗守护线程运行中，已检查 30 次
+2026-04-28 13:25:41 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:42 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:42 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:42 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:42 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:42 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:42 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:42 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:43 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:43 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:43 [DEBUG] 弹窗守护线程运行中，已检查 40 次
+2026-04-28 13:25:43 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:43 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:43 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:43 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:43 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:44 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:44 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:44 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:44 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:44 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:44 [DEBUG] 弹窗守护线程运行中，已检查 50 次
+2026-04-28 13:25:44 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:44 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:45 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:45 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:45 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:45 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:45 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:45 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:45 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:46 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:46 [DEBUG] 弹窗守护线程运行中，已检查 60 次
+2026-04-28 13:25:46 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:46 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:46 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:46 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:46 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:47 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:47 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:47 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:47 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:47 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:47 [DEBUG] 弹窗守护线程运行中，已检查 70 次
+2026-04-28 13:25:47 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:47 [INFO] 执行全部刷新...
+2026-04-28 13:25:47 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:47 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:48 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:48 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:48 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:48 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:48 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:48 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:48 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:49 [DEBUG] 弹窗守护线程运行中，已检查 80 次
+2026-04-28 13:25:49 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:49 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:49 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:49 [INFO] 没有需要验证的表格，刷新完成
+2026-04-28 13:25:49 [INFO] 启动弹窗守护线程，超时时间：90秒
+2026-04-28 13:25:49 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:49 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:49 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 13:25:49 [DEBUG] 重新应用筛选：昨日课量备份
+2026-04-28 13:25:49 [INFO] 开始截图，共 1 个区域
+2026-04-28 13:25:49 [INFO] 弹窗守护线程结束，共检查 83 次
+2026-04-28 13:25:49 [DEBUG] 截图区域地址: $A$1:$A$2
+2026-04-28 13:25:49 [INFO] 弹窗守护线程结束，共检查 2 次
+2026-04-28 13:25:50 [INFO] 截图成功：[test] 工作表[sheet1] 区域[A1]
+2026-04-28 13:25:51 [DEBUG] 已将所有工作表缩放比例恢复为100%
+2026-04-28 13:25:54 [DEBUG] Excel 进程已释放
+2026-04-28 13:25:54 [INFO] 发送成功：截图 学员明细备份_test_20260428_132549_649240.png
+2026-04-28 13:25:54 [DEBUG] 清理临时文件：学员明细备份_test_20260428_132549_649240.png
+2026-04-28 13:25:54 [INFO] 任务耗时：19.22s
+2026-04-28 13:25:54 [INFO] ====================================================================================================
+2026-04-28 13:26:51 [INFO] 日志系统已初始化，日志文件：c:\Users\EDY\Desktop\BOT_TEST\logs\2026\04\2026-04-28.log
+2026-04-28 13:26:51 [INFO] 已启用测试webhook模式
+2026-04-28 13:26:51 [INFO] 成功加载 1 个任务
+2026-04-28 13:26:51 [INFO] 进入调试模式...
+2026-04-28 13:26:51 [INFO] ====================================================================================================
+2026-04-28 13:26:51 [INFO] 启动任务：学员明细备份.xlsx
+2026-04-28 13:26:51 [INFO] ====================================================================================================
+2026-04-28 13:26:51 [DEBUG] 成功创建 Excel 实例
+2026-04-28 13:26:51 [DEBUG] 成功设置 Excel 可见性: True
+2026-04-28 13:26:51 [DEBUG] 成功设置 DisplayAlerts = False
+2026-04-28 13:26:53 [DEBUG] 成功打开文件：学员明细备份.xlsx
+2026-04-28 13:26:53 [INFO] 开始刷新数据...
+2026-04-28 13:26:53 [DEBUG] 未安装 pyautogui，跳过弹窗守护
+2026-04-28 13:26:53 [DEBUG] 发现链接数据源的表格：工作表 [昨日课量备份] - 查询 [昨日课量备份] - 范围 [$A$1:$B$59147]
+2026-04-28 13:26:53 [INFO] 共发现 1 个链接了数据源的表格
+2026-04-28 13:26:53 [INFO]   - 工作表 [昨日课量备份] - 查询 [昨日课量备份] - 范围 [$A$1:$B$59147]
+2026-04-28 13:26:53 [INFO] 检查数据连接属性：
+2026-04-28 13:26:53 [INFO]   工作表 [昨日课量备份] - 查询 [昨日课量备份]:
+2026-04-28 13:26:53 [INFO]     - 全部刷新时刷新此连接: ✗ 未设置
+2026-04-28 13:27:03 [INFO] 执行全部刷新...
+2026-04-28 13:27:04 [INFO] 没有需要验证的表格，刷新完成
+2026-04-28 13:27:04 [DEBUG] 未安装 pyautogui，跳过弹窗守护
+2026-04-28 13:27:05 [DEBUG] 重新应用筛选：昨日课量备份
+2026-04-28 13:27:05 [INFO] 开始截图，共 1 个区域
+2026-04-28 13:27:05 [DEBUG] 截图区域地址: $A$1:$A$2
+2026-04-28 13:27:06 [INFO] 截图成功：[test] 工作表[sheet1] 区域[A1]
+2026-04-28 13:27:06 [DEBUG] 已将所有工作表缩放比例恢复为100%
+2026-04-28 13:27:09 [DEBUG] Excel 进程已释放
+2026-04-28 13:27:10 [INFO] 发送成功：截图 学员明细备份_test_20260428_132705_148188.png
+2026-04-28 13:27:10 [DEBUG] 清理临时文件：学员明细备份_test_20260428_132705_148188.png
+2026-04-28 13:27:10 [INFO] 任务耗时：18.97s
+2026-04-28 13:27:10 [INFO] ====================================================================================================
+2026-04-28 13:27:20 [INFO] 日志系统已初始化，日志文件：c:\Users\EDY\Desktop\BOT_TEST\logs\2026\04\2026-04-28.log
+2026-04-28 13:27:20 [INFO] 已启用测试webhook模式
+2026-04-28 13:27:20 [INFO] 成功加载 1 个任务
+2026-04-28 13:27:20 [INFO] 进入调试模式...
+2026-04-28 13:27:20 [INFO] ====================================================================================================
+2026-04-28 13:27:20 [INFO] 启动任务：学员明细备份.xlsx
+2026-04-28 13:27:20 [INFO] ====================================================================================================
+2026-04-28 13:27:21 [DEBUG] 成功创建 Excel 实例
+2026-04-28 13:27:21 [DEBUG] 成功设置 Excel 可见性: True
+2026-04-28 13:27:21 [DEBUG] 成功设置 DisplayAlerts = False
+2026-04-28 13:27:23 [DEBUG] 成功打开文件：学员明细备份.xlsx
+2026-04-28 13:27:23 [INFO] 开始刷新数据...
+2026-04-28 13:27:23 [DEBUG] 未安装 pyautogui，跳过弹窗守护
+2026-04-28 13:27:23 [DEBUG] 发现链接数据源的表格：工作表 [昨日课量备份] - 查询 [昨日课量备份] - 范围 [$A$1:$B$59147]
+2026-04-28 13:27:23 [INFO] 共发现 1 个链接了数据源的表格
+2026-04-28 13:27:23 [INFO]   - 工作表 [昨日课量备份] - 查询 [昨日课量备份] - 范围 [$A$1:$B$59147]
+2026-04-28 13:27:23 [INFO] 检查数据连接属性：
+2026-04-28 13:27:23 [INFO]   工作表 [昨日课量备份] - 查询 [昨日课量备份]:
+2026-04-28 13:27:23 [INFO]     - 全部刷新时刷新此连接: ✗ 未设置
+2026-04-28 13:27:33 [INFO] 执行全部刷新...
+2026-04-28 13:27:34 [INFO] 没有需要验证的表格，刷新完成
+2026-04-28 13:27:34 [DEBUG] 未安装 pyautogui，跳过弹窗守护
+2026-04-28 13:29:30 [DEBUG] 重新应用筛选：昨日课量备份
+2026-04-28 13:29:30 [INFO] 开始截图，共 1 个区域
+2026-04-28 13:29:30 [DEBUG] 截图区域地址: $A$1:$A$2
+2026-04-28 13:29:32 [INFO] 截图成功：[test] 工作表[sheet1] 区域[A1]
+2026-04-28 13:29:32 [DEBUG] 已将所有工作表缩放比例恢复为100%
+2026-04-28 13:29:37 [DEBUG] Excel 进程已释放
+2026-04-28 13:29:37 [INFO] 发送成功：截图 学员明细备份_test_20260428_132930_917192.png
+2026-04-28 13:29:37 [DEBUG] 清理临时文件：学员明细备份_test_20260428_132930_917192.png
+2026-04-28 13:29:37 [INFO] 任务耗时：136.68s
+2026-04-28 13:29:37 [INFO] ====================================================================================================
+2026-04-28 13:33:12 [INFO] 日志系统已初始化，日志文件：c:\Users\EDY\Desktop\BOT_TEST\logs\2026\04\2026-04-28.log
+2026-04-28 13:33:12 [INFO] 已启用测试webhook模式
+2026-04-28 13:33:12 [INFO] 成功加载 1 个任务
+2026-04-28 13:33:12 [INFO] 进入调试模式...
+2026-04-28 13:33:12 [INFO] ====================================================================================================
+2026-04-28 13:33:12 [INFO] 启动任务：学员明细备份.xlsx
+2026-04-28 13:33:12 [INFO] ====================================================================================================
+2026-04-28 13:33:13 [DEBUG] 成功创建 Excel 实例
+2026-04-28 13:33:14 [DEBUG] 成功设置 Excel 可见性: True
+2026-04-28 13:33:14 [DEBUG] 成功设置 DisplayAlerts = False
+2026-04-28 13:33:16 [DEBUG] 成功打开文件：学员明细备份.xlsx
+2026-04-28 13:33:16 [INFO] 开始刷新数据...
+2026-04-28 13:33:16 [INFO] 启动弹窗守护线程，超时时间：620秒
+2026-04-28 13:33:16 [DEBUG] 发现链接数据源的表格：工作表 [昨日课量备份] - 查询 [昨日课量备份] - 范围 [$A$1:$B$59147]
+2026-04-28 13:33:16 [INFO] 共发现 1 个链接了数据源的表格
+2026-04-28 13:33:16 [INFO]   - 工作表 [昨日课量备份] - 查询 [昨日课量备份] - 范围 [$A$1:$B$59147]
+2026-04-28 13:33:16 [INFO] 检查数据连接属性：
+2026-04-28 13:33:16 [INFO]   工作表 [昨日课量备份] - 查询 [昨日课量备份]:
+2026-04-28 13:33:16 [INFO]     - 全部刷新时刷新此连接: ✗ 未设置
+2026-04-28 13:33:17 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 13:33:18 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 13:33:19 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 13:33:20 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 13:33:21 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 13:33:22 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 13:33:22 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 13:33:23 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 13:33:24 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 13:33:24 [DEBUG] 弹窗守护线程运行中，已检查 10 次
+2026-04-28 13:33:25 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 13:33:26 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 13:33:26 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 13:33:27 [INFO] 执行全部刷新...
+2026-04-28 13:33:27 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 13:33:28 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 13:33:29 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 13:33:30 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 13:33:30 [INFO] 没有需要验证的表格，刷新完成
+2026-04-28 13:33:30 [INFO] 启动弹窗守护线程，超时时间：90秒
+2026-04-28 13:33:31 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 13:33:31 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 13:33:33 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 13:33:33 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 13:33:34 [INFO] 检测到弹窗，已点击按钮：view_all_content.png
+2026-04-28 13:33:34 [INFO] 检测到弹窗，已点击按钮：view_all_content.png
+2026-04-28 13:33:34 [DEBUG] 弹窗守护线程运行中，已检查 20 次
+2026-04-28 13:33:34 [DEBUG] 重新应用筛选：昨日课量备份
+2026-04-28 13:33:35 [INFO] 开始截图，共 1 个区域
+2026-04-28 13:33:37 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 13:33:37 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 13:33:37 [DEBUG] 截图区域地址: $A$1:$A$2
+2026-04-28 13:33:37 [INFO] 弹窗守护线程结束，共检查 20 次
+2026-04-28 13:33:37 [INFO] 弹窗守护线程结束，共检查 4 次
+2026-04-28 13:33:38 [INFO] 截图成功：[test] 工作表[sheet1] 区域[A1]
+2026-04-28 13:33:39 [DEBUG] 已将所有工作表缩放比例恢复为100%
+2026-04-28 13:33:43 [DEBUG] Excel 进程已释放
+2026-04-28 13:33:43 [INFO] 发送成功：截图 学员明细备份_test_20260428_133336_432979.png
+2026-04-28 13:33:43 [DEBUG] 清理临时文件：学员明细备份_test_20260428_133336_432979.png
+2026-04-28 13:33:43 [INFO] 任务耗时：31.03s
+2026-04-28 13:33:43 [INFO] ====================================================================================================
+2026-04-28 13:34:19 [INFO] 日志系统已初始化，日志文件：c:\Users\EDY\Desktop\BOT_TEST\logs\2026\04\2026-04-28.log
+2026-04-28 13:34:19 [INFO] 已启用测试webhook模式
+2026-04-28 13:34:19 [INFO] 成功加载 1 个任务
+2026-04-28 13:34:19 [INFO] 进入调试模式...
+2026-04-28 13:34:19 [INFO] ====================================================================================================
+2026-04-28 13:34:19 [INFO] 启动任务：学员明细备份.xlsx
+2026-04-28 13:34:19 [INFO] ====================================================================================================
+2026-04-28 13:34:19 [DEBUG] 成功创建 Excel 实例
+2026-04-28 13:34:19 [DEBUG] 成功设置 Excel 可见性: True
+2026-04-28 13:34:19 [DEBUG] 成功设置 DisplayAlerts = False
+2026-04-28 13:34:21 [DEBUG] 成功打开文件：学员明细备份.xlsx
+2026-04-28 13:34:21 [INFO] 开始刷新数据...
+2026-04-28 13:34:21 [INFO] 启动弹窗守护线程，超时时间：620秒
+2026-04-28 13:34:22 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 13:34:22 [DEBUG] 发现链接数据源的表格：工作表 [昨日课量备份] - 查询 [昨日课量备份] - 范围 [$A$1:$B$59147]
+2026-04-28 13:34:22 [INFO] 共发现 1 个链接了数据源的表格
+2026-04-28 13:34:22 [INFO]   - 工作表 [昨日课量备份] - 查询 [昨日课量备份] - 范围 [$A$1:$B$59147]
+2026-04-28 13:34:22 [INFO] 检查数据连接属性：
+2026-04-28 13:34:22 [INFO]   工作表 [昨日课量备份] - 查询 [昨日课量备份]:
+2026-04-28 13:34:22 [INFO]     - 全部刷新时刷新此连接: ✗ 未设置
+2026-04-28 13:34:22 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 13:34:23 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 13:34:23 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 13:34:24 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 13:34:24 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 13:34:25 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 13:34:26 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 13:34:26 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 13:34:26 [DEBUG] 弹窗守护线程运行中，已检查 10 次
+2026-04-28 13:34:27 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 13:34:27 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 13:34:28 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 13:34:28 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 13:34:29 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 13:34:29 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 13:34:30 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 13:34:30 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 13:34:31 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 13:34:31 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 13:34:31 [DEBUG] 弹窗守护线程运行中，已检查 20 次
+2026-04-28 13:34:32 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 13:34:32 [INFO] 执行全部刷新...
+2026-04-28 13:34:32 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 13:34:33 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 13:34:33 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 13:34:34 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 13:34:34 [INFO] 没有需要验证的表格，刷新完成
+2026-04-28 13:34:34 [INFO] 启动弹窗守护线程，超时时间：90秒
+2026-04-28 13:34:35 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 13:34:35 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 13:34:36 [INFO] 检测到弹窗，已点击按钮：view_all_content.png
+2026-04-28 13:34:36 [DEBUG] 重新应用筛选：昨日课量备份
+2026-04-28 13:34:36 [INFO] 开始截图，共 1 个区域
+2026-04-28 13:34:36 [DEBUG] 截图区域地址: $A$1:$A$2
+2026-04-28 13:34:36 [INFO] 弹窗守护线程结束，共检查 2 次
+2026-04-28 13:34:36 [INFO] 检测到弹窗，已点击按钮：view_all_content.png
+2026-04-28 13:34:36 [INFO] 弹窗守护线程结束，共检查 26 次
+2026-04-28 13:34:37 [INFO] 截图成功：[test] 工作表[sheet1] 区域[A1]
+2026-04-28 13:34:37 [DEBUG] 已将所有工作表缩放比例恢复为100%
+2026-04-28 13:34:38 [DEBUG] Excel 进程已释放
+2026-04-28 13:34:39 [INFO] 发送成功：截图 学员明细备份_test_20260428_133436_282608.png
+2026-04-28 13:34:39 [DEBUG] 清理临时文件：学员明细备份_test_20260428_133436_282608.png
+2026-04-28 13:34:39 [INFO] 任务耗时：20.14s
+2026-04-28 13:34:39 [INFO] ====================================================================================================
+2026-04-28 14:01:39 [INFO] 日志系统已初始化，日志文件：c:\Users\EDY\Desktop\BOT_TEST\logs\2026\04\2026-04-28.log
+2026-04-28 14:01:39 [INFO] 已启用测试webhook模式
+2026-04-28 14:01:39 [INFO] 成功加载 1 个任务
+2026-04-28 14:01:39 [INFO] 进入调试模式...
+2026-04-28 14:01:39 [INFO] ====================================================================================================
+2026-04-28 14:01:39 [INFO] 启动任务：学员明细备份.xlsx
+2026-04-28 14:01:39 [INFO] ====================================================================================================
+2026-04-28 14:01:40 [DEBUG] 成功创建 Excel 实例
+2026-04-28 14:01:40 [DEBUG] 成功设置 Excel 可见性: True
+2026-04-28 14:01:40 [DEBUG] 成功设置 DisplayAlerts = False
+2026-04-28 14:01:41 [DEBUG] Excel 进程已释放
+2026-04-28 14:01:41 [ERROR] 任务异常：Excel 启动失败：(-2147352567, '发生意外。', (0, 'Microsoft Excel', 'Microsoft Excel 不能访问文件“C:\\Users\\EDY\\OneDrive - PPLINGO PTE LTD\\自动播报文件\\学员明细备份.xlsx”。 可能的原因有以下几个:\n\n• 文件名称或路径不存在。\n• 文件正被其他程序使用。\n• 您正要保存的工作簿与当前打开的工作簿同名。', 'xlmain11.chm', 0, -2146827284), None)
+Traceback (most recent call last):
+  File "c:\Users\EDY\Desktop\BOT_TEST\excel.py", line 106, in __enter__
+    self.workbook = self.excel.Workbooks.Open(self.file_path)
+  File "<COMObject <unknown>>", line 5, in Open
+pywintypes.com_error: (-2147352567, '发生意外。', (0, 'Microsoft Excel', 'Microsoft Excel 不能访问文件“C:\\Users\\EDY\\OneDrive - PPLINGO PTE LTD\\自动播报文件\\学员明细备份.xlsx”。 可能的原因有以下几个:\n\n• 文件名称或路径不存在。\n• 文件正被其他程序使用。\n• 您正要保存的工作簿与当前打开的工作簿同名。', 'xlmain11.chm', 0, -2146827284), None)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "c:\Users\EDY\Desktop\BOT_TEST\excel.py", line 665, in execute
+    with ExcelProcessor(
+  File "c:\Users\EDY\Desktop\BOT_TEST\excel.py", line 129, in __enter__
+    raise RuntimeError(f"Excel 启动失败：{str(e)}")
+RuntimeError: Excel 启动失败：(-2147352567, '发生意外。', (0, 'Microsoft Excel', 'Microsoft Excel 不能访问文件“C:\\Users\\EDY\\OneDrive - PPLINGO PTE LTD\\自动播报文件\\学员明细备份.xlsx”。 可能的原因有以下几个:\n\n• 文件名称或路径不存在。\n• 文件正被其他程序使用。\n• 您正要保存的工作簿与当前打开的工作簿同名。', 'xlmain11.chm', 0, -2146827284), None)
+2026-04-28 14:01:41 [INFO] 发送成功：任务启动失败通知
+2026-04-28 14:01:41 [INFO] 任务耗时：2.22s
+2026-04-28 14:01:41 [INFO] ====================================================================================================
+2026-04-28 14:06:45 [INFO] 日志系统已初始化，日志文件：c:\Users\EDY\Desktop\BOT_TEST\logs\2026\04\2026-04-28.log
+2026-04-28 14:06:45 [INFO] 已启用测试webhook模式
+2026-04-28 14:06:45 [INFO] 成功加载 1 个任务
+2026-04-28 14:06:45 [INFO] 进入调试模式...
+2026-04-28 14:06:45 [INFO] ====================================================================================================
+2026-04-28 14:06:45 [INFO] 启动任务：学员明细备份.xlsx
+2026-04-28 14:06:45 [INFO] ====================================================================================================
+2026-04-28 14:06:45 [DEBUG] 成功创建 Excel 实例
+2026-04-28 14:06:45 [DEBUG] 成功设置 Excel 可见性: True
+2026-04-28 14:06:45 [DEBUG] 成功设置 DisplayAlerts = False
+2026-04-28 14:06:46 [DEBUG] Excel 进程已释放
+2026-04-28 14:06:46 [ERROR] 任务异常：Excel 启动失败：(-2147352567, '发生意外。', (0, 'Microsoft Excel', 'Microsoft Excel 不能访问文件“C:\\Users\\EDY\\OneDrive - PPLINGO PTE LTD\\自动播报文件\\学员明细备份.xlsx”。 可能的原因有以下几个:\n\n• 文件名称或路径不存在。\n• 文件正被其他程序使用。\n• 您正要保存的工作簿与当前打开的工作簿同名。', 'xlmain11.chm', 0, -2146827284), None)
+Traceback (most recent call last):
+  File "c:\Users\EDY\Desktop\BOT_TEST\excel.py", line 106, in __enter__
+    self.workbook = self.excel.Workbooks.Open(self.file_path)
+  File "<COMObject <unknown>>", line 5, in Open
+pywintypes.com_error: (-2147352567, '发生意外。', (0, 'Microsoft Excel', 'Microsoft Excel 不能访问文件“C:\\Users\\EDY\\OneDrive - PPLINGO PTE LTD\\自动播报文件\\学员明细备份.xlsx”。 可能的原因有以下几个:\n\n• 文件名称或路径不存在。\n• 文件正被其他程序使用。\n• 您正要保存的工作簿与当前打开的工作簿同名。', 'xlmain11.chm', 0, -2146827284), None)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "c:\Users\EDY\Desktop\BOT_TEST\excel.py", line 665, in execute
+    with ExcelProcessor(
+  File "c:\Users\EDY\Desktop\BOT_TEST\excel.py", line 129, in __enter__
+    raise RuntimeError(f"Excel 启动失败：{str(e)}")
+RuntimeError: Excel 启动失败：(-2147352567, '发生意外。', (0, 'Microsoft Excel', 'Microsoft Excel 不能访问文件“C:\\Users\\EDY\\OneDrive - PPLINGO PTE LTD\\自动播报文件\\学员明细备份.xlsx”。 可能的原因有以下几个:\n\n• 文件名称或路径不存在。\n• 文件正被其他程序使用。\n• 您正要保存的工作簿与当前打开的工作簿同名。', 'xlmain11.chm', 0, -2146827284), None)
+2026-04-28 14:06:47 [INFO] 发送成功：任务启动失败通知
+2026-04-28 14:06:47 [INFO] 任务耗时：1.96s
+2026-04-28 14:06:47 [INFO] ====================================================================================================
+2026-04-28 14:06:57 [INFO] 日志系统已初始化，日志文件：c:\Users\EDY\Desktop\BOT_TEST\logs\2026\04\2026-04-28.log
+2026-04-28 14:06:57 [INFO] 已启用测试webhook模式
+2026-04-28 14:06:57 [INFO] 成功加载 1 个任务
+2026-04-28 14:06:57 [INFO] 进入调试模式...
+2026-04-28 14:06:57 [INFO] ====================================================================================================
+2026-04-28 14:06:57 [INFO] 启动任务：学员明细备份.xlsx
+2026-04-28 14:06:57 [INFO] ====================================================================================================
+2026-04-28 14:06:57 [DEBUG] 成功创建 Excel 实例
+2026-04-28 14:06:57 [DEBUG] 成功设置 Excel 可见性: True
+2026-04-28 14:06:57 [DEBUG] 成功设置 DisplayAlerts = False
+2026-04-28 14:06:58 [DEBUG] Excel 进程已释放
+2026-04-28 14:06:58 [ERROR] 任务异常：Excel 启动失败：(-2147352567, '发生意外。', (0, 'Microsoft Excel', 'Microsoft Excel 不能访问文件“C:\\Users\\EDY\\OneDrive - PPLINGO PTE LTD\\自动播报文件\\学员明细备份.xlsx”。 可能的原因有以下几个:\n\n• 文件名称或路径不存在。\n• 文件正被其他程序使用。\n• 您正要保存的工作簿与当前打开的工作簿同名。', 'xlmain11.chm', 0, -2146827284), None)
+Traceback (most recent call last):
+  File "c:\Users\EDY\Desktop\BOT_TEST\excel.py", line 106, in __enter__
+    self.workbook = self.excel.Workbooks.Open(self.file_path)
+  File "<COMObject <unknown>>", line 5, in Open
+pywintypes.com_error: (-2147352567, '发生意外。', (0, 'Microsoft Excel', 'Microsoft Excel 不能访问文件“C:\\Users\\EDY\\OneDrive - PPLINGO PTE LTD\\自动播报文件\\学员明细备份.xlsx”。 可能的原因有以下几个:\n\n• 文件名称或路径不存在。\n• 文件正被其他程序使用。\n• 您正要保存的工作簿与当前打开的工作簿同名。', 'xlmain11.chm', 0, -2146827284), None)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "c:\Users\EDY\Desktop\BOT_TEST\excel.py", line 665, in execute
+    with ExcelProcessor(
+  File "c:\Users\EDY\Desktop\BOT_TEST\excel.py", line 129, in __enter__
+    raise RuntimeError(f"Excel 启动失败：{str(e)}")
+RuntimeError: Excel 启动失败：(-2147352567, '发生意外。', (0, 'Microsoft Excel', 'Microsoft Excel 不能访问文件“C:\\Users\\EDY\\OneDrive - PPLINGO PTE LTD\\自动播报文件\\学员明细备份.xlsx”。 可能的原因有以下几个:\n\n• 文件名称或路径不存在。\n• 文件正被其他程序使用。\n• 您正要保存的工作簿与当前打开的工作簿同名。', 'xlmain11.chm', 0, -2146827284), None)
+2026-04-28 14:06:58 [INFO] 发送成功：任务启动失败通知
+2026-04-28 14:06:58 [INFO] 任务耗时：1.54s
+2026-04-28 14:06:58 [INFO] ====================================================================================================
+2026-04-28 14:07:07 [INFO] 日志系统已初始化，日志文件：c:\Users\EDY\Desktop\BOT_TEST\logs\2026\04\2026-04-28.log
+2026-04-28 14:07:07 [INFO] 已启用测试webhook模式
+2026-04-28 14:07:07 [INFO] 成功加载 1 个任务
+2026-04-28 14:07:07 [INFO] 进入调试模式...
+2026-04-28 14:07:07 [INFO] ====================================================================================================
+2026-04-28 14:07:07 [INFO] 启动任务：学员明细备份.xlsx
+2026-04-28 14:07:07 [INFO] ====================================================================================================
+2026-04-28 14:07:07 [DEBUG] 成功创建 Excel 实例
+2026-04-28 14:07:08 [DEBUG] 成功设置 Excel 可见性: True
+2026-04-28 14:07:08 [DEBUG] 成功设置 DisplayAlerts = False
+2026-04-28 14:07:10 [DEBUG] 成功打开文件：学员明细备份.xlsx
+2026-04-28 14:07:10 [INFO] 开始刷新数据...
+2026-04-28 14:07:10 [DEBUG] 发现链接数据源的表格：工作表 [昨日课量备份] - 查询 [昨日课量备份] - 范围 [$A$1:$B$59147]
+2026-04-28 14:07:10 [INFO] 共发现 1 个链接了数据源的表格
+2026-04-28 14:07:10 [INFO]   - 工作表 [昨日课量备份] - 查询 [昨日课量备份] - 范围 [$A$1:$B$59147]
+2026-04-28 14:07:10 [INFO] 检查数据连接属性：
+2026-04-28 14:07:10 [INFO]   工作表 [昨日课量备份] - 查询 [昨日课量备份]:
+2026-04-28 14:07:10 [INFO]     - 全部刷新时刷新此连接: ✗ 未设置
+2026-04-28 14:07:20 [INFO] 执行全部刷新...
+2026-04-28 14:07:20 [INFO] 没有需要验证的表格，刷新完成
+2026-04-28 14:07:20 [INFO] 启动弹窗守护线程，超时时间：90秒
+2026-04-28 14:07:21 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 14:07:21 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 14:07:21 [DEBUG] 重新应用筛选：昨日课量备份
+2026-04-28 14:07:21 [INFO] 开始截图，共 1 个区域
+2026-04-28 14:07:21 [DEBUG] 截图区域地址: $A$1:$A$2
+2026-04-28 14:07:21 [INFO] 弹窗守护线程结束，共检查 2 次
+2026-04-28 14:07:22 [INFO] 截图成功：[test] 工作表[sheet1] 区域[A1]
+2026-04-28 14:07:22 [DEBUG] 已将所有工作表缩放比例恢复为100%
+2026-04-28 14:07:26 [DEBUG] Excel 进程已释放
+2026-04-28 14:07:26 [INFO] 发送成功：截图 学员明细备份_test_20260428_140721_215768.png
+2026-04-28 14:07:26 [DEBUG] 清理临时文件：学员明细备份_test_20260428_140721_215768.png
+2026-04-28 14:07:26 [INFO] 任务耗时：19.31s
+2026-04-28 14:07:26 [INFO] ====================================================================================================
+2026-04-28 14:11:09 [INFO] 日志系统已初始化，日志文件：c:\Users\EDY\Desktop\BOT_TEST\logs\2026\04\2026-04-28.log
+2026-04-28 14:11:09 [INFO] 已启用测试webhook模式
+2026-04-28 14:11:09 [INFO] 成功加载 1 个任务
+2026-04-28 14:11:09 [INFO] 进入调试模式...
+2026-04-28 14:11:09 [INFO] ====================================================================================================
+2026-04-28 14:11:09 [INFO] 启动任务：学员明细备份.xlsx
+2026-04-28 14:11:09 [INFO] ====================================================================================================
+2026-04-28 14:11:10 [DEBUG] 成功创建 Excel 实例
+2026-04-28 14:11:10 [DEBUG] 成功设置 Excel 可见性: True
+2026-04-28 14:11:10 [DEBUG] 成功设置 DisplayAlerts = False
+2026-04-28 14:11:13 [DEBUG] 成功打开文件：学员明细备份.xlsx
+2026-04-28 14:11:13 [INFO] 开始刷新数据...
+2026-04-28 14:11:13 [DEBUG] 发现链接数据源的表格：工作表 [昨日课量备份] - 查询 [昨日课量备份] - 范围 [$A$1:$B$59147]
+2026-04-28 14:11:13 [INFO] 共发现 1 个链接了数据源的表格
+2026-04-28 14:11:13 [INFO]   - 工作表 [昨日课量备份] - 查询 [昨日课量备份] - 范围 [$A$1:$B$59147]
+2026-04-28 14:11:13 [INFO] 检查数据连接属性：
+2026-04-28 14:11:13 [INFO]   工作表 [昨日课量备份] - 查询 [昨日课量备份]:
+2026-04-28 14:11:13 [INFO]     - 全部刷新时刷新此连接: ✗ 未设置
+2026-04-28 14:11:23 [INFO] 执行全部刷新...
+2026-04-28 14:11:23 [INFO] 没有需要验证的表格，刷新完成
+2026-04-28 14:11:23 [INFO] 启动弹窗守护线程，超时时间：90秒
+2026-04-28 14:11:24 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 14:11:24 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 14:11:24 [DEBUG] 重新应用筛选：昨日课量备份
+2026-04-28 14:11:24 [INFO] 开始截图，共 1 个区域
+2026-04-28 14:11:24 [DEBUG] 截图区域地址: $A$1:$A$2
+2026-04-28 14:11:24 [INFO] 弹窗守护线程结束，共检查 2 次
+2026-04-28 14:11:25 [INFO] 截图成功：[test] 工作表[sheet1] 区域[A1]
+2026-04-28 14:11:25 [DEBUG] 已将所有工作表缩放比例恢复为100%
+2026-04-28 14:11:28 [DEBUG] Excel 进程已释放
+2026-04-28 14:11:29 [INFO] 发送成功：截图 学员明细备份_test_20260428_141124_208359.png
+2026-04-28 14:11:29 [DEBUG] 清理临时文件：学员明细备份_test_20260428_141124_208359.png
+2026-04-28 14:11:29 [INFO] 任务耗时：19.28s
+2026-04-28 14:11:29 [INFO] ====================================================================================================
+2026-04-28 14:20:07 [INFO] 日志系统已初始化，日志文件：c:\Users\EDY\Desktop\BOT_TEST\logs\2026\04\2026-04-28.log
+2026-04-28 14:20:07 [INFO] 已启用测试webhook模式
+2026-04-28 14:20:07 [INFO] 成功加载 1 个任务
+2026-04-28 14:20:07 [INFO] 进入调试模式...
+2026-04-28 14:20:07 [INFO] ====================================================================================================
+2026-04-28 14:20:07 [INFO] 启动任务：学员明细备份.xlsx
+2026-04-28 14:20:07 [INFO] ====================================================================================================
+2026-04-28 14:20:07 [DEBUG] 成功创建 Excel 实例
+2026-04-28 14:20:08 [DEBUG] 成功设置 Excel 可见性: True
+2026-04-28 14:20:08 [DEBUG] 成功设置 DisplayAlerts = False
+2026-04-28 14:20:10 [DEBUG] 成功打开文件：学员明细备份.xlsx
+2026-04-28 14:20:10 [INFO] 开始刷新数据...
+2026-04-28 14:20:10 [DEBUG] 发现链接数据源的表格：工作表 [昨日课量备份] - 查询 [昨日课量备份] - 范围 [$A$1:$B$59147]
+2026-04-28 14:20:10 [INFO] 共发现 1 个链接了数据源的表格
+2026-04-28 14:20:10 [INFO]   - 工作表 [昨日课量备份] - 查询 [昨日课量备份] - 范围 [$A$1:$B$59147]
+2026-04-28 14:20:10 [INFO] 检查数据连接属性：
+2026-04-28 14:20:10 [INFO]   工作表 [昨日课量备份] - 查询 [昨日课量备份]:
+2026-04-28 14:20:10 [INFO]     - 全部刷新时刷新此连接: ✗ 未设置
+2026-04-28 14:20:20 [INFO] 执行全部刷新...
+2026-04-28 14:20:20 [INFO] 没有需要验证的表格，刷新完成
+2026-04-28 14:20:20 [INFO] 启动弹窗守护线程，超时时间：90秒
+2026-04-28 14:20:20 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 14:20:21 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 14:20:21 [DEBUG] 检测按钮 view_all_content.png 失败：The confidence keyword argument is only available if OpenCV is installed.
+2026-04-28 14:20:21 [DEBUG] 重新应用筛选：昨日课量备份
+2026-04-28 14:20:21 [INFO] 开始截图，共 1 个区域
+2026-04-28 14:20:21 [INFO] 弹窗守护线程结束，共检查 3 次
+2026-04-28 14:20:21 [DEBUG] 截图区域地址: $A$1:$A$2
+2026-04-28 14:20:22 [INFO] 截图成功：[test] 工作表[sheet1] 区域[A1]
+2026-04-28 14:20:22 [DEBUG] 已将所有工作表缩放比例恢复为100%
+2026-04-28 14:20:24 [DEBUG] Excel 进程已释放
+2026-04-28 14:20:24 [INFO] 发送成功：截图 学员明细备份_test_20260428_142021_262917.png
+2026-04-28 14:20:24 [DEBUG] 清理临时文件：学员明细备份_test_20260428_142021_262917.png
+2026-04-28 14:20:24 [INFO] 任务耗时：16.99s
+2026-04-28 14:20:24 [INFO] ====================================================================================================
+2026-04-28 14:25:25 [INFO] 日志系统已初始化，日志文件：c:\Users\EDY\Desktop\BOT_TEST\logs\2026\04\2026-04-28.log
+2026-04-28 14:25:26 [INFO] 已启用测试webhook模式
+2026-04-28 14:25:26 [INFO] 成功加载 1 个任务
+2026-04-28 14:25:26 [INFO] 进入调试模式...
+2026-04-28 14:25:26 [INFO] ====================================================================================================
+2026-04-28 14:25:26 [INFO] 启动任务：学员明细备份.xlsx
+2026-04-28 14:25:26 [INFO] ====================================================================================================
+2026-04-28 14:25:26 [DEBUG] 成功创建 Excel 实例
+2026-04-28 14:25:26 [DEBUG] 成功设置 Excel 可见性: True
+2026-04-28 14:25:26 [DEBUG] 成功设置 DisplayAlerts = False
+2026-04-28 14:25:29 [DEBUG] 成功打开文件：学员明细备份.xlsx
+2026-04-28 14:25:29 [INFO] 开始刷新数据...
+2026-04-28 14:25:29 [DEBUG] 发现链接数据源的表格：工作表 [昨日课量备份] - 查询 [昨日课量备份] - 范围 [$A$1:$B$59147]
+2026-04-28 14:25:29 [INFO] 共发现 1 个链接了数据源的表格
+2026-04-28 14:25:29 [INFO]   - 工作表 [昨日课量备份] - 查询 [昨日课量备份] - 范围 [$A$1:$B$59147]
+2026-04-28 14:25:29 [INFO] 检查数据连接属性：
+2026-04-28 14:25:29 [INFO]   工作表 [昨日课量备份] - 查询 [昨日课量备份]:
+2026-04-28 14:25:29 [INFO]     - 全部刷新时刷新此连接: ✗ 未设置
+2026-04-28 14:25:39 [INFO] 执行全部刷新...
+2026-04-28 14:25:39 [INFO] 没有需要验证的表格，刷新完成
+2026-04-28 14:25:39 [INFO] 启动弹窗守护线程，超时时间：90秒
+2026-04-28 14:25:40 [DEBUG] 重新应用筛选：昨日课量备份
+2026-04-28 14:25:40 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:25:40 [INFO] 开始截图，共 1 个区域
+2026-04-28 14:25:40 [DEBUG] 截图区域地址: $A$1:$A$2
+2026-04-28 14:25:40 [INFO] 弹窗守护线程结束
+2026-04-28 14:25:42 [INFO] 截图成功：[test] 工作表[sheet1] 区域[A1]
+2026-04-28 14:25:42 [DEBUG] 已将所有工作表缩放比例恢复为100%
+2026-04-28 14:25:43 [DEBUG] Excel 进程已释放
+2026-04-28 14:25:43 [INFO] 发送成功：截图 学员明细备份_test_20260428_142540_748773.png
+2026-04-28 14:25:43 [DEBUG] 清理临时文件：学员明细备份_test_20260428_142540_748773.png
+2026-04-28 14:25:43 [INFO] 任务耗时：17.49s
+2026-04-28 14:25:43 [INFO] ====================================================================================================
+2026-04-28 14:44:03 [INFO] 日志系统已初始化，日志文件：c:\Users\EDY\Desktop\BOT_TEST\logs\2026\04\2026-04-28.log
+2026-04-28 14:44:03 [INFO] 已启用测试webhook模式
+2026-04-28 14:44:03 [INFO] 成功加载 1 个任务
+2026-04-28 14:44:03 [INFO] 进入调试模式...
+2026-04-28 14:44:03 [INFO] ====================================================================================================
+2026-04-28 14:44:03 [INFO] 启动任务：学员明细备份.xlsx
+2026-04-28 14:44:03 [INFO] ====================================================================================================
+2026-04-28 14:44:03 [DEBUG] 成功创建 Excel 实例
+2026-04-28 14:44:03 [DEBUG] 成功设置 Excel 可见性: True
+2026-04-28 14:44:03 [DEBUG] 成功设置 DisplayAlerts = False
+2026-04-28 14:44:06 [DEBUG] 成功打开文件：学员明细备份.xlsx
+2026-04-28 14:44:06 [INFO] 开始刷新数据...
+2026-04-28 14:44:06 [DEBUG] 发现链接数据源的表格：工作表 [昨日课量备份] - 查询 [昨日课量备份] - 范围 [$A$1:$B$59147]
+2026-04-28 14:44:06 [INFO] 共发现 1 个链接了数据源的表格
+2026-04-28 14:44:06 [INFO]   - 工作表 [昨日课量备份] - 查询 [昨日课量备份] - 范围 [$A$1:$B$59147]
+2026-04-28 14:44:06 [INFO] 检查数据连接属性：
+2026-04-28 14:44:06 [INFO]   工作表 [昨日课量备份] - 查询 [昨日课量备份]:
+2026-04-28 14:44:06 [INFO]     - 全部刷新时刷新此连接: ✗ 未设置
+2026-04-28 14:44:16 [INFO] 执行全部刷新...
+2026-04-28 14:44:16 [INFO] 没有需要验证的表格，刷新完成
+2026-04-28 14:44:16 [INFO] 启动弹窗守护线程，超时时间：90秒
+2026-04-28 14:44:16 [DEBUG] 重新应用筛选：昨日课量备份
+2026-04-28 14:44:17 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:44:17 [INFO] 开始截图，共 1 个区域
+2026-04-28 14:44:17 [DEBUG] 截图区域地址: $A$1:$A$2
+2026-04-28 14:44:17 [INFO] 弹窗守护线程结束
+2026-04-28 14:44:18 [INFO] 截图成功：[test] 工作表[sheet1] 区域[A1]
+2026-04-28 14:44:18 [DEBUG] 已将所有工作表缩放比例恢复为100%
+2026-04-28 14:44:19 [DEBUG] Excel 进程已释放
+2026-04-28 14:44:19 [INFO] 发送成功：截图 学员明细备份_test_20260428_144417_195180.png
+2026-04-28 14:44:19 [DEBUG] 清理临时文件：学员明细备份_test_20260428_144417_195180.png
+2026-04-28 14:44:19 [INFO] 任务耗时：16.59s
+2026-04-28 14:44:19 [INFO] ====================================================================================================
+2026-04-28 14:46:31 [INFO] 日志系统已初始化，日志文件：c:\Users\EDY\Desktop\BOT_TEST\logs\2026\04\2026-04-28.log
+2026-04-28 14:46:31 [INFO] 已启用测试webhook模式
+2026-04-28 14:46:31 [INFO] 成功加载 1 个任务
+2026-04-28 14:46:31 [INFO] 进入调试模式...
+2026-04-28 14:46:31 [INFO] ====================================================================================================
+2026-04-28 14:46:31 [INFO] 启动任务：学员明细备份.xlsx
+2026-04-28 14:46:31 [INFO] ====================================================================================================
+2026-04-28 14:46:31 [DEBUG] 成功创建 Excel 实例
+2026-04-28 14:46:31 [DEBUG] 成功设置 Excel 可见性: True
+2026-04-28 14:46:31 [DEBUG] 成功设置 DisplayAlerts = False
+2026-04-28 14:46:34 [DEBUG] 成功打开文件：学员明细备份.xlsx
+2026-04-28 14:46:34 [INFO] 开始刷新数据...
+2026-04-28 14:46:34 [DEBUG] 发现链接数据源的表格：工作表 [昨日课量备份] - 查询 [昨日课量备份] - 范围 [$A$1:$B$59147]
+2026-04-28 14:46:34 [INFO] 共发现 1 个链接了数据源的表格
+2026-04-28 14:46:34 [INFO]   - 工作表 [昨日课量备份] - 查询 [昨日课量备份] - 范围 [$A$1:$B$59147]
+2026-04-28 14:46:34 [INFO] 检查数据连接属性：
+2026-04-28 14:46:34 [INFO]   工作表 [昨日课量备份] - 查询 [昨日课量备份]:
+2026-04-28 14:46:34 [INFO]     - 全部刷新时刷新此连接: ✗ 未设置
+2026-04-28 14:46:44 [INFO] 执行全部刷新...
+2026-04-28 14:46:45 [INFO] 没有需要验证的表格，刷新完成
+2026-04-28 14:46:45 [INFO] 启动弹窗守护线程，超时时间：90秒
+2026-04-28 14:46:45 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:46:46 [INFO] 检测到弹窗，已点击按钮：view_all_content.png
+2026-04-28 14:46:46 [DEBUG] 重新应用筛选：昨日课量备份
+2026-04-28 14:46:46 [INFO] 开始截图，共 1 个区域
+2026-04-28 14:46:47 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:46:47 [DEBUG] 截图区域地址: $A$1:$A$2
+2026-04-28 14:46:47 [INFO] 弹窗守护线程结束
+2026-04-28 14:46:50 [INFO] 截图成功：[test] 工作表[sheet1] 区域[A1]
+2026-04-28 14:46:50 [DEBUG] 已将所有工作表缩放比例恢复为100%
+2026-04-28 14:47:08 [DEBUG] Excel 进程已释放
+2026-04-28 14:47:09 [INFO] 发送成功：截图 学员明细备份_test_20260428_144646_852208.png
+2026-04-28 14:47:09 [DEBUG] 清理临时文件：学员明细备份_test_20260428_144646_852208.png
+2026-04-28 14:47:09 [INFO] 任务耗时：37.92s
+2026-04-28 14:47:09 [INFO] ====================================================================================================
+2026-04-28 14:48:56 [INFO] 日志系统已初始化，日志文件：c:\Users\EDY\Desktop\BOT_TEST\logs\2026\04\2026-04-28.log
+2026-04-28 14:48:56 [INFO] 已启用测试webhook模式
+2026-04-28 14:48:56 [INFO] 成功加载 2 个任务
+2026-04-28 14:48:56 [ERROR] 配置加载失败：C:/Users/EDY/OneDrive - PPLINGO PTE LTD/自动播报文件/线索-工作簿2026-当月往期+顺次1.xlsx
+2026-04-28 14:48:56 [ERROR] 系统异常：C:/Users/EDY/OneDrive - PPLINGO PTE LTD/自动播报文件/线索-工作簿2026-当月往期+顺次1.xlsx
+Traceback (most recent call last):
+  File "c:\Users\EDY\Desktop\BOT_TEST\excel.py", line 937, in main
+    scheduler = TaskScheduler("config.yml", debug=args.debug, test_webhook=test_webhook)
+  File "c:\Users\EDY\Desktop\BOT_TEST\excel.py", line 841, in __init__
+    self.tasks = self._load_tasks(config_path, test_webhook, error_webhook)
+  File "c:\Users\EDY\Desktop\BOT_TEST\excel.py", line 863, in _load_tasks
+    return [ReportTask(task, test_webhook, error_webhook) for task in config["tasks"]]
+  File "c:\Users\EDY\Desktop\BOT_TEST\excel.py", line 863, in <listcomp>
+    return [ReportTask(task, test_webhook, error_webhook) for task in config["tasks"]]
+  File "c:\Users\EDY\Desktop\BOT_TEST\excel.py", line 576, in __init__
+    self.config = self._validate_config(config)
+  File "c:\Users\EDY\Desktop\BOT_TEST\excel.py", line 594, in _validate_config
+    raise FileNotFoundError(config["excel_path"])
+FileNotFoundError: C:/Users/EDY/OneDrive - PPLINGO PTE LTD/自动播报文件/线索-工作簿2026-当月往期+顺次1.xlsx
+2026-04-28 14:49:15 [INFO] 日志系统已初始化，日志文件：c:\Users\EDY\Desktop\BOT_TEST\logs\2026\04\2026-04-28.log
+2026-04-28 14:49:15 [INFO] 已启用测试webhook模式
+2026-04-28 14:49:15 [INFO] 成功加载 2 个任务
+2026-04-28 14:49:15 [INFO] 进入调试模式...
+2026-04-28 14:49:15 [INFO] ====================================================================================================
+2026-04-28 14:49:15 [INFO] 启动任务：线索-工作簿2026-当月往期+顺次1.xlsx
+2026-04-28 14:49:15 [INFO] ====================================================================================================
+2026-04-28 14:49:15 [DEBUG] 成功创建 Excel 实例
+2026-04-28 14:49:16 [DEBUG] 成功设置 Excel 可见性: True
+2026-04-28 14:49:16 [DEBUG] 成功设置 DisplayAlerts = False
+2026-04-28 14:49:33 [DEBUG] 成功打开文件：线索-工作簿2026-当月往期+顺次1.xlsx
+2026-04-28 14:49:33 [INFO] 开始刷新数据...
+2026-04-28 14:49:33 [DEBUG] 工作表 [总览页面] 的表格 [表3] 未连接数据源
+2026-04-28 14:49:33 [DEBUG] 发现链接数据源的表格：工作表 [view_cnsale_first_sale_m1_detai] - 查询 [view_cnsale_first_sale_m1_details_key_57ce2n6vq7pcw0e8] - 范围 [$A$1:$CW$31564]
+2026-04-28 14:49:33 [DEBUG] 发现链接数据源的表格：工作表 [view_cnsale_sale_wq_detai_lastm] - 查询 [view_cnsale_sale_wq_detai_lastmonth1?key_57ce2n6vq7pcw0e8] - 范围 [$A$1:$CW$8911]
+2026-04-28 14:49:33 [INFO] 共发现 2 个链接了数据源的表格
+2026-04-28 14:49:33 [INFO]   - 工作表 [view_cnsale_first_sale_m1_detai] - 查询 [view_cnsale_first_sale_m1_details_key_57ce2n6vq7pcw0e8] - 范围 [$A$1:$CW$31564]
+2026-04-28 14:49:33 [INFO]   - 工作表 [view_cnsale_sale_wq_detai_lastm] - 查询 [view_cnsale_sale_wq_detai_lastmonth1?key_57ce2n6vq7pcw0e8] - 范围 [$A$1:$CW$8911]
+2026-04-28 14:49:33 [INFO] 检查数据连接属性：
+2026-04-28 14:49:33 [INFO]   工作表 [view_cnsale_first_sale_m1_detai] - 查询 [view_cnsale_first_sale_m1_details_key_57ce2n6vq7pcw0e8]:
+2026-04-28 14:49:33 [INFO]     - 全部刷新时刷新此连接: ✓ 已设置
+2026-04-28 14:49:33 [INFO]     - 数据源表格范围: $A$1:$CW$31564
+2026-04-28 14:49:33 [INFO]   工作表 [view_cnsale_sale_wq_detai_lastm] - 查询 [view_cnsale_sale_wq_detai_lastmonth1?key_57ce2n6vq7pcw0e8]:
+2026-04-28 14:49:33 [INFO]     - 全部刷新时刷新此连接: ✓ 已设置
+2026-04-28 14:49:33 [INFO]     - 数据源表格范围: $A$1:$CW$8911
+2026-04-28 14:49:33 [INFO] 在 2 个工作表中设置左上角单元格值为1
+2026-04-28 14:49:34 [INFO]   工作表 [view_cnsale_first_sale_m1_detai] - 已将 $A$1 单元格值设置为 1
+2026-04-28 14:49:34 [INFO]   工作表 [view_cnsale_sale_wq_detai_lastm] - 已将 $A$1 单元格值设置为 1
+2026-04-28 14:49:44 [INFO] 执行全部刷新...
+2026-04-28 14:49:44 [ERROR] 刷新异常：(-2147418111, '被呼叫方拒绝接收呼叫。', None, None)
+2026-04-28 14:49:44 [WARNING] 数据刷新失败，发送通知并终止任务
+2026-04-28 14:49:44 [INFO] 发送成功：数据刷新失败通知
+2026-04-28 14:49:49 [DEBUG] Excel 进程已释放
+2026-04-28 14:49:49 [INFO] 任务耗时：33.87s
+2026-04-28 14:49:49 [INFO] ====================================================================================================
+2026-04-28 14:50:10 [INFO] 日志系统已初始化，日志文件：c:\Users\EDY\Desktop\BOT_TEST\logs\2026\04\2026-04-28.log
+2026-04-28 14:50:10 [INFO] 已启用测试webhook模式
+2026-04-28 14:50:10 [INFO] 成功加载 2 个任务
+2026-04-28 14:50:10 [INFO] 进入调试模式...
+2026-04-28 14:50:10 [INFO] ====================================================================================================
+2026-04-28 14:50:10 [INFO] 启动任务：线索-工作簿2026-当月往期+顺次1.xlsx
+2026-04-28 14:50:10 [INFO] ====================================================================================================
+2026-04-28 14:50:10 [DEBUG] 成功创建 Excel 实例
+2026-04-28 14:50:10 [DEBUG] 成功设置 Excel 可见性: True
+2026-04-28 14:50:10 [DEBUG] 成功设置 DisplayAlerts = False
+2026-04-28 14:50:26 [DEBUG] 成功打开文件：线索-工作簿2026-当月往期+顺次1.xlsx
+2026-04-28 14:50:26 [INFO] 开始刷新数据...
+2026-04-28 14:50:26 [DEBUG] 工作表 [总览页面] 的表格 [表3] 未连接数据源
+2026-04-28 14:50:26 [DEBUG] 发现链接数据源的表格：工作表 [view_cnsale_first_sale_m1_detai] - 查询 [view_cnsale_first_sale_m1_details_key_57ce2n6vq7pcw0e8] - 范围 [$A$1:$CW$31564]
+2026-04-28 14:50:26 [DEBUG] 发现链接数据源的表格：工作表 [view_cnsale_sale_wq_detai_lastm] - 查询 [view_cnsale_sale_wq_detai_lastmonth1?key_57ce2n6vq7pcw0e8] - 范围 [$A$1:$CW$8911]
+2026-04-28 14:50:27 [INFO] 共发现 2 个链接了数据源的表格
+2026-04-28 14:50:27 [INFO]   - 工作表 [view_cnsale_first_sale_m1_detai] - 查询 [view_cnsale_first_sale_m1_details_key_57ce2n6vq7pcw0e8] - 范围 [$A$1:$CW$31564]
+2026-04-28 14:50:27 [INFO]   - 工作表 [view_cnsale_sale_wq_detai_lastm] - 查询 [view_cnsale_sale_wq_detai_lastmonth1?key_57ce2n6vq7pcw0e8] - 范围 [$A$1:$CW$8911]
+2026-04-28 14:50:27 [INFO] 检查数据连接属性：
+2026-04-28 14:50:27 [INFO]   工作表 [view_cnsale_first_sale_m1_detai] - 查询 [view_cnsale_first_sale_m1_details_key_57ce2n6vq7pcw0e8]:
+2026-04-28 14:50:27 [INFO]     - 全部刷新时刷新此连接: ✓ 已设置
+2026-04-28 14:50:27 [INFO]     - 数据源表格范围: $A$1:$CW$31564
+2026-04-28 14:50:27 [INFO]   工作表 [view_cnsale_sale_wq_detai_lastm] - 查询 [view_cnsale_sale_wq_detai_lastmonth1?key_57ce2n6vq7pcw0e8]:
+2026-04-28 14:50:27 [INFO]     - 全部刷新时刷新此连接: ✓ 已设置
+2026-04-28 14:50:27 [INFO]     - 数据源表格范围: $A$1:$CW$8911
+2026-04-28 14:50:27 [INFO] 在 2 个工作表中设置左上角单元格值为1
+2026-04-28 14:50:27 [INFO]   工作表 [view_cnsale_first_sale_m1_detai] - 已将 $A$1 单元格值设置为 1
+2026-04-28 14:50:27 [INFO]   工作表 [view_cnsale_sale_wq_detai_lastm] - 已将 $A$1 单元格值设置为 1
+2026-04-28 14:50:37 [INFO] 执行全部刷新...
+2026-04-28 14:54:25 [INFO] 工作表 [view_cnsale_first_sale_m1_detai] - 查询 [view_cnsale_first_sale_m1_details_key_57ce2n6vq7pcw0e8] 的 $A$1 单元格值已更新，刷新成功
+2026-04-28 14:54:25 [INFO] 工作表 [view_cnsale_sale_wq_detai_lastm] - 查询 [view_cnsale_sale_wq_detai_lastmonth1?key_57ce2n6vq7pcw0e8] 的 $A$1 单元格值已更新，刷新成功
+2026-04-28 14:54:25 [INFO] 所有表格刷新成功！
+2026-04-28 14:54:25 [INFO] 启动弹窗守护线程，超时时间：90秒
+2026-04-28 14:54:26 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:54:26 [DEBUG] 重新应用筛选：view_cnsale_first_sale_m1_detai
+2026-04-28 14:54:27 [DEBUG] 重新应用筛选：view_cnsale_sale_wq_detai_lastm
+2026-04-28 14:54:27 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:54:28 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:54:29 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:54:30 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:54:31 [DEBUG] 刷新数据透视表：顺次渠道 - 数据透视表2
+2026-04-28 14:54:31 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:54:32 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:54:33 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:54:34 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:54:35 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:54:36 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:54:37 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:54:38 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:54:39 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:54:40 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:54:41 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:54:42 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:54:43 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:54:44 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:54:45 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:54:46 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:54:47 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:54:48 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:54:49 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:54:50 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:54:51 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:54:52 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:54:54 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:54:55 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:54:55 [DEBUG] 刷新数据透视表：顺次渠道 - 数据透视表5
+2026-04-28 14:54:56 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:54:57 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:54:58 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:54:59 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:00 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:01 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:02 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:03 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:04 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:05 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:06 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:07 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:08 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:09 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:10 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:11 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:12 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:13 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:14 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:15 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:16 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:17 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:18 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:19 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:20 [DEBUG] 刷新数据透视表：顺次渠道 - 数据透视表4
+2026-04-28 14:55:21 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:22 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:23 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:24 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:25 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:26 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:27 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:28 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:29 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:30 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:31 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:32 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:33 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:34 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:35 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:36 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:37 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:38 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:39 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:40 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:41 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:42 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:43 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:44 [DEBUG] 刷新数据透视表：顺次渠道 - 数据透视表1
+2026-04-28 14:55:44 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:45 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:46 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:47 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:48 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:49 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:50 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:51 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:52 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:54 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:55 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 14:55:55 [INFO] 弹窗守护线程结束
+2026-04-28 14:56:06 [DEBUG] 刷新数据透视表：顺次渠道 - 数据透视表3
+2026-04-28 14:56:31 [DEBUG] 刷新数据透视表：团队 - 数据透视表3
+2026-04-28 14:56:55 [DEBUG] 刷新数据透视表：团队 - 数据透视表2
+2026-04-28 14:57:18 [DEBUG] 刷新数据透视表：团队 - 数据透视表4
+2026-04-28 14:57:41 [DEBUG] 刷新数据透视表：团队 - 数据透视表1
+2026-04-28 14:58:03 [DEBUG] 刷新数据透视表：往期渠道  - 数据透视表2
+2026-04-28 14:58:25 [DEBUG] 刷新数据透视表：往期渠道  - 数据透视表3
+2026-04-28 14:58:47 [DEBUG] 刷新数据透视表：往期渠道  - 数据透视表1
+2026-04-28 14:59:07 [INFO] 开始截图，共 1 个区域
+2026-04-28 14:59:07 [DEBUG] 截图区域地址: $A$1:$B$2
+2026-04-28 14:59:09 [ERROR] 截图异常：(-2147352567, '发生意外。', (0, None, None, None, 0, -2147024809), None)
+Traceback (most recent call last):
+  File "c:\Users\EDY\Desktop\BOT_TEST\excel.py", line 554, in _capture_range
+    chart.Export(output_path)
+  File "<COMObject <unknown>>", line 2, in Export
+pywintypes.com_error: (-2147352567, '发生意外。', (0, None, None, None, 0, -2147024809), None)
+2026-04-28 14:59:09 [WARNING] 截图失败：[test] 工作表[总览页面] 区域[A1]
+2026-04-28 14:59:11 [WARNING] 截图重试第 1/3 次，待重试区域 1 个
+2026-04-28 14:59:11 [DEBUG] 截图区域地址: $A$1:$B$2
+2026-04-28 14:59:12 [ERROR] 截图异常：(-2147352567, '发生意外。', (0, None, None, None, 0, -2147024809), None)
+Traceback (most recent call last):
+  File "c:\Users\EDY\Desktop\BOT_TEST\excel.py", line 554, in _capture_range
+    chart.Export(output_path)
+  File "<COMObject <unknown>>", line 2, in Export
+pywintypes.com_error: (-2147352567, '发生意外。', (0, None, None, None, 0, -2147024809), None)
+2026-04-28 14:59:12 [WARNING] 截图失败：[test] 工作表[总览页面] 区域[A1]
+2026-04-28 14:59:14 [WARNING] 截图重试第 2/3 次，待重试区域 1 个
+2026-04-28 14:59:14 [DEBUG] 截图区域地址: $A$1:$B$2
+2026-04-28 14:59:15 [ERROR] 截图异常：(-2147352567, '发生意外。', (0, None, None, None, 0, -2147024809), None)
+Traceback (most recent call last):
+  File "c:\Users\EDY\Desktop\BOT_TEST\excel.py", line 554, in _capture_range
+    chart.Export(output_path)
+  File "<COMObject <unknown>>", line 2, in Export
+pywintypes.com_error: (-2147352567, '发生意外。', (0, None, None, None, 0, -2147024809), None)
+2026-04-28 14:59:15 [WARNING] 截图失败：[test] 工作表[总览页面] 区域[A1]
+2026-04-28 14:59:17 [WARNING] 截图重试第 3/3 次，待重试区域 1 个
+2026-04-28 14:59:17 [DEBUG] 截图区域地址: $A$1:$B$2
+2026-04-28 14:59:18 [ERROR] 截图异常：(-2147352567, '发生意外。', (0, None, None, None, 0, -2147024809), None)
+Traceback (most recent call last):
+  File "c:\Users\EDY\Desktop\BOT_TEST\excel.py", line 554, in _capture_range
+    chart.Export(output_path)
+  File "<COMObject <unknown>>", line 2, in Export
+pywintypes.com_error: (-2147352567, '发生意外。', (0, None, None, None, 0, -2147024809), None)
+2026-04-28 14:59:18 [WARNING] 截图失败：[test] 工作表[总览页面] 区域[A1]
+2026-04-28 14:59:19 [DEBUG] 已将所有工作表缩放比例恢复为100%
+2026-04-28 14:59:19 [ERROR] 截图在重试 3 次后仍失败，共 1 个区域：test(总览页面:A1)
+2026-04-28 14:59:20 [INFO] 发送成功：截图失败通知
+2026-04-28 14:59:24 [DEBUG] Excel 进程已释放
+2026-04-28 14:59:24 [INFO] 任务耗时：554.66s
+2026-04-28 14:59:24 [INFO] ====================================================================================================
+2026-04-28 15:06:23 [INFO] 日志系统已初始化，日志文件：c:\Users\EDY\Desktop\BOT_TEST\logs\2026\04\2026-04-28.log
+2026-04-28 15:06:23 [INFO] 已启用测试webhook模式
+2026-04-28 15:06:23 [INFO] 成功加载 2 个任务
+2026-04-28 15:06:23 [INFO] 进入调试模式...
+2026-04-28 15:06:23 [INFO] ====================================================================================================
+2026-04-28 15:06:23 [INFO] 启动任务：线索-工作簿2026-当月往期+顺次1.xlsx
+2026-04-28 15:06:23 [INFO] ====================================================================================================
+2026-04-28 15:06:23 [DEBUG] 成功创建 Excel 实例
+2026-04-28 15:06:23 [DEBUG] 成功设置 Excel 可见性: True
+2026-04-28 15:06:23 [DEBUG] 成功设置 DisplayAlerts = False
+2026-04-28 15:06:34 [DEBUG] 成功打开文件：线索-工作簿2026-当月往期+顺次1.xlsx
+2026-04-28 15:06:34 [INFO] 开始刷新数据...
+2026-04-28 15:06:34 [DEBUG] 工作表 [总览页面] 的表格 [表3] 未连接数据源
+2026-04-28 15:06:34 [DEBUG] 发现链接数据源的表格：工作表 [view_cnsale_first_sale_m1_detai] - 查询 [view_cnsale_first_sale_m1_details_key_57ce2n6vq7pcw0e8] - 范围 [$A$1:$CW$31564]
+2026-04-28 15:06:34 [DEBUG] 发现链接数据源的表格：工作表 [view_cnsale_sale_wq_detai_lastm] - 查询 [view_cnsale_sale_wq_detai_lastmonth1?key_57ce2n6vq7pcw0e8] - 范围 [$A$1:$CW$8911]
+2026-04-28 15:06:34 [INFO] 共发现 2 个链接了数据源的表格
+2026-04-28 15:06:34 [INFO]   - 工作表 [view_cnsale_first_sale_m1_detai] - 查询 [view_cnsale_first_sale_m1_details_key_57ce2n6vq7pcw0e8] - 范围 [$A$1:$CW$31564]
+2026-04-28 15:06:34 [INFO]   - 工作表 [view_cnsale_sale_wq_detai_lastm] - 查询 [view_cnsale_sale_wq_detai_lastmonth1?key_57ce2n6vq7pcw0e8] - 范围 [$A$1:$CW$8911]
+2026-04-28 15:06:34 [INFO] 检查数据连接属性：
+2026-04-28 15:06:34 [INFO]   工作表 [view_cnsale_first_sale_m1_detai] - 查询 [view_cnsale_first_sale_m1_details_key_57ce2n6vq7pcw0e8]:
+2026-04-28 15:06:34 [INFO]     - 全部刷新时刷新此连接: ✓ 已设置
+2026-04-28 15:06:34 [INFO]     - 数据源表格范围: $A$1:$CW$31564
+2026-04-28 15:06:34 [INFO]   工作表 [view_cnsale_sale_wq_detai_lastm] - 查询 [view_cnsale_sale_wq_detai_lastmonth1?key_57ce2n6vq7pcw0e8]:
+2026-04-28 15:06:34 [INFO]     - 全部刷新时刷新此连接: ✓ 已设置
+2026-04-28 15:06:34 [INFO]     - 数据源表格范围: $A$1:$CW$8911
+2026-04-28 15:06:34 [INFO] 在 2 个工作表中设置左上角单元格值为1
+2026-04-28 15:06:34 [INFO]   工作表 [view_cnsale_first_sale_m1_detai] - 已将 $A$1 单元格值设置为 1
+2026-04-28 15:06:34 [INFO]   工作表 [view_cnsale_sale_wq_detai_lastm] - 已将 $A$1 单元格值设置为 1
+2026-04-28 15:06:44 [INFO] 执行全部刷新...
+2026-04-28 15:09:16 [INFO] 工作表 [view_cnsale_first_sale_m1_detai] - 查询 [view_cnsale_first_sale_m1_details_key_57ce2n6vq7pcw0e8] 的 $A$1 单元格值已更新，刷新成功
+2026-04-28 15:09:16 [INFO] 工作表 [view_cnsale_sale_wq_detai_lastm] - 查询 [view_cnsale_sale_wq_detai_lastmonth1?key_57ce2n6vq7pcw0e8] 的 $A$1 单元格值已更新，刷新成功
+2026-04-28 15:09:16 [INFO] 所有表格刷新成功！
+2026-04-28 15:09:16 [INFO] 启动弹窗守护线程，超时时间：90秒
+2026-04-28 15:09:16 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 15:09:16 [DEBUG] 重新应用筛选：view_cnsale_first_sale_m1_detai
+2026-04-28 15:09:17 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 15:09:17 [DEBUG] 重新应用筛选：view_cnsale_sale_wq_detai_lastm
+2026-04-28 15:09:17 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 15:09:17 [INFO] 弹窗守护线程结束
+2026-04-28 15:09:21 [DEBUG] 刷新数据透视表：顺次渠道 - 数据透视表5
+2026-04-28 15:09:44 [DEBUG] 刷新数据透视表：顺次渠道 - 数据透视表4
+2026-04-28 15:10:07 [DEBUG] 刷新数据透视表：顺次渠道 - 数据透视表1
+2026-04-28 15:10:31 [DEBUG] 刷新数据透视表：顺次渠道 - 数据透视表3
+2026-04-28 15:10:55 [DEBUG] 刷新数据透视表：顺次渠道 - 数据透视表2
+2026-04-28 15:11:19 [DEBUG] 刷新数据透视表：团队 - 数据透视表1
+2026-04-28 15:11:42 [DEBUG] 刷新数据透视表：团队 - 数据透视表3
+2026-04-28 15:12:05 [DEBUG] 刷新数据透视表：团队 - 数据透视表2
+2026-04-28 15:12:29 [DEBUG] 刷新数据透视表：团队 - 数据透视表4
+2026-04-28 15:12:51 [DEBUG] 刷新数据透视表：往期渠道  - 数据透视表3
+2026-04-28 15:13:13 [DEBUG] 刷新数据透视表：往期渠道  - 数据透视表1
+2026-04-28 15:13:35 [DEBUG] 刷新数据透视表：往期渠道  - 数据透视表2
+2026-04-28 15:13:55 [INFO] 开始截图，共 1 个区域
+2026-04-28 15:13:55 [DEBUG] 截图区域地址: $AD$1:$AS$9
+2026-04-28 15:13:56 [INFO] 截图成功：[test] 工作表[总览页面] 区域[AD1]
+2026-04-28 15:13:56 [DEBUG] 已将所有工作表缩放比例恢复为100%
+2026-04-28 15:17:06 [DEBUG] Excel 进程已释放
+2026-04-28 15:17:07 [INFO] 发送成功：截图 线索-工作簿2026-当月往期+顺次1_test_20260428_151355_202978.png
+2026-04-28 15:17:07 [DEBUG] 清理临时文件：线索-工作簿2026-当月往期+顺次1_test_20260428_151355_202978.png
+2026-04-28 15:17:07 [INFO] 任务耗时：644.09s
+2026-04-28 15:17:07 [INFO] ====================================================================================================
+2026-04-28 15:35:35 [INFO] 日志系统已初始化，日志文件：c:\Users\EDY\Desktop\BOT_TEST\logs\2026\04\2026-04-28.log
+2026-04-28 15:35:35 [INFO] 已启用测试webhook模式
+2026-04-28 15:35:35 [INFO] 成功加载 2 个任务
+2026-04-28 15:35:35 [INFO] 进入调试模式...
+2026-04-28 15:35:35 [INFO] ====================================================================================================
+2026-04-28 15:35:35 [INFO] 启动任务：线索-工作簿2026-当月往期+顺次1.xlsx
+2026-04-28 15:35:35 [INFO] ====================================================================================================
+2026-04-28 15:35:36 [DEBUG] 成功创建 Excel 实例
+2026-04-28 15:35:36 [DEBUG] 成功设置 Excel 可见性: True
+2026-04-28 15:35:36 [DEBUG] 成功设置 DisplayAlerts = False
+2026-04-28 15:35:37 [DEBUG] Excel 进程已释放
+2026-04-28 15:35:37 [ERROR] 任务异常：Excel 启动失败：(-2147352567, '发生意外。', (0, 'Microsoft Excel', 'Microsoft Excel 不能访问文件“C:\\Users\\EDY\\OneDrive - PPLINGO PTE LTD\\自动播报文件\\线索-工作簿2026-当月往期+顺次1.xlsx”。 可能的原因有以下几个:\n\n• 文件名称或路径不存在。\n• 文件正被其他程序使用。\n• 您正要保存的工作簿与当前打开的工作簿同名。', 'xlmain11.chm', 0, -2146827284), None)
+Traceback (most recent call last):
+  File "c:\Users\EDY\Desktop\BOT_TEST\excel.py", line 106, in __enter__
+    self.workbook = self.excel.Workbooks.Open(self.file_path)
+  File "<COMObject <unknown>>", line 5, in Open
+pywintypes.com_error: (-2147352567, '发生意外。', (0, 'Microsoft Excel', 'Microsoft Excel 不能访问文件“C:\\Users\\EDY\\OneDrive - PPLINGO PTE LTD\\自动播报文件\\线索-工作簿2026-当月往期+顺次1.xlsx”。 可能的原因有以下几个:\n\n• 文件名称或路径不存在。\n• 文件正被其他程序使用。\n• 您正要保存的工作簿与当前打开的工作簿同名。', 'xlmain11.chm', 0, -2146827284), None)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "c:\Users\EDY\Desktop\BOT_TEST\excel.py", line 612, in execute
+    with ExcelProcessor(
+  File "c:\Users\EDY\Desktop\BOT_TEST\excel.py", line 129, in __enter__
+    raise RuntimeError(f"Excel 启动失败：{str(e)}")
+RuntimeError: Excel 启动失败：(-2147352567, '发生意外。', (0, 'Microsoft Excel', 'Microsoft Excel 不能访问文件“C:\\Users\\EDY\\OneDrive - PPLINGO PTE LTD\\自动播报文件\\线索-工作簿2026-当月往期+顺次1.xlsx”。 可能的原因有以下几个:\n\n• 文件名称或路径不存在。\n• 文件正被其他程序使用。\n• 您正要保存的工作簿与当前打开的工作簿同名。', 'xlmain11.chm', 0, -2146827284), None)
+2026-04-28 15:35:37 [INFO] 发送成功：任务启动失败通知
+2026-04-28 15:35:37 [INFO] 任务耗时：2.04s
+2026-04-28 15:35:37 [INFO] ====================================================================================================
+2026-04-28 15:35:55 [INFO] 日志系统已初始化，日志文件：c:\Users\EDY\Desktop\BOT_TEST\logs\2026\04\2026-04-28.log
+2026-04-28 15:35:55 [INFO] 已启用测试webhook模式
+2026-04-28 15:35:55 [INFO] 成功加载 2 个任务
+2026-04-28 15:35:55 [INFO] 进入调试模式...
+2026-04-28 15:35:55 [INFO] ====================================================================================================
+2026-04-28 15:35:55 [INFO] 启动任务：线索-工作簿2026-当月往期+顺次1.xlsx
+2026-04-28 15:35:55 [INFO] ====================================================================================================
+2026-04-28 15:35:56 [DEBUG] 成功创建 Excel 实例
+2026-04-28 15:35:56 [DEBUG] 成功设置 Excel 可见性: True
+2026-04-28 15:35:56 [DEBUG] 成功设置 DisplayAlerts = False
+2026-04-28 15:36:07 [DEBUG] 成功打开文件：线索-工作簿2026-当月往期+顺次1.xlsx
+2026-04-28 15:36:07 [INFO] 开始刷新数据...
+2026-04-28 15:36:07 [DEBUG] 工作表 [总览页面] 的表格 [表3] 未连接数据源
+2026-04-28 15:36:07 [DEBUG] 发现链接数据源的表格：工作表 [view_cnsale_first_sale_m1_detai] - 查询 [view_cnsale_first_sale_m1_details_key_57ce2n6vq7pcw0e8] - 范围 [$A$1:$CW$31564]
+2026-04-28 15:36:07 [DEBUG] 发现链接数据源的表格：工作表 [view_cnsale_sale_wq_detai_lastm] - 查询 [view_cnsale_sale_wq_detai_lastmonth1?key_57ce2n6vq7pcw0e8] - 范围 [$A$1:$CW$8911]
+2026-04-28 15:36:07 [INFO] 共发现 2 个链接了数据源的表格
+2026-04-28 15:36:07 [INFO]   - 工作表 [view_cnsale_first_sale_m1_detai] - 查询 [view_cnsale_first_sale_m1_details_key_57ce2n6vq7pcw0e8] - 范围 [$A$1:$CW$31564]
+2026-04-28 15:36:07 [INFO]   - 工作表 [view_cnsale_sale_wq_detai_lastm] - 查询 [view_cnsale_sale_wq_detai_lastmonth1?key_57ce2n6vq7pcw0e8] - 范围 [$A$1:$CW$8911]
+2026-04-28 15:36:07 [INFO] 检查数据连接属性：
+2026-04-28 15:36:07 [INFO]   工作表 [view_cnsale_first_sale_m1_detai] - 查询 [view_cnsale_first_sale_m1_details_key_57ce2n6vq7pcw0e8]:
+2026-04-28 15:36:07 [INFO]     - 全部刷新时刷新此连接: ✓ 已设置
+2026-04-28 15:36:07 [INFO]     - 数据源表格范围: $A$1:$CW$31564
+2026-04-28 15:36:07 [INFO]   工作表 [view_cnsale_sale_wq_detai_lastm] - 查询 [view_cnsale_sale_wq_detai_lastmonth1?key_57ce2n6vq7pcw0e8]:
+2026-04-28 15:36:07 [INFO]     - 全部刷新时刷新此连接: ✓ 已设置
+2026-04-28 15:36:07 [INFO]     - 数据源表格范围: $A$1:$CW$8911
+2026-04-28 15:36:07 [INFO] 在 2 个工作表中设置左上角单元格值为1
+2026-04-28 15:36:07 [INFO]   工作表 [view_cnsale_first_sale_m1_detai] - 已将 $A$1 单元格值设置为 1
+2026-04-28 15:36:07 [INFO]   工作表 [view_cnsale_sale_wq_detai_lastm] - 已将 $A$1 单元格值设置为 1
+2026-04-28 15:36:17 [INFO] 执行全部刷新...
+2026-04-28 15:38:33 [INFO] 工作表 [view_cnsale_first_sale_m1_detai] - 查询 [view_cnsale_first_sale_m1_details_key_57ce2n6vq7pcw0e8] 的 $A$1 单元格值已更新，刷新成功
+2026-04-28 15:38:33 [INFO] 工作表 [view_cnsale_sale_wq_detai_lastm] - 查询 [view_cnsale_sale_wq_detai_lastmonth1?key_57ce2n6vq7pcw0e8] 的 $A$1 单元格值已更新，刷新成功
+2026-04-28 15:38:33 [INFO] 所有表格刷新成功！
+2026-04-28 15:38:33 [INFO] 启动弹窗守护线程，超时时间：90秒
+2026-04-28 15:38:33 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 15:38:33 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 15:38:34 [INFO] 检测到弹窗，已点击按钮：view_all_content.png
+2026-04-28 15:38:34 [DEBUG] 重新应用筛选：view_cnsale_first_sale_m1_detai
+2026-04-28 15:38:35 [DEBUG] 检测按钮 view_all_content.png 失败：
+2026-04-28 15:38:35 [DEBUG] 重新应用筛选：view_cnsale_sale_wq_detai_lastm
+2026-04-28 15:38:35 [INFO] 弹窗守护线程结束
+2026-04-28 15:38:38 [DEBUG] 刷新数据透视表：顺次渠道 - 数据透视表1
+2026-04-28 15:38:42 [DEBUG] 刷新数据透视表：顺次渠道 - 数据透视表3
+2026-04-28 15:38:45 [DEBUG] 刷新数据透视表：顺次渠道 - 数据透视表2
+2026-04-28 15:38:47 [DEBUG] 刷新数据透视表：顺次渠道 - 数据透视表5
+2026-04-28 15:38:49 [DEBUG] 刷新数据透视表：顺次渠道 - 数据透视表4
+2026-04-28 15:38:51 [DEBUG] 刷新数据透视表：团队 - 数据透视表4
+2026-04-28 15:38:58 [DEBUG] 刷新数据透视表：团队 - 数据透视表1
+2026-04-28 15:39:02 [DEBUG] 刷新数据透视表：团队 - 数据透视表3
+2026-04-28 15:39:06 [DEBUG] 刷新数据透视表：团队 - 数据透视表2
+2026-04-28 15:39:09 [DEBUG] 刷新数据透视表：往期渠道  - 数据透视表1
+2026-04-28 15:39:12 [DEBUG] 刷新数据透视表：往期渠道  - 数据透视表2
+2026-04-28 15:39:16 [DEBUG] 刷新数据透视表：往期渠道  - 数据透视表3
+2026-04-28 15:39:17 [INFO] 开始截图，共 1 个区域
+2026-04-28 15:39:17 [DEBUG] 截图区域地址: $AD$1:$AS$9
+2026-04-28 15:39:18 [INFO] 截图成功：[test] 工作表[总览页面] 区域[AD1]
+2026-04-28 15:39:19 [DEBUG] 已将所有工作表缩放比例恢复为100%
+2026-04-28 15:40:03 [DEBUG] Excel 进程已释放
+2026-04-28 15:40:03 [INFO] 发送成功：截图 线索-工作簿2026-当月往期+顺次1_test_20260428_153917_116702.png
+2026-04-28 15:40:03 [DEBUG] 清理临时文件：线索-工作簿2026-当月往期+顺次1_test_20260428_153917_116702.png
+2026-04-28 15:40:03 [INFO] 任务耗时：247.94s
+2026-04-28 15:40:03 [INFO] ====================================================================================================
+2026-04-28 15:46:33 [INFO] 日志系统已初始化，日志文件：c:\Users\EDY\Desktop\BOT_TEST\logs\2026\04\2026-04-28.log
+2026-04-28 15:46:33 [INFO] 已启用测试webhook模式
+2026-04-28 15:46:33 [INFO] 成功加载 2 个任务
+2026-04-28 15:46:33 [INFO] 进入调试模式...
+2026-04-28 15:46:33 [INFO] ====================================================================================================
+2026-04-28 15:46:33 [INFO] 启动任务：线索-工作簿2026-当月往期+顺次1.xlsx
+2026-04-28 15:46:33 [INFO] ====================================================================================================
+2026-04-28 15:46:34 [DEBUG] 成功创建 Excel 实例
+2026-04-28 15:46:34 [DEBUG] 成功设置 Excel 可见性: True
+2026-04-28 15:46:34 [DEBUG] 成功设置 DisplayAlerts = False
+2026-04-28 15:46:44 [DEBUG] 成功打开文件：线索-工作簿2026-当月往期+顺次1.xlsx
+2026-04-28 15:46:44 [INFO] 开始刷新数据...
+2026-04-28 15:46:44 [DEBUG] 工作表 [总览页面] 的表格 [表3] 未连接数据源
+2026-04-28 15:46:44 [DEBUG] 发现链接数据源的表格：工作表 [view_cnsale_first_sale_m1_detai] - 查询 [view_cnsale_first_sale_m1_details_key_57ce2n6vq7pcw0e8] - 范围 [$A$1:$CW$31564]
+2026-04-28 15:46:44 [DEBUG] 发现链接数据源的表格：工作表 [view_cnsale_sale_wq_detai_lastm] - 查询 [view_cnsale_sale_wq_detai_lastmonth1?key_57ce2n6vq7pcw0e8] - 范围 [$A$1:$CW$8911]
+2026-04-28 15:46:44 [INFO] 共发现 2 个链接了数据源的表格
+2026-04-28 15:46:44 [INFO]   - 工作表 [view_cnsale_first_sale_m1_detai] - 查询 [view_cnsale_first_sale_m1_details_key_57ce2n6vq7pcw0e8] - 范围 [$A$1:$CW$31564]
+2026-04-28 15:46:44 [INFO]   - 工作表 [view_cnsale_sale_wq_detai_lastm] - 查询 [view_cnsale_sale_wq_detai_lastmonth1?key_57ce2n6vq7pcw0e8] - 范围 [$A$1:$CW$8911]
+2026-04-28 15:46:44 [INFO] 检查数据连接属性：
+2026-04-28 15:46:44 [INFO]   工作表 [view_cnsale_first_sale_m1_detai] - 查询 [view_cnsale_first_sale_m1_details_key_57ce2n6vq7pcw0e8]:
+2026-04-28 15:46:44 [INFO]     - 全部刷新时刷新此连接: ✓ 已设置
+2026-04-28 15:46:44 [INFO]     - 数据源表格范围: $A$1:$CW$31564
+2026-04-28 15:46:44 [INFO]   工作表 [view_cnsale_sale_wq_detai_lastm] - 查询 [view_cnsale_sale_wq_detai_lastmonth1?key_57ce2n6vq7pcw0e8]:
+2026-04-28 15:46:44 [INFO]     - 全部刷新时刷新此连接: ✓ 已设置
+2026-04-28 15:46:44 [INFO]     - 数据源表格范围: $A$1:$CW$8911
+2026-04-28 15:46:44 [INFO] 在 2 个工作表中设置左上角单元格值为1
+2026-04-28 15:46:44 [INFO]   工作表 [view_cnsale_first_sale_m1_detai] - 已将 $A$1 单元格值设置为 1
+2026-04-28 15:46:44 [INFO]   工作表 [view_cnsale_sale_wq_detai_lastm] - 已将 $A$1 单元格值设置为 1
+2026-04-28 15:46:54 [INFO] 执行全部刷新...
+2026-04-28 15:49:10 [INFO] 工作表 [view_cnsale_first_sale_m1_detai] - 查询 [view_cnsale_first_sale_m1_details_key_57ce2n6vq7pcw0e8] 的 $A$1 单元格值已更新，刷新成功
+2026-04-28 15:49:10 [INFO] 工作表 [view_cnsale_sale_wq_detai_lastm] - 查询 [view_cnsale_sale_wq_detai_lastmonth1?key_57ce2n6vq7pcw0e8] 的 $A$1 单元格值已更新，刷新成功
+2026-04-28 15:49:10 [INFO] 所有表格刷新成功！
+2026-04-28 15:49:10 [INFO] 启动弹窗守护线程，超时时间：90秒
+2026-04-28 15:49:10 [DEBUG] 未检测到按钮 view_all_content.png ：
+2026-04-28 15:49:11 [DEBUG] 重新应用筛选：view_cnsale_first_sale_m1_detai
+2026-04-28 15:49:11 [DEBUG] 未检测到按钮 view_all_content.png ：
+2026-04-28 15:49:11 [DEBUG] 重新应用筛选：view_cnsale_sale_wq_detai_lastm
+2026-04-28 15:49:11 [DEBUG] 未检测到按钮 view_all_content.png ：
+2026-04-28 15:49:11 [INFO] 弹窗守护线程结束
+2026-04-28 15:49:15 [DEBUG] 刷新数据透视表：顺次渠道 - 数据透视表2
+2026-04-28 15:49:19 [DEBUG] 刷新数据透视表：顺次渠道 - 数据透视表5
+2026-04-28 15:49:24 [DEBUG] 刷新数据透视表：顺次渠道 - 数据透视表4
+2026-04-28 15:49:28 [DEBUG] 刷新数据透视表：顺次渠道 - 数据透视表1
+2026-04-28 15:49:32 [DEBUG] 刷新数据透视表：顺次渠道 - 数据透视表3
+2026-04-28 15:49:37 [DEBUG] 刷新数据透视表：团队 - 数据透视表2
+2026-04-28 15:49:41 [DEBUG] 刷新数据透视表：团队 - 数据透视表4
+2026-04-28 15:49:46 [DEBUG] 刷新数据透视表：团队 - 数据透视表1
+2026-04-28 15:49:50 [DEBUG] 刷新数据透视表：团队 - 数据透视表3
+2026-04-28 15:49:53 [DEBUG] 刷新数据透视表：往期渠道  - 数据透视表2
+2026-04-28 15:49:56 [DEBUG] 刷新数据透视表：往期渠道  - 数据透视表3
+2026-04-28 15:49:59 [DEBUG] 刷新数据透视表：往期渠道  - 数据透视表1
+2026-04-28 15:50:00 [INFO] 开始截图，共 1 个区域
+2026-04-28 15:50:00 [DEBUG] 截图区域地址: $AD$1:$AS$9
+2026-04-28 15:50:02 [INFO] 截图成功：[test] 工作表[总览页面] 区域[AD1]
+2026-04-28 15:50:03 [DEBUG] 已将所有工作表缩放比例恢复为100%
+2026-04-28 15:50:06 [DEBUG] Excel 进程已释放
+2026-04-28 15:50:06 [INFO] 发送成功：截图 线索-工作簿2026-当月往期+顺次1_test_20260428_155000_941565.png
+2026-04-28 15:50:06 [DEBUG] 清理临时文件：线索-工作簿2026-当月往期+顺次1_test_20260428_155000_941565.png
+2026-04-28 15:50:06 [INFO] 任务耗时：213.35s
+2026-04-28 15:50:06 [INFO] ====================================================================================================
+2026-04-28 15:51:18 [INFO] 日志系统已初始化，日志文件：c:\Users\EDY\Desktop\BOT_TEST\logs\2026\04\2026-04-28.log
+2026-04-28 15:51:18 [INFO] 已启用测试webhook模式
+2026-04-28 15:51:18 [INFO] 成功加载 2 个任务
+2026-04-28 15:51:18 [INFO] 进入调试模式...
+2026-04-28 15:51:18 [INFO] ====================================================================================================
+2026-04-28 15:51:18 [INFO] 启动任务：学员明细备份.xlsx
+2026-04-28 15:51:18 [INFO] ====================================================================================================
+2026-04-28 15:51:19 [DEBUG] 成功创建 Excel 实例
+2026-04-28 15:51:19 [DEBUG] 成功设置 Excel 可见性: True
+2026-04-28 15:51:19 [DEBUG] 成功设置 DisplayAlerts = False
+2026-04-28 15:51:22 [DEBUG] 成功打开文件：学员明细备份.xlsx
+2026-04-28 15:51:22 [INFO] 开始刷新数据...
+2026-04-28 15:51:22 [DEBUG] 发现链接数据源的表格：工作表 [昨日课量备份] - 查询 [昨日课量备份] - 范围 [$A$1:$B$59147]
+2026-04-28 15:51:22 [INFO] 共发现 1 个链接了数据源的表格
+2026-04-28 15:51:22 [INFO]   - 工作表 [昨日课量备份] - 查询 [昨日课量备份] - 范围 [$A$1:$B$59147]
+2026-04-28 15:51:22 [INFO] 检查数据连接属性：
+2026-04-28 15:51:22 [INFO]   工作表 [昨日课量备份] - 查询 [昨日课量备份]:
+2026-04-28 15:51:22 [INFO]     - 全部刷新时刷新此连接: ✗ 未设置
+2026-04-28 15:51:32 [INFO] 执行全部刷新...
+2026-04-28 15:51:32 [INFO] 没有需要验证的表格，刷新完成
+2026-04-28 15:51:32 [INFO] 启动弹窗守护线程，超时时间：90秒
+2026-04-28 15:51:33 [DEBUG] 未检测到按钮 view_all_content.png ：
+2026-04-28 15:51:34 [INFO] 检测到弹窗，已点击按钮：view_all_content.png
+2026-04-28 15:51:34 [DEBUG] 重新应用筛选：昨日课量备份
+2026-04-28 15:51:34 [INFO] 开始截图，共 1 个区域
+2026-04-28 15:51:34 [DEBUG] 截图区域地址: $A$1:$A$2
+2026-04-28 15:51:34 [INFO] 弹窗守护线程结束
+2026-04-28 15:51:37 [INFO] 截图成功：[test] 工作表[sheet1] 区域[A1]
+2026-04-28 15:51:38 [DEBUG] 已将所有工作表缩放比例恢复为100%
+2026-04-28 15:52:02 [DEBUG] Excel 进程已释放
+2026-04-28 15:52:03 [INFO] 发送成功：截图 学员明细备份_test_20260428_155134_264445.png
+2026-04-28 15:52:03 [DEBUG] 清理临时文件：学员明细备份_test_20260428_155134_264445.png
+2026-04-28 15:52:03 [INFO] 任务耗时：44.66s
+2026-04-28 15:52:03 [INFO] ====================================================================================================
+2026-04-28 15:53:38 [INFO] 日志系统已初始化，日志文件：c:\Users\EDY\Desktop\BOT_TEST\logs\2026\04\2026-04-28.log
+2026-04-28 15:53:38 [INFO] 已启用测试webhook模式
+2026-04-28 15:53:38 [INFO] 成功加载 2 个任务
+2026-04-28 15:53:38 [INFO] 进入调试模式...
+2026-04-28 15:53:38 [INFO] ====================================================================================================
+2026-04-28 15:53:38 [INFO] 启动任务：学员明细备份.xlsx
+2026-04-28 15:53:38 [INFO] ====================================================================================================
+2026-04-28 15:53:39 [DEBUG] 成功创建 Excel 实例
+2026-04-28 15:53:39 [DEBUG] 成功设置 Excel 可见性: True
+2026-04-28 15:53:39 [DEBUG] 成功设置 DisplayAlerts = False
+2026-04-28 15:53:41 [DEBUG] 成功打开文件：学员明细备份.xlsx
+2026-04-28 15:53:42 [INFO] 开始刷新数据...
+2026-04-28 15:53:42 [DEBUG] 发现链接数据源的表格：工作表 [昨日课量备份] - 查询 [昨日课量备份] - 范围 [$A$1:$B$59147]
+2026-04-28 15:53:42 [INFO] 共发现 1 个链接了数据源的表格
+2026-04-28 15:53:42 [INFO]   - 工作表 [昨日课量备份] - 查询 [昨日课量备份] - 范围 [$A$1:$B$59147]
+2026-04-28 15:53:42 [INFO] 检查数据连接属性：
+2026-04-28 15:53:42 [INFO]   工作表 [昨日课量备份] - 查询 [昨日课量备份]:
+2026-04-28 15:53:42 [INFO]     - 全部刷新时刷新此连接: ✗ 未设置
+2026-04-28 15:53:52 [INFO] 执行全部刷新...
+2026-04-28 15:53:52 [INFO] 没有需要验证的表格，刷新完成
+2026-04-28 15:53:52 [INFO] 启动弹窗守护线程，超时时间：90秒
+2026-04-28 15:53:53 [DEBUG] 未检测到按钮 view_all_content.png ：
+2026-04-28 15:53:53 [DEBUG] 重新应用筛选：昨日课量备份
+2026-04-28 15:53:53 [INFO] 开始截图，共 1 个区域
+2026-04-28 15:53:53 [DEBUG] 截图区域地址: $A$1:$A$2
+2026-04-28 15:53:53 [INFO] 弹窗守护线程结束
+2026-04-28 15:53:56 [INFO] 截图成功：[test] 工作表[sheet1] 区域[A1]
+2026-04-28 15:53:56 [DEBUG] 已将所有工作表缩放比例恢复为100%
+2026-04-28 15:54:00 [DEBUG] Excel 进程已释放
+2026-04-28 15:54:00 [INFO] 发送成功：截图 学员明细备份_test_20260428_155353_182169.png
+2026-04-28 15:54:00 [DEBUG] 清理临时文件：学员明细备份_test_20260428_155353_182169.png
+2026-04-28 15:54:00 [INFO] 任务耗时：22.04s
+2026-04-28 15:54:00 [INFO] ====================================================================================================
+2026-04-28 15:54:08 [INFO] 日志系统已初始化，日志文件：c:\Users\EDY\Desktop\BOT_TEST\logs\2026\04\2026-04-28.log
+2026-04-28 15:54:08 [INFO] 已启用测试webhook模式
+2026-04-28 15:54:08 [INFO] 成功加载 2 个任务
+2026-04-28 15:54:08 [INFO] 进入调试模式...
+2026-04-28 15:54:08 [INFO] ====================================================================================================
+2026-04-28 15:54:08 [INFO] 启动任务：学员明细备份.xlsx
+2026-04-28 15:54:08 [INFO] ====================================================================================================
+2026-04-28 15:54:08 [DEBUG] 成功创建 Excel 实例
+2026-04-28 15:54:08 [DEBUG] 成功设置 Excel 可见性: True
+2026-04-28 15:54:08 [DEBUG] 成功设置 DisplayAlerts = False
+2026-04-28 15:54:11 [DEBUG] 成功打开文件：学员明细备份.xlsx
+2026-04-28 15:54:11 [INFO] 开始刷新数据...
+2026-04-28 15:54:11 [DEBUG] 发现链接数据源的表格：工作表 [昨日课量备份] - 查询 [昨日课量备份] - 范围 [$A$1:$B$59147]
+2026-04-28 15:54:11 [INFO] 共发现 1 个链接了数据源的表格
+2026-04-28 15:54:11 [INFO]   - 工作表 [昨日课量备份] - 查询 [昨日课量备份] - 范围 [$A$1:$B$59147]
+2026-04-28 15:54:11 [INFO] 检查数据连接属性：
+2026-04-28 15:54:11 [INFO]   工作表 [昨日课量备份] - 查询 [昨日课量备份]:
+2026-04-28 15:54:11 [INFO]     - 全部刷新时刷新此连接: ✗ 未设置
+2026-04-28 15:54:21 [INFO] 执行全部刷新...
+2026-04-28 15:54:22 [INFO] 没有需要验证的表格，刷新完成
+2026-04-28 15:54:22 [INFO] 启动弹窗守护线程，超时时间：90秒
+2026-04-28 15:54:22 [DEBUG] 未检测到按钮 view_all_content.png ：
+2026-04-28 15:54:22 [DEBUG] 重新应用筛选：昨日课量备份
+2026-04-28 15:54:23 [INFO] 开始截图，共 1 个区域
+2026-04-28 15:54:23 [DEBUG] 未检测到按钮 view_all_content.png ：
+2026-04-28 15:54:23 [DEBUG] 截图区域地址: $A$1:$A$2
+2026-04-28 15:54:23 [INFO] 弹窗守护线程结束
+2026-04-28 15:54:26 [INFO] 截图成功：[test] 工作表[sheet1] 区域[A1]
+2026-04-28 15:54:26 [DEBUG] 已将所有工作表缩放比例恢复为100%
+2026-04-28 15:54:28 [DEBUG] Excel 进程已释放
+2026-04-28 15:54:28 [INFO] 发送成功：截图 学员明细备份_test_20260428_155423_168149.png
+2026-04-28 15:54:28 [DEBUG] 清理临时文件：学员明细备份_test_20260428_155423_168149.png
+2026-04-28 15:54:28 [INFO] 任务耗时：20.20s
+2026-04-28 15:54:28 [INFO] ====================================================================================================
+2026-04-28 15:55:58 [INFO] 日志系统已初始化，日志文件：c:\Users\EDY\Desktop\BOT_TEST\logs\2026\04\2026-04-28.log
+2026-04-28 15:55:58 [INFO] 已启用测试webhook模式
+2026-04-28 15:55:58 [INFO] 成功加载 2 个任务
+2026-04-28 15:55:58 [INFO] 进入调试模式...
+2026-04-28 15:55:58 [INFO] ====================================================================================================
+2026-04-28 15:55:58 [INFO] 启动任务：学员明细备份.xlsx
+2026-04-28 15:55:58 [INFO] ====================================================================================================
+2026-04-28 15:55:58 [DEBUG] 成功创建 Excel 实例
+2026-04-28 15:55:58 [DEBUG] 成功设置 Excel 可见性: True
+2026-04-28 15:55:58 [DEBUG] 成功设置 DisplayAlerts = False
+2026-04-28 15:56:01 [DEBUG] 成功打开文件：学员明细备份.xlsx
+2026-04-28 15:56:01 [INFO] 开始刷新数据...
+2026-04-28 15:56:01 [DEBUG] 发现链接数据源的表格：工作表 [昨日课量备份] - 查询 [昨日课量备份] - 范围 [$A$1:$B$59147]
+2026-04-28 15:56:01 [INFO] 共发现 1 个链接了数据源的表格
+2026-04-28 15:56:01 [INFO]   - 工作表 [昨日课量备份] - 查询 [昨日课量备份] - 范围 [$A$1:$B$59147]
+2026-04-28 15:56:01 [INFO] 检查数据连接属性：
+2026-04-28 15:56:01 [INFO]   工作表 [昨日课量备份] - 查询 [昨日课量备份]:
+2026-04-28 15:56:01 [INFO]     - 全部刷新时刷新此连接: ✗ 未设置
+2026-04-28 15:56:11 [INFO] 执行全部刷新...
+2026-04-28 15:56:12 [INFO] 没有需要验证的表格，刷新完成
+2026-04-28 15:56:12 [INFO] 启动弹窗守护线程，超时时间：90秒
+2026-04-28 15:56:12 [INFO] 开始截图，共 1 个区域
+2026-04-28 15:56:13 [DEBUG] 未检测到按钮 view_all_content.png ：
+2026-04-28 15:56:13 [DEBUG] 截图区域地址: $A$1:$A$2
+2026-04-28 15:56:13 [INFO] 弹窗守护线程结束
+2026-04-28 15:56:16 [INFO] 截图成功：[test] 工作表[sheet1] 区域[A1]
+2026-04-28 15:56:17 [DEBUG] 已将所有工作表缩放比例恢复为100%
+2026-04-28 15:56:39 [DEBUG] Excel 进程已释放
+2026-04-28 15:56:39 [INFO] 发送成功：截图 学员明细备份_test_20260428_155613_206864.png
+2026-04-28 15:56:39 [DEBUG] 清理临时文件：学员明细备份_test_20260428_155613_206864.png
+2026-04-28 15:56:39 [INFO] 任务耗时：41.41s
+2026-04-28 15:56:39 [INFO] ====================================================================================================
+2026-04-28 15:57:48 [INFO] 日志系统已初始化，日志文件：c:\Users\EDY\Desktop\BOT_TEST\logs\2026\04\2026-04-28.log
+2026-04-28 15:57:48 [INFO] 已启用测试webhook模式
+2026-04-28 15:57:48 [INFO] 成功加载 2 个任务
+2026-04-28 15:57:48 [INFO] 进入调试模式...
+2026-04-28 15:57:48 [INFO] ====================================================================================================
+2026-04-28 15:57:48 [INFO] 启动任务：学员明细备份.xlsx
+2026-04-28 15:57:48 [INFO] ====================================================================================================
+2026-04-28 15:57:49 [DEBUG] 成功创建 Excel 实例
+2026-04-28 15:57:49 [DEBUG] 成功设置 Excel 可见性: True
+2026-04-28 15:57:49 [DEBUG] 成功设置 DisplayAlerts = False
+2026-04-28 15:57:52 [DEBUG] 成功打开文件：学员明细备份.xlsx
+2026-04-28 15:57:52 [INFO] 开始刷新数据...
+2026-04-28 15:57:52 [DEBUG] 发现链接数据源的表格：工作表 [昨日课量备份] - 查询 [昨日课量备份] - 范围 [$A$1:$B$59147]
+2026-04-28 15:57:52 [INFO] 共发现 1 个链接了数据源的表格
+2026-04-28 15:57:52 [INFO]   - 工作表 [昨日课量备份] - 查询 [昨日课量备份] - 范围 [$A$1:$B$59147]
+2026-04-28 15:57:52 [INFO] 检查数据连接属性：
+2026-04-28 15:57:52 [INFO]   工作表 [昨日课量备份] - 查询 [昨日课量备份]:
+2026-04-28 15:57:52 [INFO]     - 全部刷新时刷新此连接: ✗ 未设置
+2026-04-28 15:58:02 [INFO] 执行全部刷新...
+2026-04-28 15:58:03 [INFO] 没有需要验证的表格，刷新完成
+2026-04-28 15:58:03 [INFO] 启动弹窗守护线程，超时时间：90秒
+2026-04-28 15:58:04 [DEBUG] 未检测到按钮 view_all_content.png ：
+2026-04-28 15:58:05 [INFO] 检测到弹窗，已点击按钮：view_all_content.png
+2026-04-28 15:58:05 [DEBUG] 重新应用筛选：昨日课量备份
+2026-04-28 15:58:05 [INFO] 开始截图，共 1 个区域
+2026-04-28 15:58:05 [DEBUG] 截图区域地址: $A$1:$A$2
+2026-04-28 15:58:05 [INFO] 弹窗守护线程结束
+2026-04-28 15:58:08 [INFO] 截图成功：[test] 工作表[sheet1] 区域[A1]
+2026-04-28 15:58:08 [DEBUG] 已将所有工作表缩放比例恢复为100%
+2026-04-28 15:58:20 [DEBUG] Excel 进程已释放
+2026-04-28 15:58:21 [INFO] 发送成功：截图 学员明细备份_test_20260428_155805_357456.png
+2026-04-28 15:58:21 [DEBUG] 清理临时文件：学员明细备份_test_20260428_155805_357456.png
+2026-04-28 15:58:21 [INFO] 任务耗时：32.25s
+2026-04-28 15:58:21 [INFO] ====================================================================================================
