@@ -172,12 +172,17 @@ class ExcelProcessor:
         if pyautogui is None:
             return False
 
+        # 按钮图片存放目录
+        button_images_dir = os.path.join(os.path.dirname(__file__), 'button_images')
+        os.makedirs(button_images_dir, exist_ok=True)
+        
         button_images = ['view_all_content.png', 'continue.png', 'ok.png']
         
         for button_image in button_images:
-            if os.path.exists(button_image):
+            button_path = os.path.join(button_images_dir, button_image)
+            if os.path.exists(button_path):
                 try:
-                    location = pyautogui.locateCenterOnScreen(button_image)
+                    location = pyautogui.locateCenterOnScreen(button_path)
                     if location:
                         pyautogui.click(location)
                         logger.info(f"检测到弹窗，已点击按钮：{button_image}")
