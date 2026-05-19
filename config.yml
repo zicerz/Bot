@@ -17,14 +17,11 @@ webhooks:
   AP&研学数据播报:    "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=686ad22f-8943-462c-8be8-4a1160df0af5"
   约课数据看板:      "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=3afd2ff7-8d7c-42c8-8a47-1bfe86c68a2d"
 
-
-
-  报错提醒:         "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=833b098e-d8b8-43ea-bfdf-cade0d040fb6"
-  测试Bot:          "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=ee57f939-0e4e-4707-beba-422dae91538e"
   
 
 test_webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=ee57f939-0e4e-4707-beba-422dae91538e"
 error_webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=833b098e-d8b8-43ea-bfdf-cade0d040fb6"
+upload_url_template: "https://qyapi.weixin.qq.com/cgi-bin/webhook/upload_media?key={key}&type=file"
 
 tasks:
 
@@ -38,23 +35,19 @@ tasks:
         range: A1
         name: "test"
     # 发送文件
-    # send_file_enable: 1
-    # upload_url: "https://qyapi.weixin.qq.com/cgi-bin/webhook/upload_media?key=ee57f939-0e4e-4707-beba-422dae91538e&type=file"
-    # file_path: "C:/Users/EDY/OneDrive - PPLINGO PTE LTD/自动播报文件/新生交接时效T-1-202512.xlsx"
+    send_file_enable: 1
 
-  - excel_path: "C:/Users/EDY/OneDrive - PPLINGO PTE LTD/自动播报文件/线索-工作簿2026-当月往期+顺次1.xlsx"
-    schedule:
-      times: ["08:35","10:35", "12:35", "14:35", "16:35", "18:35", "20:35", "22:00"]
-      webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=833b098e-d8b8-43ea-bfdf-cade0d040fb6"
-    capture_configs:
-      - sheet_name: "总览页面"
-        range: AD1
-        name: "test"
+  # - excel_path: "C:/Users/EDY/OneDrive - PPLINGO PTE LTD/自动播报文件/线索-工作簿2026-当月往期+顺次1.xlsx"
+  #   schedule:
+  #     times: ["08:35","10:35", "12:35", "14:35", "16:35", "18:35", "20:35", "22:00"]
+  #     webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=833b098e-d8b8-43ea-bfdf-cade0d040fb6"
+  #   capture_configs:
+  #     - sheet_name: "总览页面"
+  #       range: AD1
+  #       name: "test"
 
     # # 发送文件
     # send_file_enable: 0
-    # upload_url: "https://qyapi.weixin.qq.com/cgi-bin/webhook/upload_media?key=ee57f939-0e4e-4707-beba-422dae91538e&type=file"
-    # file_path: "C:/Users/EDY/OneDrive - PPLINGO PTE LTD/自动播报文件/新生交接时效T-1-202512.xlsx"
     # # 数据校验
     # data_check:
     #   check_sheet: "团队"

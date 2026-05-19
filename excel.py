@@ -632,11 +632,12 @@ class ExcelProcessor:
 class ReportTask:
     """报表任务实例"""
 
-    def __init__(self, config: dict, test_webhook: str = None, error_webhook: str = None):
+    def __init__(self, config: dict, test_webhook: str = None, error_webhook: str = None, upload_url_template: str = None):
         self.config = self._validate_config(config)
         self.retry_limit = 3  # 微信发送重试次数
         self.error_webhook = error_webhook or "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=833b098e-d8b8-43ea-bfdf-cade0d040fb6"
         self.test_webhook = test_webhook
+        self.upload_url_template = upload_url_template
 
     def _validate_config(self, config: dict) -> dict:
         """配置完整性检查"""
@@ -658,6 +659,27 @@ class ReportTask:
     def _get_webhook(self) -> str:
         """获取实际使用的webhook"""
         return self.test_webhook if self.test_webhook else self.config["schedule"]["webhook"]
+
+    def _get_upload_url(self) -> str:
+        """获取实际使用的文件上传URL"""
+        if not self.upload_url_template:
+            return self.config.get("upload_url", "")
+        
+        try:
+            # 根据测试模式选择对应的 webhook 来提取 key
+            if self.test_webhook:
+                source_webhook = self.test_webhook
+            else:
+                source_webhook = self.config["schedule"]["webhook"]
+            
+            # 从 webhook URL 中提取 key
+            key = source_webhook.split("key=")[-1]
+            
+            # 替换模板中的 key 并返回
+            return self.upload_url_template.format(key=key)
+        except Exception as e:
+            logger.warning(f"构建上传URL失败：{str(e)}")
+            return self.config.get("upload_url", "")
 
     def execute(self, debug_mode=False):
         """执行任务流程"""
@@ -788,7 +810,7 @@ class ReportTask:
 
     def _send_attachment(self):
         """发送关联文件"""
-        file_path = self.config.get("file_path")
+        file_path = self.config.get("file_path") or self.config.get("excel_path")
         if not file_path or not os.path.exists(file_path):
             logger.warning("无效的文件路径，跳过发送")
             return
@@ -808,6 +830,11 @@ class ReportTask:
     def _upload_file(self, file_obj) -> str:
         """上传文件到临时素材"""
         try:
+            upload_url = self._get_upload_url()
+            if not upload_url:
+                logger.warning("无效的上传URL，跳过文件上传")
+                return None
+                
             logger.debug(f"正在上传文件：{file_obj.name}")
             #文件路径改为文件名
             filename = os.path.basename(file_obj.name)
@@ -816,7 +843,7 @@ class ReportTask:
             
             # 上传文件
             response = requests.post(
-                self.config["upload_url"],
+                upload_url,
                 files={"media": (filename_with_time, file_obj)},
                 timeout=15
             )
@@ -911,16 +938,15 @@ class TaskScheduler:
             if not isinstance(config.get("tasks"), list):
                 raise ValueError("配置文件格式错误")
 
-            # 获取测试webhook配置
-            if test_webhook is None and config.get("test_webhook"):
-                test_webhook = config["test_webhook"]
-
             # 获取错误webhook配置
             if error_webhook is None and config.get("error_webhook"):
                 error_webhook = config["error_webhook"]
 
+            # 获取上传URL模板
+            upload_url_template = config.get("upload_url_template", "")
+
             logger.info(f"成功加载 {len(config['tasks'])} 个任务")
-            return [ReportTask(task, test_webhook, error_webhook) for task in config["tasks"]]
+            return [ReportTask(task, test_webhook, error_webhook, upload_url_template) for task in config["tasks"]]
         except Exception as e:
             logger.error(f"配置加载失败：{str(e)}")
             raise
@@ -992,6 +1018,10 @@ def main():
     test_webhook = None
     if args.test:
         logger.info("已启用测试webhook模式")
+        with open("config.yml", "r", encoding="utf-8") as f:
+            config = yaml.safe_load(f)
+            if config.get("test_webhook"):
+                test_webhook = config["test_webhook"]
 
     try:
         scheduler = TaskScheduler("config.yml", debug=args.debug, test_webhook=test_webhook)
