@@ -10,9 +10,64 @@ from datetime import datetime
 import logging
 import argparse
 import pythoncom
-from PIL import Image
 import io
 import threading
+
+# ---------------------------- 自动安装依赖 ----------------------------
+def install_missing_dependencies():
+    """自动安装未安装的依赖"""
+    import subprocess
+    import sys
+    
+    dependencies = {
+        'PIL': 'pillow',
+        'pyautogui': 'pyautogui',
+        'pymsgbox': 'pymsgbox',
+        'pyscreeze': 'pyscreeze',
+        'pygetwindow': 'pygetwindow',
+        'pyrect': 'pyrect',
+        'mouseinfo': 'mouseinfo',
+        'pytweening': 'pytweening'
+    }
+    
+    installed = []
+    failed = []
+    
+    for module_name, package_name in dependencies.items():
+        try:
+            __import__(module_name)
+            installed.append(module_name)
+        except ImportError:
+            print(f"检测到缺失依赖：{module_name}，正在安装...")
+            try:
+                subprocess.check_call([
+                    sys.executable, '-m', 'pip', 'install', package_name,
+                    '-i', 'https://pypi.tuna.tsinghua.edu.cn/simple',
+                    '--timeout', '60'
+                ])
+                # 尝试重新导入
+                __import__(module_name)
+                print(f"成功安装：{module_name}")
+                installed.append(module_name)
+            except subprocess.CalledProcessError:
+                print(f"安装失败：{module_name}")
+                failed.append(module_name)
+            except Exception as e:
+                print(f"安装 {module_name} 时发生异常：{e}")
+                failed.append(module_name)
+    
+    if installed:
+        print(f"已安装/确认依赖：{', '.join(installed)}")
+    if failed:
+        print(f"安装失败的依赖：{', '.join(failed)}")
+    
+    return failed
+
+# 自动安装缺失依赖
+install_missing_dependencies()
+
+# 现在导入 PIL
+from PIL import Image
 
 # ---------------------------- 日志配置 ----------------------------
 def setup_logging():
@@ -54,12 +109,12 @@ def setup_logging():
 
 logger = setup_logging()
 
-# 延迟导入 pyautogui，确保 logger 已初始化
+# 导入 pyautogui（已在前面自动安装）
 try:
     import pyautogui
-    logger.debug("成功导入 pyautogui")
+    logger.info("成功导入 pyautogui")
 except Exception as e:
-    logger.debug(f"导入 pyautogui 失败：{e}")
+    logger.warning(f"导入 pyautogui 失败：{e}")
     pyautogui = None
 
 # ---------------------------- Excel 处理器 ----------------------------

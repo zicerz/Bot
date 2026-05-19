@@ -1,0 +1,176 @@
+2026-05-19 11:48:37 [INFO] 日志系统已初始化，日志文件：C:\Users\EDY\Desktop\BOT_TEST\logs\2026\05\2026-05-19.log
+2026-05-19 11:48:37 [INFO] 成功导入 pyautogui
+2026-05-19 11:48:37 [INFO] 已启用测试webhook模式
+2026-05-19 11:48:37 [INFO] 成功加载 2 个任务
+2026-05-19 11:48:37 [INFO] 启动任务调度器...
+2026-05-19 11:48:37 [INFO] 已安排任务：08:35 → 学员明细备份.xlsx
+2026-05-19 11:48:37 [INFO] 已安排任务：10:35 → 学员明细备份.xlsx
+2026-05-19 11:48:37 [INFO] 已安排任务：12:35 → 学员明细备份.xlsx
+2026-05-19 11:48:37 [INFO] 已安排任务：14:35 → 学员明细备份.xlsx
+2026-05-19 11:48:37 [INFO] 已安排任务：16:35 → 学员明细备份.xlsx
+2026-05-19 11:48:37 [INFO] 已安排任务：18:35 → 学员明细备份.xlsx
+2026-05-19 11:48:37 [INFO] 已安排任务：20:35 → 学员明细备份.xlsx
+2026-05-19 11:48:37 [INFO] 已安排任务：22:00 → 学员明细备份.xlsx
+2026-05-19 11:48:37 [INFO] 已安排任务：08:35 → 线索-工作簿2026-当月往期+顺次1.xlsx
+2026-05-19 11:48:37 [INFO] 已安排任务：10:35 → 线索-工作簿2026-当月往期+顺次1.xlsx
+2026-05-19 11:48:37 [INFO] 已安排任务：12:35 → 线索-工作簿2026-当月往期+顺次1.xlsx
+2026-05-19 11:48:37 [INFO] 已安排任务：14:35 → 线索-工作簿2026-当月往期+顺次1.xlsx
+2026-05-19 11:48:37 [INFO] 已安排任务：16:35 → 线索-工作簿2026-当月往期+顺次1.xlsx
+2026-05-19 11:48:37 [INFO] 已安排任务：18:35 → 线索-工作簿2026-当月往期+顺次1.xlsx
+2026-05-19 11:48:37 [INFO] 已安排任务：20:35 → 线索-工作簿2026-当月往期+顺次1.xlsx
+2026-05-19 11:48:37 [INFO] 已安排任务：22:00 → 线索-工作簿2026-当月往期+顺次1.xlsx
+2026-05-19 12:35:00 [INFO] 
+2026-05-19 12:35:00 [INFO] 定时任务触发 - 2026-05-19 12:35:00
+2026-05-19 12:35:00 [INFO] ====================================================================================================
+2026-05-19 12:35:00 [INFO] ====================================================================================================
+2026-05-19 12:35:00 [INFO] 启动任务：学员明细备份.xlsx
+2026-05-19 12:35:00 [INFO] ====================================================================================================
+2026-05-19 12:35:03 [INFO] 开始刷新数据...
+2026-05-19 12:35:03 [INFO] 共发现 1 个链接了数据源的表格
+2026-05-19 12:35:03 [INFO]   - 工作表 [昨日课量备份] - 查询 [昨日课量备份] - 范围 [$A$1:$B$59147]
+2026-05-19 12:35:03 [INFO] 检查数据连接属性：
+2026-05-19 12:35:03 [INFO]   工作表 [昨日课量备份] - 查询 [昨日课量备份]:
+2026-05-19 12:35:03 [INFO]     - 全部刷新时刷新此连接: ✗ 未设置
+2026-05-19 12:35:13 [INFO] 执行全部刷新...
+2026-05-19 12:35:20 [INFO] 没有需要验证的表格，刷新完成
+2026-05-19 12:35:20 [INFO] 启动弹窗守护线程，超时时间：90秒
+2026-05-19 12:35:21 [INFO] 开始截图，共 1 个区域
+2026-05-19 12:35:21 [INFO] 弹窗守护线程结束
+2026-05-19 12:35:23 [ERROR] 截图异常：(-2147352567, '发生意外。', (0, 'Microsoft Excel', '类 Range 的 CopyPicture 方法无效', 'xlmain11.chm', 0, -2146827284), None)
+Traceback (most recent call last):
+  File "C:\Users\EDY\Desktop\BOT_TEST\excel.py", line 597, in _capture_range
+    range_obj.CopyPicture(Format=1)
+  File "<COMObject <unknown>>", line 2, in CopyPicture
+  File "D:\Program\Miniconda\lib\site-packages\win32com\client\dynamic.py", line 356, in _ApplyTypes_
+    result = self._oleobj_.InvokeTypes(
+pywintypes.com_error: (-2147352567, '发生意外。', (0, 'Microsoft Excel', '类 Range 的 CopyPicture 方法无效', 'xlmain11.chm', 0, -2146827284), None)
+2026-05-19 12:35:23 [WARNING] 截图失败：[test] 工作表[sheet1] 区域[A1]
+2026-05-19 12:35:25 [WARNING] 截图重试第 1/3 次，待重试区域 1 个
+2026-05-19 12:35:27 [ERROR] 截图异常：(-2147352567, '发生意外。', (0, 'Microsoft Excel', '类 Range 的 CopyPicture 方法无效', 'xlmain11.chm', 0, -2146827284), None)
+Traceback (most recent call last):
+  File "C:\Users\EDY\Desktop\BOT_TEST\excel.py", line 597, in _capture_range
+    range_obj.CopyPicture(Format=1)
+  File "<COMObject <unknown>>", line 2, in CopyPicture
+  File "D:\Program\Miniconda\lib\site-packages\win32com\client\dynamic.py", line 356, in _ApplyTypes_
+    result = self._oleobj_.InvokeTypes(
+pywintypes.com_error: (-2147352567, '发生意外。', (0, 'Microsoft Excel', '类 Range 的 CopyPicture 方法无效', 'xlmain11.chm', 0, -2146827284), None)
+2026-05-19 12:35:27 [WARNING] 截图失败：[test] 工作表[sheet1] 区域[A1]
+2026-05-19 12:35:29 [WARNING] 截图重试第 2/3 次，待重试区域 1 个
+2026-05-19 12:35:31 [ERROR] 截图异常：(-2147352567, '发生意外。', (0, 'Microsoft Excel', '类 Range 的 CopyPicture 方法无效', 'xlmain11.chm', 0, -2146827284), None)
+Traceback (most recent call last):
+  File "C:\Users\EDY\Desktop\BOT_TEST\excel.py", line 597, in _capture_range
+    range_obj.CopyPicture(Format=1)
+  File "<COMObject <unknown>>", line 2, in CopyPicture
+  File "D:\Program\Miniconda\lib\site-packages\win32com\client\dynamic.py", line 356, in _ApplyTypes_
+    result = self._oleobj_.InvokeTypes(
+pywintypes.com_error: (-2147352567, '发生意外。', (0, 'Microsoft Excel', '类 Range 的 CopyPicture 方法无效', 'xlmain11.chm', 0, -2146827284), None)
+2026-05-19 12:35:31 [WARNING] 截图失败：[test] 工作表[sheet1] 区域[A1]
+2026-05-19 12:35:33 [WARNING] 截图重试第 3/3 次，待重试区域 1 个
+2026-05-19 12:35:35 [ERROR] 截图异常：(-2147352567, '发生意外。', (0, 'Microsoft Excel', '类 Range 的 CopyPicture 方法无效', 'xlmain11.chm', 0, -2146827284), None)
+Traceback (most recent call last):
+  File "C:\Users\EDY\Desktop\BOT_TEST\excel.py", line 597, in _capture_range
+    range_obj.CopyPicture(Format=1)
+  File "<COMObject <unknown>>", line 2, in CopyPicture
+  File "D:\Program\Miniconda\lib\site-packages\win32com\client\dynamic.py", line 356, in _ApplyTypes_
+    result = self._oleobj_.InvokeTypes(
+pywintypes.com_error: (-2147352567, '发生意外。', (0, 'Microsoft Excel', '类 Range 的 CopyPicture 方法无效', 'xlmain11.chm', 0, -2146827284), None)
+2026-05-19 12:35:35 [WARNING] 截图失败：[test] 工作表[sheet1] 区域[A1]
+2026-05-19 12:35:35 [ERROR] 截图在重试 3 次后仍失败，共 1 个区域：test(sheet1:A1)
+2026-05-19 12:35:35 [INFO] 发送成功：截图失败通知
+2026-05-19 12:35:37 [INFO] 任务耗时：36.05s
+2026-05-19 12:35:37 [INFO] ====================================================================================================
+2026-05-19 12:35:37 [INFO] 
+2026-05-19 12:35:37 [INFO] 定时任务触发 - 2026-05-19 12:35:37
+2026-05-19 12:35:37 [INFO] ====================================================================================================
+2026-05-19 12:35:37 [INFO] ====================================================================================================
+2026-05-19 12:35:37 [INFO] 启动任务：线索-工作簿2026-当月往期+顺次1.xlsx
+2026-05-19 12:35:37 [INFO] ====================================================================================================
+2026-05-19 12:35:49 [INFO] 开始刷新数据...
+2026-05-19 12:35:49 [INFO] 共发现 2 个链接了数据源的表格
+2026-05-19 12:35:49 [INFO]   - 工作表 [view_cnsale_first_sale_m1_detai] - 查询 [view_cnsale_first_sale_m1_details_key_57ce2n6vq7pcw0e8] - 范围 [$A$1:$CW$31564]
+2026-05-19 12:35:49 [INFO]   - 工作表 [view_cnsale_sale_wq_detai_lastm] - 查询 [view_cnsale_sale_wq_detai_lastmonth1?key_57ce2n6vq7pcw0e8] - 范围 [$A$1:$CW$8911]
+2026-05-19 12:35:49 [INFO] 检查数据连接属性：
+2026-05-19 12:35:49 [INFO]   工作表 [view_cnsale_first_sale_m1_detai] - 查询 [view_cnsale_first_sale_m1_details_key_57ce2n6vq7pcw0e8]:
+2026-05-19 12:35:49 [INFO]     - 全部刷新时刷新此连接: ✓ 已设置
+2026-05-19 12:35:49 [INFO]     - 数据源表格范围: $A$1:$CW$31564
+2026-05-19 12:35:49 [INFO]   工作表 [view_cnsale_sale_wq_detai_lastm] - 查询 [view_cnsale_sale_wq_detai_lastmonth1?key_57ce2n6vq7pcw0e8]:
+2026-05-19 12:35:49 [INFO]     - 全部刷新时刷新此连接: ✓ 已设置
+2026-05-19 12:35:49 [INFO]     - 数据源表格范围: $A$1:$CW$8911
+2026-05-19 12:35:49 [INFO] 在 2 个工作表中设置左上角单元格值为1
+2026-05-19 12:35:49 [INFO]   工作表 [view_cnsale_first_sale_m1_detai] - 已将 $A$1 单元格值设置为 1
+2026-05-19 12:35:49 [INFO]   工作表 [view_cnsale_sale_wq_detai_lastm] - 已将 $A$1 单元格值设置为 1
+2026-05-19 12:35:59 [INFO] 执行全部刷新...
+2026-05-19 12:38:12 [INFO] 工作表 [view_cnsale_first_sale_m1_detai] - 查询 [view_cnsale_first_sale_m1_details_key_57ce2n6vq7pcw0e8] 的 $A$1 单元格值已更新，刷新成功
+2026-05-19 12:38:12 [INFO] 工作表 [view_cnsale_sale_wq_detai_lastm] - 查询 [view_cnsale_sale_wq_detai_lastmonth1?key_57ce2n6vq7pcw0e8] 的 $A$1 单元格值已更新，刷新成功
+2026-05-19 12:38:12 [INFO] 所有表格刷新成功！
+2026-05-19 12:38:12 [INFO] 启动弹窗守护线程，超时时间：90秒
+2026-05-19 12:38:13 [INFO] 弹窗守护线程结束
+2026-05-19 12:38:56 [INFO] 开始截图，共 1 个区域
+2026-05-19 12:38:57 [ERROR] 截图异常：(-2147352567, '发生意外。', (0, 'Microsoft Excel', '类 Range 的 CopyPicture 方法无效', 'xlmain11.chm', 0, -2146827284), None)
+Traceback (most recent call last):
+  File "C:\Users\EDY\Desktop\BOT_TEST\excel.py", line 597, in _capture_range
+    range_obj.CopyPicture(Format=1)
+  File "<COMObject <unknown>>", line 2, in CopyPicture
+  File "D:\Program\Miniconda\lib\site-packages\win32com\client\dynamic.py", line 356, in _ApplyTypes_
+    result = self._oleobj_.InvokeTypes(
+pywintypes.com_error: (-2147352567, '发生意外。', (0, 'Microsoft Excel', '类 Range 的 CopyPicture 方法无效', 'xlmain11.chm', 0, -2146827284), None)
+2026-05-19 12:38:57 [WARNING] 截图失败：[test] 工作表[总览页面] 区域[AD1]
+2026-05-19 12:39:00 [WARNING] 截图重试第 1/3 次，待重试区域 1 个
+2026-05-19 12:39:01 [ERROR] 截图异常：(-2147352567, '发生意外。', (0, 'Microsoft Excel', '类 Range 的 CopyPicture 方法无效', 'xlmain11.chm', 0, -2146827284), None)
+Traceback (most recent call last):
+  File "C:\Users\EDY\Desktop\BOT_TEST\excel.py", line 597, in _capture_range
+    range_obj.CopyPicture(Format=1)
+  File "<COMObject <unknown>>", line 2, in CopyPicture
+  File "D:\Program\Miniconda\lib\site-packages\win32com\client\dynamic.py", line 356, in _ApplyTypes_
+    result = self._oleobj_.InvokeTypes(
+pywintypes.com_error: (-2147352567, '发生意外。', (0, 'Microsoft Excel', '类 Range 的 CopyPicture 方法无效', 'xlmain11.chm', 0, -2146827284), None)
+2026-05-19 12:39:01 [WARNING] 截图失败：[test] 工作表[总览页面] 区域[AD1]
+2026-05-19 12:39:03 [WARNING] 截图重试第 2/3 次，待重试区域 1 个
+2026-05-19 12:39:05 [ERROR] 截图异常：(-2147352567, '发生意外。', (0, 'Microsoft Excel', '类 Range 的 CopyPicture 方法无效', 'xlmain11.chm', 0, -2146827284), None)
+Traceback (most recent call last):
+  File "C:\Users\EDY\Desktop\BOT_TEST\excel.py", line 597, in _capture_range
+    range_obj.CopyPicture(Format=1)
+  File "<COMObject <unknown>>", line 2, in CopyPicture
+  File "D:\Program\Miniconda\lib\site-packages\win32com\client\dynamic.py", line 356, in _ApplyTypes_
+    result = self._oleobj_.InvokeTypes(
+pywintypes.com_error: (-2147352567, '发生意外。', (0, 'Microsoft Excel', '类 Range 的 CopyPicture 方法无效', 'xlmain11.chm', 0, -2146827284), None)
+2026-05-19 12:39:05 [WARNING] 截图失败：[test] 工作表[总览页面] 区域[AD1]
+2026-05-19 12:39:07 [WARNING] 截图重试第 3/3 次，待重试区域 1 个
+2026-05-19 12:39:09 [ERROR] 截图异常：(-2147352567, '发生意外。', (0, 'Microsoft Excel', '类 Range 的 CopyPicture 方法无效', 'xlmain11.chm', 0, -2146827284), None)
+Traceback (most recent call last):
+  File "C:\Users\EDY\Desktop\BOT_TEST\excel.py", line 597, in _capture_range
+    range_obj.CopyPicture(Format=1)
+  File "<COMObject <unknown>>", line 2, in CopyPicture
+  File "D:\Program\Miniconda\lib\site-packages\win32com\client\dynamic.py", line 356, in _ApplyTypes_
+    result = self._oleobj_.InvokeTypes(
+pywintypes.com_error: (-2147352567, '发生意外。', (0, 'Microsoft Excel', '类 Range 的 CopyPicture 方法无效', 'xlmain11.chm', 0, -2146827284), None)
+2026-05-19 12:39:09 [WARNING] 截图失败：[test] 工作表[总览页面] 区域[AD1]
+2026-05-19 12:39:10 [ERROR] 截图在重试 3 次后仍失败，共 1 个区域：test(总览页面:AD1)
+2026-05-19 12:39:11 [INFO] 发送成功：截图失败通知
+2026-05-19 12:39:16 [INFO] 任务耗时：219.43s
+2026-05-19 12:39:16 [INFO] ====================================================================================================
+2026-05-19 13:03:36 [INFO] 正在关闭调度器...
+2026-05-19 13:06:38 [INFO] 日志系统已初始化，日志文件：C:\Users\EDY\Desktop\BOT_TEST\logs\2026\05\2026-05-19.log
+2026-05-19 13:06:38 [INFO] 成功导入 pyautogui
+2026-05-19 13:06:38 [INFO] 已启用测试webhook模式
+2026-05-19 13:06:38 [INFO] 成功加载 2 个任务
+2026-05-19 13:06:38 [INFO] 进入调试模式...
+2026-05-19 13:06:38 [INFO] ====================================================================================================
+2026-05-19 13:06:38 [INFO] 启动任务：学员明细备份.xlsx
+2026-05-19 13:06:38 [INFO] ====================================================================================================
+2026-05-19 13:06:40 [INFO] 开始刷新数据...
+2026-05-19 13:06:40 [INFO] 共发现 1 个链接了数据源的表格
+2026-05-19 13:06:40 [INFO]   - 工作表 [昨日课量备份] - 查询 [昨日课量备份] - 范围 [$A$1:$B$59147]
+2026-05-19 13:06:40 [INFO] 检查数据连接属性：
+2026-05-19 13:06:40 [INFO]   工作表 [昨日课量备份] - 查询 [昨日课量备份]:
+2026-05-19 13:06:40 [INFO]     - 全部刷新时刷新此连接: ✗ 未设置
+2026-05-19 13:06:50 [INFO] 执行全部刷新...
+2026-05-19 13:06:52 [INFO] 没有需要验证的表格，刷新完成
+2026-05-19 13:06:52 [INFO] 启动弹窗守护线程，超时时间：90秒
+2026-05-19 13:06:55 [INFO] 检测到弹窗，已点击按钮：view_all_content.png
+2026-05-19 13:06:55 [INFO] 开始截图，共 1 个区域
+2026-05-19 13:06:55 [INFO] 弹窗守护线程结束
+2026-05-19 13:06:56 [INFO] 截图成功：[test] 工作表[sheet1] 区域[A1]
+2026-05-19 13:07:05 [INFO] 发送成功：截图 学员明细备份_test_20260519_130655_417171.png
+2026-05-19 13:07:05 [INFO] 任务耗时：27.08s
+2026-05-19 13:07:05 [INFO] ====================================================================================================
