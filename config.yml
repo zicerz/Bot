@@ -17,7 +17,6 @@ webhooks:
   AP&研学数据播报:    "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=686ad22f-8943-462c-8be8-4a1160df0af5"
   约课数据看板:      "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=3afd2ff7-8d7c-42c8-8a47-1bfe86c68a2d"
 
-  
 
 test_webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=ee57f939-0e4e-4707-beba-422dae91538e"
 error_webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=833b098e-d8b8-43ea-bfdf-cade0d040fb6"
@@ -25,18 +24,30 @@ upload_url_template: "https://qyapi.weixin.qq.com/cgi-bin/webhook/upload_media?k
 
 tasks:
 
-#-----------------------------------------   task 0  --------------------------------------     
-  - excel_path: "C:/Users/EDY/OneDrive - PPLINGO PTE LTD/自动播报文件/学员明细备份.xlsx"
-    schedule:
-      times: ["08:35","10:35", "12:35", "14:35", "16:35", "18:35", "20:35", "22:00"]
-      webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=833b098e-d8b8-43ea-bfdf-cade0d040fb6"
-    capture_configs:
-      - sheet_name: "sheet1"
-        range: A1
-        name: "test"
-    # 发送文件
-    send_file_enable: 1
+#-----------------------------------------   task 0 多webhook示例  --------------------------------------     
+  - name: "学员明细自动播报"
+    excel_path: "C:/Users/EDY/OneDrive - PPLINGO PTE LTD/自动播报文件/学员明细备份.xlsx"
+    # 多个webhook配置，每个可独立设置times、capture_configs、send_file_enable
+    webhooks:
+      - webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=833b098e-d8b8-43ea-bfdf-cade0d040fb6"
+        name: "学员明细"
+        times: ["08:35","10:35", "12:35", "14:35", "16:35", "18:35", "20:35", "22:00"]
+        capture_configs:
+          - sheet_name: "sheet1"
+            range: A1
+            name: "test_webhook1"
+        send_file_enable: 1  # 可选，未配置默认为0
 
+      - webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=ee57f939-0e4e-4707-beba-422dae91538e"
+        name: "学员明细自动播报"
+        times: ["08:40","10:40", "12:40", "14:40", "16:40", "18:40", "20:40", "22:05"]
+        capture_configs:
+          - sheet_name: "sheet2"
+            range: A1
+            name: "test_webhook2"
+        send_file_enable: 0  # 可选，未配置默认为0
+
+#-----------------------------------------   task 1 单webhook示例（兼容旧格式）  --------------------------------------     
   # - excel_path: "C:/Users/EDY/OneDrive - PPLINGO PTE LTD/自动播报文件/线索-工作簿2026-当月往期+顺次1.xlsx"
   #   schedule:
   #     times: ["08:35","10:35", "12:35", "14:35", "16:35", "18:35", "20:35", "22:00"]
@@ -46,22 +57,22 @@ tasks:
   #       range: AD1
   #       name: "test"
 
-    # # 发送文件
-    # send_file_enable: 0
-    # # 数据校验
-    # data_check:
-    #   check_sheet: "团队"
-    #   check_range: "L5"
-    #   check_frequency: 3
-    #   notify_message: "数据校验失败，请检查"
-    #   notify_users: ["hezhengsong","zhufuzhe"]
-    #   warning_webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=833b098e-d8b8-43ea-bfdf-cade0d040fb6"
-
+  #   # 发送文件
+  #   send_file_enable: 0
+  #   # 数据校验
+  #   data_check:
+  #     check_sheet: "团队"
+  #     check_range: "L5"
+  #     check_frequency: 3
+  #     notify_message: "数据校验失败，请检查"
+  #     notify_users: ["hezhengsong","zhufuzhe"]
+  #     warning_webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=833b098e-d8b8-43ea-bfdf-cade0d040fb6"
 
 
 
 
 # 当前程序只能保证excel端刷新完成，如果数仓数据未处理完，无法判断
+
 
 
 # 每发送一次都将文件备份一次，文件名称为：文件名_日期_时间.xlsx

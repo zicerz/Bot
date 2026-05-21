@@ -45,7 +45,6 @@ def install_missing_dependencies():
                     '-i', 'https://pypi.tuna.tsinghua.edu.cn/simple',
                     '--timeout', '60'
                 ])
-                # 尝试重新导入
                 __import__(module_name)
                 print(f"成功安装：{module_name}")
                 installed.append(module_name)
@@ -63,44 +62,36 @@ def install_missing_dependencies():
     
     return failed
 
-# 自动安装缺失依赖
 install_missing_dependencies()
 
-# 现在导入 PIL
 from PIL import Image
 
 # ---------------------------- 日志配置 ----------------------------
 def setup_logging():
     """配置日志系统：按年/月分级目录，每日独立日志文件"""
-    # 获取当前脚本所在目录
     base_dir = os.path.dirname(os.path.abspath(__file__))
     
-    # 创建日志目录结构：logs/年/月/
     now = datetime.now()
     log_dir = os.path.join(base_dir, "logs", str(now.year), f"{now.month:02d}")
     os.makedirs(log_dir, exist_ok=True)
     
-    # 生成日志文件名：年-月-日.log
     log_filename = now.strftime("%Y-%m-%d.log")
     log_path = os.path.join(log_dir, log_filename)
     
-    # 配置日志格式
     log_format = "%(asctime)s [%(levelname)s] %(message)s"
     date_format = "%Y-%m-%d %H:%M:%S"
     
-    # 创建处理器：控制台输出 + 文件输出（追加模式）
     handlers = [
-        logging.StreamHandler(),  # 控制台输出
-        logging.FileHandler(log_path, mode='a', encoding='utf-8')  # 文件输出（追加模式）
+        logging.StreamHandler(),
+        logging.FileHandler(log_path, mode='a', encoding='utf-8')
     ]
     
-    # 配置日志
     logging.basicConfig(
         level=logging.INFO,
         format=log_format,
         datefmt=date_format,
         handlers=handlers,
-        force=True  # 强制重新配置，避免重复配置问题
+        force=True
     )
     
     logger = logging.getLogger("ExcelBot")
@@ -109,7 +100,6 @@ def setup_logging():
 
 logger = setup_logging()
 
-# 导入 pyautogui（已在前面自动安装）
 try:
     import pyautogui
     logger.info("成功导入 pyautogui")
@@ -122,30 +112,21 @@ class ExcelProcessor:
     """Excel 操作引擎"""
     
     def __init__(self, file_path: str, visible=True):
-        """
-        初始化处理器
-        :param file_path: Excel 文件绝对路径
-        :param visible: 是否显示 Excel 界面（调试用）
-        """
-    
         self.file_path = os.path.abspath(file_path)
-        self.visible = True  # 可视化调试模式
+        self.visible = True
         self.excel = None
         self.workbook = None
-        self._refresh_timeout = 500  # 数据刷新超时时间（秒）
-        self._dialog_watchdog_stop = threading.Event()  # 用于控制弹窗守护线程的停止
+        self._refresh_timeout = 500
+        self._dialog_watchdog_stop = threading.Event()
 
     def __enter__(self):
-        """安全启动 Excel 实例"""
         max_retries = 3
         retry_delay = 2
         
-        # 确保COM初始化（移到循环外部，只初始化一次）
         pythoncom.CoInitialize()
         
         for attempt in range(max_retries + 1):
             try:
-                # 使用 DispatchEx 创建新的 Excel 实例，避免与现有实例冲突
                 self.excel = win32.DispatchEx("Excel.Application")
                 logger.debug("成功创建 Excel 实例")
                 try:
@@ -160,10 +141,8 @@ class ExcelProcessor:
                     logger.warning(f"设置 DisplayAlerts 失败: {e}")
                 self.workbook = self.excel.Workbooks.Open(self.file_path)
                 
-                # 等待Excel就绪
                 time.sleep(1)
                 
-                # 自动设置所有工作表的缩放比例为220%
                 for sheet in self._iter_worksheets():
                     try:
                         sheet.Activate()
@@ -178,24 +157,21 @@ class ExcelProcessor:
                     logger.warning(f"Excel 忙，第 {attempt + 1}/{max_retries} 次重试...")
                     self._safe_shutdown()
                     time.sleep(retry_delay)
-                    retry_delay *= 2  # 指数退避
+                    retry_delay *= 2
                 else:
                     self._safe_shutdown()
                     raise RuntimeError(f"Excel 启动失败：{str(e)}")
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        """确保资源释放"""
         self._safe_shutdown()
 
     def _iter_worksheets(self):
-        """兼容遍历：部分环境不支持直接枚举 Worksheets。"""
         if not self.workbook:
             return []
         sheets = self.workbook.Worksheets
         return [sheets.Item(i) for i in range(1, sheets.Count + 1)]
 
     def _start_dialog_watchdog(self, timeout_s: float = 90.0):
-        """启动弹窗守护线程"""
         if pyautogui is None:
             return
 
@@ -212,22 +188,15 @@ class ExcelProcessor:
         threading.Thread(target=_run, daemon=True).start()
 
     def _stop_dialog_watchdog(self):
-        """停止弹窗守护线程"""
         try:
             self._dialog_watchdog_stop.set()
         except Exception:
             pass
 
     def _dismiss_other_people_editing_dialog(self) -> bool:
-        """
-        处理弹窗：
-        标题：其他人也在更改
-        基于屏幕截图检测并点击相应按钮
-        """
         if pyautogui is None:
             return False
 
-        # 按钮图片存放目录
         button_images_dir = os.path.join(os.path.dirname(__file__), 'button_images')
         os.makedirs(button_images_dir, exist_ok=True)
         
@@ -248,11 +217,8 @@ class ExcelProcessor:
         return False
 
     def _safe_shutdown(self):
-        """安全关闭 Excel 进程"""
-        # 停止弹窗守护线程
         self._stop_dialog_watchdog()
 
-        # 分步清理，避免某一步异常影响后续释放
         if self.workbook is not None:
             try:
                 self.workbook.Close(SaveChanges=True)
@@ -277,24 +243,18 @@ class ExcelProcessor:
         logger.debug("Excel 进程已释放")
 
     def refresh_data(self) -> bool:
-        """带超时检测的数据刷新"""
         logger.info("开始刷新数据...")
         start_time = time.time()
         
-        
         try:
-            # 刷新之前，判断哪些表是链接了数据源的表格
             linked_tables = []
             for sheet in self._iter_worksheets():
                 try:
-                    # 检查工作表中的表格（ListObjects）
                     list_objects = sheet.ListObjects
                     for i in range(1, list_objects.Count + 1):
                         table = list_objects.Item(i)
                         try:
-                            # 检查表格是否有查询表（QueryTable），这表示链接了外部数据源
                             if hasattr(table, 'QueryTable') and table.QueryTable is not None:
-                                # 获取表格的范围
                                 table_range = table.Range.Address if hasattr(table, 'Range') else "未知"
                                 linked_tables.append({
                                     'sheet': sheet.Name,
@@ -305,7 +265,6 @@ class ExcelProcessor:
                                 })
                                 logger.debug(f"发现链接数据源的表格：工作表 [{sheet.Name}] - 查询 [{table.Name}] - 范围 [{table_range}]")
                         except Exception as e:
-                            # logger.debug(f"检查工作表 [{sheet.Name}] 的表格 [{table.Name if hasattr(table, 'Name') else 'Unknown'}] 时出错：{e}")
                             logger.debug(f"工作表 [{sheet.Name}] 的表格 [{table.Name if hasattr(table, 'Name') else 'Unknown'}] 未连接数据源")
                 except Exception as e:
                     logger.debug(f"检查工作表 [{sheet.Name}] 时出错：{e}")
@@ -317,7 +276,6 @@ class ExcelProcessor:
             else:
                 logger.info("未发现链接了数据源的表格")
 
-            # 在发现了数据源的表格中查询是否设置了全部刷新时刷新此连接
             refresh_tables = []
             if linked_tables:
                 logger.info("检查数据连接属性：")
@@ -326,14 +284,10 @@ class ExcelProcessor:
                         query_table = item['query_table']
                         
                         if query_table is not None:
-                            # 检查各种刷新属性
                             will_refresh_on_refresh_all = False
-                            # 通过QueryTable直接访问WorkbookConnection
                             try:
-                                # 通过QueryTable的WorkbookConnection属性
                                 workbook_conn = query_table.WorkbookConnection
                                 if workbook_conn:
-                                    # 检查RefreshWithRefreshAll属性（如果存在）
                                     try:
                                         if hasattr(workbook_conn, 'RefreshWithRefreshAll'):
                                             will_refresh_on_refresh_all = workbook_conn.RefreshWithRefreshAll
@@ -346,27 +300,19 @@ class ExcelProcessor:
                             logger.info(f"  工作表 [{item['sheet']}] - 查询 [{item['table']}]:")
                             logger.info(f"    - 全部刷新时刷新此连接: {status}")
                             
-                            # 如果设置了全部刷新时刷新此连接，打印表格范围
                             if will_refresh_on_refresh_all:
                                 logger.info(f"    - 数据源表格范围: {item['range']}")
-                                # 添加到需要设置单元格值的工作表列表
                                 refresh_tables.append(item)
-                
+                                
                     except Exception as e:
                         logger.warning(f"检查表格 [{item['sheet']}] - [{item['table']}] 的连接属性时出错: {e}")
             
-            # 将每个链接了数据源并设置了全部刷新时刷新此连接的表格所在工作表的左上角单元格值设置为1
             if refresh_tables:
                 logger.info(f"在 {len(refresh_tables)} 个工作表中设置左上角单元格值为1")
                 for item in refresh_tables:
-                    # print('--------------------------------------------------------------------------------------------')
-                    # print(item['range'])
-                    #将range转换为左上角单元格
                     range_start = item['range'].split(':')[0]
-                    # print(range_start)
                     try:
                         sheet = self.workbook.Worksheets(item['sheet'])
-                        # 设置表格范围的左上角单元格值为1
                         sheet.Range(range_start).Value = 1
                         logger.info(f"  工作表 [{item['sheet']}] - 已将 {range_start} 单元格值设置为 1")
                     except Exception as e:
@@ -374,28 +320,22 @@ class ExcelProcessor:
 
             time.sleep(10)
             
-            # 执行刷新并验证，最多重试3次
             max_retries = 3
-            failed_tables = []  # 保存失败的表格列表
+            failed_tables = []
             
             for retry_count in range(max_retries + 1):
                 if retry_count == 0:
-                    # 第一次：执行全部刷新
                     logger.info("执行全部刷新...")
                     self.workbook.RefreshAll()
                     self.excel.CalculateUntilAsyncQueriesDone()
                 else:
-                    # 重试：只刷新失败的表格
                     if not failed_tables:
-                        # 如果没有失败的表格，说明已经全部成功，退出循环
                         break
                     
                     logger.warning(f"第 {retry_count} 次重试刷新，发现 {len(failed_tables)} 个表格刷新失败")
                     for item in failed_tables:
                         logger.warning(f"  重试刷新：工作表 [{item['sheet']}] - 查询 [{item['table']}]")
                         try:
-                            
-                            # 刷新单个表格
                             if item['query_table']:
                                 item['query_table'].Refresh()
                         except Exception as e:
@@ -403,30 +343,22 @@ class ExcelProcessor:
                     
                     self.excel.CalculateUntilAsyncQueriesDone()
                 
-                # 轮询检查计算状态
-                calculation_timeout = 300  # 5分钟超时
+                calculation_timeout = 300
                 calculation_start = time.time()
                 while time.time() - calculation_start < calculation_timeout:
-                    if self.excel.CalculationState == 0:  # 0 表示计算完成
+                    if self.excel.CalculationState == 0:
                         break
                     time.sleep(5)
                 else:
                     logger.warning("计算状态检查超时，继续验证单元格值")
                 
-                # 检查刷新结果：验证所有表格的左上角单元格值
                 if refresh_tables:
-                    failed_tables = []  # 重置失败列表
+                    failed_tables = []
                     for item in refresh_tables:
                         range_start = item['range'].split(':')[0]
                         try:
                             sheet = self.workbook.Worksheets(item['sheet'])
                             cell_value = sheet.Range(range_start).Value
-                            print(item['sheet'])
-                            print(item['table'])
-                            print(range_start)
-                            print(cell_value)
-                            # 修正判断逻辑：单元格值为1表示刷新失败
-                            # 考虑不同数据类型的情况，将单元格值转为字符串后与'1'比较，以避免由于数值/文本/其他类型造成的判断失误
                             if str(cell_value).strip() != '1':
                                 logger.info(f"工作表 [{item['sheet']}] - 查询 [{item['table']}] 的 {range_start} 单元格值已更新，刷新成功")
                             else:
@@ -438,8 +370,6 @@ class ExcelProcessor:
                     
                     if not failed_tables:
                         logger.info("所有表格刷新成功！")
-                        # 刷新后重新应用所有表格的筛选和排序，并刷新所有的数据透视表
-                        # 重新应用筛选时最容易触发“其他人也在更改”弹窗
                         self._start_dialog_watchdog(timeout_s=90)
                         for sheet in self._iter_worksheets():
                             try:
@@ -448,9 +378,7 @@ class ExcelProcessor:
                                     logger.debug(f"重新应用筛选：{sheet.Name}")
                             except Exception as e:
                                 logger.debug(f"应用筛选/排序失败：{sheet.Name} - {e}")
-                        # 筛选完成，停止弹窗检测
                         self._stop_dialog_watchdog()
-                        # 刷新所有的数据透视表（不检测弹窗）
                         for sheet in self._iter_worksheets():
                             try:
                                 if hasattr(sheet, "PivotTables"):
@@ -461,74 +389,58 @@ class ExcelProcessor:
                                         time.sleep(1)
                             except Exception as e:
                                 logger.debug(f"刷新数据透视表失败：{sheet.Name} - {e}")
-                               
 
-
-                                
                         return True
                     else:
                         if retry_count < max_retries:
                             logger.warning(f"发现 {len(failed_tables)} 个表格刷新失败，准备重试（剩余 {max_retries - retry_count} 次）")
-                            time.sleep(5)  # 等待一段时间后重试
+                            time.sleep(5)
                         else:
-                            # 达到最大重试次数，仍有失败的表格
                             logger.error(f"达到最大重试次数（{max_retries}次），仍有 {len(failed_tables)} 个表格刷新失败")
                             for item in failed_tables:
                                 logger.error(f"  失败表格：工作表 [{item['sheet']}] - 查询 [{item['table']}]")
                             return False
                 else:
-                    # 没有需要验证的表格，直接返回成功
                     logger.info("没有需要验证的表格，刷新完成")
-                    # 刷新后重新应用所有表格的筛选和排序
                     self._start_dialog_watchdog(timeout_s=90)
                     for sheet in self._iter_worksheets():
                         try:
                             if sheet.AutoFilter is not None:
-                                # 重新应用筛选
                                 sheet.AutoFilter.ApplyFilter()
                                 logger.debug(f"重新应用筛选：{sheet.Name}")
                         except Exception as e:
                             logger.debug(f"应用筛选/排序失败：{sheet.Name} - {e}")
                     return True
             
-            # 如果循环正常结束（理论上不应该到这里，因为所有情况都应该有return）
             logger.warning("刷新循环异常结束")
             return False
         except Exception as e:
             logger.error(f"刷新异常：{str(e)}")
             return False
         finally:
-            # 尽量停止守护线程（daemon 不会阻塞退出，这里只是减少无意义轮询）
             self._stop_dialog_watchdog()
 
     def validate_date(self, check_sheet, check_range, check_frequency) -> bool:
-        """带重试的数据校验"""
         for attempt in range(1, check_frequency+1):
             try:
                 logger.debug(f"校验数据：工作表 [{check_sheet}] 区域 [{check_range}]")
                 sheet = self.workbook.Worksheets(check_sheet)
                 valid = sheet.Range(check_range).Value != 0
                 logger.info(f"数据校验 {'通过' if valid else '失败'}（第 {attempt} 次尝试）共{check_frequency}次")
-        
+    
                 if valid:
                     return True
                 if attempt < check_frequency:
-                    time.sleep(10)  # 重试间隔
-                    # 重新刷新数据
+                    time.sleep(10)
                     self.refresh_data()
             except Exception as e:
                 logger.error(f"校验异常：{str(e)}")
         return False
 
     def capture_screenshots(self, configs: list, retry_times: int = 3):
-        """
-        批量截图（失败区域重试），返回：
-        - screenshots: 成功截图路径列表
-        - failed_configs: 重试后仍失败的配置列表
-        """
         screenshots = []
         pending_configs = list(configs)
-        total_attempts = retry_times + 1  # 首次 + 重试次数
+        total_attempts = retry_times + 1
 
         try:
             for attempt in range(1, total_attempts + 1):
@@ -566,7 +478,6 @@ class ExcelProcessor:
                 if pending_configs and attempt < total_attempts:
                     time.sleep(2)
         finally:
-            # 截图完成后，将所有工作表缩放比例恢复为100%
             try:
                 for sheet in self._iter_worksheets():
                     sheet.Activate()
@@ -579,7 +490,6 @@ class ExcelProcessor:
     
 
     def _capture_range(self, sheet, range_addr: str, output_path: str) -> bool:
-        """执行区域截图"""
         try:
             if ":" in range_addr:
                 range_obj = sheet.Range(range_addr)
@@ -588,11 +498,6 @@ class ExcelProcessor:
                 range_obj = start_cell.CurrentRegion
 
             logger.debug(f"截图区域地址: {range_obj.Address}")
-            # try:
-            #     val = range_obj.Value
-            #     logger.debug(f"截图区域首行首列值: {val[0][0] if isinstance(val, tuple) else val}")
-            # except Exception as e:
-            #     logger.debug(f"无法获取区域值: {e}")
 
             range_obj.CopyPicture(Format=1)
             time.sleep(1)
@@ -619,9 +524,7 @@ class ExcelProcessor:
             return False
 
     def _generate_path(self, prefix: str) -> str:
-        """生成唯一文件名"""
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")  # 加微秒
-        # 加入excel文件名或任务名，防止同名
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
         task_tag = os.path.splitext(os.path.basename(self.file_path))[0]
         return os.path.join(
             os.path.dirname(self.file_path),
@@ -634,73 +537,95 @@ class ReportTask:
 
     def __init__(self, config: dict, test_webhook: str = None, error_webhook: str = None, upload_url_template: str = None):
         self.config = self._validate_config(config)
-        self.retry_limit = 3  # 微信发送重试次数
+        self.retry_limit = 3
         self.error_webhook = error_webhook or "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=833b098e-d8b8-43ea-bfdf-cade0d040fb6"
         self.test_webhook = test_webhook
         self.upload_url_template = upload_url_template
 
     def _validate_config(self, config: dict) -> dict:
-        """配置完整性检查"""
-        required_fields = ["excel_path", "schedule", "capture_configs"]
+        """配置完整性检查，支持新的多webhook配置和旧的单webhook配置"""
+        required_fields = ["excel_path"]
         missing = [f for f in required_fields if f not in config]
         if missing:
             raise ValueError(f"缺失必要配置：{missing}")
 
-        # 检查 schedule 下的 times 和 webhook
-        schedule = config["schedule"]
-        if "times" not in schedule or "webhook" not in schedule:
-            raise ValueError("缺失必要配置：['schedule.times', 'schedule.webhook']")
-
         if not os.path.exists(config["excel_path"]):
             raise FileNotFoundError(config["excel_path"])
 
+        # 支持新的webhooks配置格式
+        if "webhooks" in config:
+            if not isinstance(config["webhooks"], list) or len(config["webhooks"]) == 0:
+                raise ValueError("webhooks必须是非空列表")
+            
+            for idx, webhook_config in enumerate(config["webhooks"]):
+                if "webhook" not in webhook_config:
+                    raise ValueError(f"webhook配置[{idx}]缺失webhook字段")
+                if "times" not in webhook_config:
+                    raise ValueError(f"webhook配置[{idx}]缺失times字段")
+                if "capture_configs" not in webhook_config:
+                    raise ValueError(f"webhook配置[{idx}]缺失capture_configs字段")
+                
+                # 设置默认值
+                if "send_file_enable" not in webhook_config:
+                    webhook_config["send_file_enable"] = 0
+        elif "schedule" in config:
+            # 兼容旧格式，转换为新格式
+            schedule = config["schedule"]
+            webhook = schedule.get("webhook", "")
+            times = schedule.get("times", [])
+            capture_configs = config.get("capture_configs", [])
+            send_file_enable = config.get("send_file_enable", 0)
+            
+            config["webhooks"] = [{
+                "webhook": webhook,
+                "times": times,
+                "capture_configs": capture_configs,
+                "send_file_enable": send_file_enable
+            }]
+            logger.warning("检测到旧版配置格式，已自动转换为多webhook格式")
+        else:
+            raise ValueError("任务配置必须包含webhooks或schedule字段")
+
         return config
 
-    def _get_webhook(self) -> str:
-        """获取实际使用的webhook"""
-        return self.test_webhook if self.test_webhook else self.config["schedule"]["webhook"]
-
-    def _get_upload_url(self) -> str:
-        """获取实际使用的文件上传URL"""
+    def _get_upload_url(self, webhook: str) -> str:
+        """根据webhook获取文件上传URL"""
         if not self.upload_url_template:
-            return self.config.get("upload_url", "")
+            return ""
         
         try:
-            # 根据测试模式选择对应的 webhook 来提取 key
-            if self.test_webhook:
-                source_webhook = self.test_webhook
-            else:
-                source_webhook = self.config["schedule"]["webhook"]
-            
-            # 从 webhook URL 中提取 key
-            key = source_webhook.split("key=")[-1]
-            
-            # 替换模板中的 key 并返回
+            key = webhook.split("key=")[-1]
             return self.upload_url_template.format(key=key)
         except Exception as e:
             logger.warning(f"构建上传URL失败：{str(e)}")
-            return self.config.get("upload_url", "")
+            return ""
 
-    def execute(self, debug_mode=False):
-        """执行任务流程"""
-        # 任务开始分割线
+    def execute(self, debug_mode=False, webhook_config=None):
+        """
+        执行任务流程
+        :param debug_mode: 是否调试模式
+        :param webhook_config: 特定的webhook配置（None表示执行所有webhook）
+        """
         separator = "=" * 100
         logger.info(separator)
         logger.info(f"启动任务：{os.path.basename(self.config['excel_path'])}")
+        
+        if webhook_config:
+            webhook_key = webhook_config["webhook"].split("key=")[-1][:8] + "..."
+            logger.info(f"Webhook：{webhook_key}")
         logger.info(separator)
+        
         start_time = time.time()
+        results_to_deliver = []
         
         try:
             with ExcelProcessor(
                 self.config["excel_path"], 
                 visible=debug_mode
             ) as excel:
-                # 核心流程
-
-                # 刷新数据
+                # 刷新数据（所有webhook共享一次刷新）
                 if not excel.refresh_data():
                     logger.warning("数据刷新失败，发送通知并终止任务")
-                    # 发送异常通知
                     self._send_wechat(
                         type="text",
                         data={
@@ -712,14 +637,13 @@ class ReportTask:
                     )
                     return
 
-                # 数据校验
+                # 数据校验（任务级别）
                 if self.config.get("data_check_enable", False):
                     check_sheet = self.config["data_check"]["check_sheet"]
                     check_range = self.config["data_check"]["check_range"]
                     check_frequency = self.config["data_check"]["check_frequency"]
                     if not excel.validate_date(check_sheet, check_range, check_frequency):
                         logger.warning("数据校验未通过，发送通知并终止任务")
-                        #发送异常通知
                         self._send_wechat(
                             type="text",
                             data={"content": self.config["data_check"]["notify_message"], 
@@ -730,45 +654,64 @@ class ReportTask:
                         )
                         return
                 
-                screenshots, failed_capture_configs = excel.capture_screenshots(
-                    self.config["capture_configs"],
-                    retry_times=3
-                )
-
-                if failed_capture_configs:
-                    failed_regions_text = "；".join(
-                        [
-                            f"{item.get('name', '未命名')}({item.get('sheet_name', '未知工作表')}:{item.get('range', '未知区域')})"
-                            for item in failed_capture_configs
-                        ]
+                # 确定要执行的webhook配置
+                target_webhooks = []
+                if webhook_config:
+                    target_webhooks = [webhook_config]
+                else:
+                    target_webhooks = self.config["webhooks"]
+                
+                # 为每个webhook执行截图
+                for wh_config in target_webhooks:
+                    logger.info(f"处理Webhook：{wh_config['webhook'].split('key=')[-1][:8]}...")
+                    
+                    screenshots, failed_capture_configs = excel.capture_screenshots(
+                        wh_config["capture_configs"],
+                        retry_times=3
                     )
-                    logger.error(
-                        f"截图在重试 3 次后仍失败，共 {len(failed_capture_configs)} 个区域：{failed_regions_text}"
-                    )
 
-                    # 截图最终失败：不发送图片/文件，清理已生成的临时截图并发送失败通知
-                    if screenshots:
-                        self._cleanup(screenshots)
-                    self._send_wechat(
-                        type="text",
-                        data={
-                            "content": (
-                                f"截图失败：重试3次后仍有 {len(failed_capture_configs)} 个区域未成功截图，"
-                                f"任务已终止。文件：{os.path.basename(self.config['excel_path'])}。"
-                                f"失败区域：{failed_regions_text}"
-                            )
-                        },
-                        description="截图失败通知",
-                        webhook=self._get_webhook()
-                    )
-                    return
+                    if failed_capture_configs:
+                        failed_regions_text = "；".join(
+                            [
+                                f"{item.get('name', '未命名')}({item.get('sheet_name', '未知工作表')}:{item.get('range', '未知区域')})"
+                                for item in failed_capture_configs
+                            ]
+                        )
+                        logger.error(
+                            f"截图在重试 3 次后仍失败，共 {len(failed_capture_configs)} 个区域：{failed_regions_text}"
+                        )
 
-            self._deliver_results(screenshots)
+                        if screenshots:
+                            self._cleanup(screenshots)
+                        self._send_wechat(
+                            type="text",
+                            data={
+                                "content": (
+                                    f"截图失败：重试3次后仍有 {len(failed_capture_configs)} 个区域未成功截图，"
+                                    f"任务已终止。文件：{os.path.basename(self.config['excel_path'])}。"
+                                    f"失败区域：{failed_regions_text}"
+                                )
+                            },
+                            description="截图失败通知",
+                            webhook=wh_config["webhook"]
+                        )
+                        continue
+
+                    results_to_deliver.append({
+                        "screenshots": screenshots,
+                        "webhook_config": wh_config
+                    })
+                
+                # 退出Excel上下文，释放文件
+                excel = None
+            
+            # Excel已关闭，现在发送文件
+            for result in results_to_deliver:
+                self._deliver_results(result["screenshots"], result["webhook_config"])
 
         except Exception as e:
             error_text = str(e)
             logger.error(f"任务异常：{error_text}", exc_info=debug_mode)
-            # 启动阶段失败也要有告警，便于第一时间排查（如 Excel COM/文件占用/权限问题）
             if "Excel 启动失败" in error_text:
                 self._send_wechat(
                     type="text",
@@ -785,13 +728,20 @@ class ReportTask:
         finally:
             elapsed_time = time.time() - start_time
             logger.info(f"任务耗时：{elapsed_time:.2f}s")
-            # 任务结束分割线
             separator = "=" * 100
             logger.info(separator)
-            print(separator)  # 同时输出到控制台
+            print(separator)
 
-    def _deliver_results(self, screenshots: list):
-        """结果交付（图片+文件）"""
+    def _deliver_results(self, screenshots: list, webhook_config: dict):
+        """根据webhook配置交付结果"""
+        webhook = webhook_config["webhook"]
+        send_file_enable = webhook_config.get("send_file_enable", 0)
+        
+        webhook_key = webhook.split("key=")[-1][:8]
+        logger.info(f"_deliver_results 被调用")
+        logger.info(f"  webhook: {webhook_key}...")
+        logger.info(f"  screenshots数量: {len(screenshots)}")
+        logger.info(f"  send_file_enable: {send_file_enable}")
 
         # 发送截图
         for img_path in screenshots:
@@ -799,75 +749,96 @@ class ReportTask:
                 type="image",
                 data=self._prepare_image(img_path),
                 description=f"截图 {os.path.basename(img_path)}",
-                webhook = self._get_webhook()
+                webhook=webhook
             )
 
         # 发送文件
-        if self.config.get("send_file_enable", False):
-            self._send_attachment()
+        if send_file_enable:
+            logger.info("send_file_enable 为真，准备发送文件")
+            self._send_attachment(webhook)
+        else:
+            logger.info("send_file_enable 为假，跳过发送文件")
+        
         # 清理临时文件
         self._cleanup(screenshots)
 
-    def _send_attachment(self):
+    def _send_attachment(self, webhook: str):
         """发送关联文件"""
         file_path = self.config.get("file_path") or self.config.get("excel_path")
-        if not file_path or not os.path.exists(file_path):
-            logger.warning("无效的文件路径，跳过发送")
+        logger.info(f"准备发送文件，file_path: {file_path}")
+        logger.info(f"send_file_enable 检查，webhook: {webhook.split('key=')[-1][:8]}...")
+        
+        if not file_path:
+            logger.warning("文件路径为空，跳过发送")
             return
+        if not os.path.exists(file_path):
+            logger.warning(f"文件不存在：{file_path}，跳过发送")
+            return
+        
+        logger.info(f"开始上传文件：{os.path.basename(file_path)}")
         try:
             with open(file_path, "rb") as f:
-                media_id = self._upload_file(f)
+                media_id = self._upload_file(f, webhook)
                 if media_id:
+                    logger.info(f"文件上传成功，media_id: {media_id}")
                     self._send_wechat(
                         type="file",
                         data={"media_id": media_id},
                         description=f"文件 {os.path.basename(file_path)}",
-                        webhook = self._get_webhook()
+                        webhook=webhook
                     )
+                else:
+                    logger.warning("文件上传失败，未获取到media_id")
         except Exception as e:
-            logger.error(f"文件发送失败：{str(e)}")
+            logger.error(f"文件发送异常：{str(e)}")
 
-    def _upload_file(self, file_obj) -> str:
+    def _upload_file(self, file_obj, webhook: str) -> str:
         """上传文件到临时素材"""
         try:
-            upload_url = self._get_upload_url()
+            upload_url = self._get_upload_url(webhook)
+            logger.info(f"上传URL: {upload_url}")
+            
             if not upload_url:
                 logger.warning("无效的上传URL，跳过文件上传")
                 return None
                 
-            logger.debug(f"正在上传文件：{file_obj.name}")
-            #文件路径改为文件名
+            logger.info(f"正在上传文件：{file_obj.name}")
             filename = os.path.basename(file_obj.name)
             name, ext = os.path.splitext(filename)
             filename_with_time = f"{name}_{datetime.now().strftime('%Y-%m-%d')}{ext}"
+            logger.info(f"上传文件名：{filename_with_time}")
             
-            # 上传文件
             response = requests.post(
                 upload_url,
                 files={"media": (filename_with_time, file_obj)},
                 timeout=15
             )
+            
+            logger.info(f"上传响应状态码: {response.status_code}")
+            logger.info(f"上传响应内容: {response.text}")
+            
             response.raise_for_status()
-            return response.json().get("media_id")
+            result = response.json()
+            logger.info(f"上传结果: {result}")
+            return result.get("media_id")
         except Exception as e:
             logger.error(f"文件上传异常：{str(e)}")
             return None
 
     def _prepare_image(self, img_path: str) -> dict:
         """准备图片数据"""
-        max_size = 2 * 1024 * 1024  # 2MB
-        min_width = 800  # 最小宽度，防止图片太小
-        min_height = 600 # 最小高度
+        max_size = 2 * 1024 * 1024
+        min_width = 800
+        min_height = 600
 
         with open(img_path, "rb") as f:
             img_data = f.read()
             if len(img_data) > max_size:
                 img = Image.open(io.BytesIO(img_data))
-                img = img.convert("RGB")  # 保证兼容性
+                img = img.convert("RGB")
                 buf = io.BytesIO()
                 quality = 85
 
-                # 先尝试只压缩质量
                 while True:
                     buf.seek(0)
                     img.save(buf, format="JPEG", quality=quality)
@@ -875,7 +846,6 @@ class ReportTask:
                         break
                     quality -= 5
 
-                # 如果还超出2M，再缩放尺寸
                 if buf.tell() > max_size:
                     width, height = img.size
                     while buf.tell() > max_size and width > min_width and height > min_height:
@@ -891,14 +861,17 @@ class ReportTask:
             "md5": hashlib.md5(img_data).hexdigest()
         }
 
-    def _send_wechat(self, type: str, data: dict, description: str, webhook):
+    def _send_wechat(self, type: str, data: dict, description: str, webhook: str):
         """发送到企业微信（带重试）"""
+        # 如果是测试模式，使用测试webhook
+        target_webhook = self.test_webhook if self.test_webhook else webhook
+        
         payload = {"msgtype": type, type: data}
         
         for attempt in range(1, self.retry_limit+1):
             try:
                 response = requests.post(
-                    webhook,
+                    target_webhook,
                     json=payload,
                     timeout=10
                 )
@@ -938,11 +911,9 @@ class TaskScheduler:
             if not isinstance(config.get("tasks"), list):
                 raise ValueError("配置文件格式错误")
 
-            # 获取错误webhook配置
             if error_webhook is None and config.get("error_webhook"):
                 error_webhook = config["error_webhook"]
 
-            # 获取上传URL模板
             upload_url_template = config.get("upload_url_template", "")
 
             logger.info(f"成功加载 {len(config['tasks'])} 个任务")
@@ -964,42 +935,65 @@ class TaskScheduler:
             logger.info("正在关闭调度器...")
 
     def _schedule_tasks(self):
-        """配置定时任务"""
-        for task in self.tasks:
-            for trigger_time in task.config["schedule"]["times"]:
-                schedule.every().day.at(trigger_time).do(
-                    self._run_task, task
-                )
-                logger.info(f"已安排任务：{trigger_time} → {os.path.basename(task.config['excel_path'])}")
+        """配置定时任务，为每个webhook独立调度"""
+        for task_idx, task in enumerate(self.tasks):
+            task_name = task.config.get("name", os.path.basename(task.config["excel_path"]))
+            
+            for webhook_idx, webhook_config in enumerate(task.config["webhooks"]):
+                webhook_key = webhook_config["webhook"].split("key=")[-1][:8]
+                for trigger_time in webhook_config["times"]:
+                    schedule.every().day.at(trigger_time).do(
+                        self._run_task, task, webhook_config
+                    )
+                    logger.info(f"已安排任务：{trigger_time} → [{task_idx}] {task_name} → webhook[{task_idx}-{webhook_idx}][{webhook_key}]")
 
-    def _run_task(self, task: ReportTask):
-        """串行执行任务"""
+    def _run_task(self, task: ReportTask, webhook_config: dict):
+        """串行执行任务（针对特定webhook配置）"""
         pythoncom.CoInitialize()
         try:
-            # 定时任务执行时添加分割线
             separator = "=" * 100
             logger.info("")
             logger.info(f"定时任务触发 - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
             logger.info(separator)
-            task.execute(self.debug_mode)
+            task.execute(self.debug_mode, webhook_config)
         finally:
             pythoncom.CoUninitialize()
 
-    def run_now(self, task_id: int = None):
+    def run_now(self, task_id: int = None, webhook_id: int = None):
         """立即执行任务（调试）"""
         logger.info("进入调试模式...")
+        
+        # 显示任务配置信息
+        logger.info("当前任务配置：")
+        for idx, task in enumerate(self.tasks):
+            task_name = os.path.basename(task.config["excel_path"])
+            logger.info(f"  [{idx}] {task_name}")
+            for wh_idx, wh_config in enumerate(task.config["webhooks"]):
+                wh_key = wh_config["webhook"].split("key=")[-1][:10]
+                logger.info(f"    - [{wh_idx}] webhook: {wh_key}..., times: {wh_config['times']}")
+        
+        if task_id is not None and webhook_id is not None:
+            logger.info(f"将执行任务 {task_id} 的 webhook {webhook_id}")
+        
         targets = self.tasks if task_id is None else [self.tasks[task_id]]
         
         for idx, task in enumerate(targets, 1):
             pythoncom.CoInitialize()
             try:
-                # 多个任务之间添加分割线
                 if len(targets) > 1:
                     separator = "=" * 100
                     logger.info("")
                     logger.info(f"任务 {idx}/{len(targets)}")
                     logger.info(separator)
-                task.execute(self.debug_mode)
+                
+                # 确定要执行的webhook
+                if task_id is not None and webhook_id is not None and len(targets) == 1:
+                    webhook_config = task.config["webhooks"][webhook_id]
+                    logger.info(f"执行指定的 webhook: {webhook_config['webhook'].split('key=')[-1][:10]}...")
+                    task.execute(self.debug_mode, webhook_config)
+                else:
+                    # 执行所有webhook配置
+                    task.execute(self.debug_mode)
             except Exception as e:
                 logger.error(f"执行异常：{str(e)}")
             finally:
@@ -1010,7 +1004,8 @@ def main():
     """命令行入口"""
     parser = argparse.ArgumentParser(description="Excel 自动化")
     parser.add_argument("--run-all", action="store_true", help="立即执行所有任务")
-    parser.add_argument("--task", type=int, help="执行指定序号的任务")
+    parser.add_argument("--task", type=str, help="执行指定序号的任务，格式：任务索引 或 任务索引-webhook索引")
+    parser.add_argument("--list", action="store_true", help="列出所有已配置的任务")
     parser.add_argument("--debug", action="store_true", help="开启调试模式")
     parser.add_argument("--test", action="store_true", help="启用测试webhook，发送到测试群")
     args = parser.parse_args()
@@ -1024,14 +1019,62 @@ def main():
                 test_webhook = config["test_webhook"]
 
     try:
+        if args.list:
+            print_task_list()
+            return
+        
+        task_id = None
+        webhook_id = None
+        if args.task:
+            if "-" in args.task:
+                task_id_str, webhook_id_str = args.task.split("-", 1)
+                task_id = int(task_id_str)
+                webhook_id = int(webhook_id_str)
+            else:
+                task_id = int(args.task)
+        
         scheduler = TaskScheduler("config.yml", debug=args.debug, test_webhook=test_webhook)
 
         if args.run_all or args.task is not None:
-            scheduler.run_now(args.task)
+            scheduler.run_now(task_id, webhook_id)
         else:
             scheduler.start()
     except Exception as e:
         logger.error(f"系统异常：{str(e)}", exc_info=args.debug)
         exit(1)
+
+def print_task_list():
+    """打印所有已配置的任务列表"""
+    try:
+        with open("config.yml", "r", encoding="utf-8") as f:
+            config = yaml.safe_load(f)
+        
+        tasks = config.get("tasks", [])
+        print("已配置的任务列表：")
+        print("-" * 100)
+        
+        for idx, task in enumerate(tasks):
+            task_name = task.get("name", os.path.basename(task["excel_path"]))
+            webhooks = task.get("webhooks", [])
+            
+            if webhooks:
+                for wh_idx, wh_config in enumerate(webhooks):
+                    times = wh_config.get("times", [])
+                    times_str = str(times).replace("'", '"')
+                    if wh_idx == 0:
+                        print(f"[{idx}] {task_name}")
+                        print(f"      webhook[{wh_idx}]: times={times_str}")
+                    else:
+                        print(f"      webhook[{wh_idx}]: times={times_str}")
+            else:
+                print(f"[{idx}] {task_name}")
+                print("      (无webhook配置)")
+        
+        print("-" * 100)
+        print(f"共 {len(tasks)} 个任务")
+        
+    except Exception as e:
+        logger.error(f"读取任务列表失败：{str(e)}")
+
 if __name__ == "__main__":
     main()
