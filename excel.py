@@ -45,9 +45,13 @@ def install_missing_dependencies():
                     '-i', 'https://pypi.tuna.tsinghua.edu.cn/simple',
                     '--timeout', '60'
                 ])
-                __import__(module_name)
-                print(f"成功安装：{module_name}")
-                installed.append(module_name)
+                try:
+                    __import__(module_name)
+                    print(f"成功安装：{module_name}")
+                    installed.append(module_name)
+                except ImportError:
+                    print(f"安装成功但导入失败：{module_name}")
+                    failed.append(module_name)
             except subprocess.CalledProcessError:
                 print(f"安装失败：{module_name}")
                 failed.append(module_name)
