@@ -33,8 +33,8 @@ tasks:
         name: "学员明细"
         times: ["08:35","10:35", "12:35", "14:35", "16:35", "18:35", "20:35", "22:00"]
         capture_configs:
-          - sheet_name: "sheet1"
-            range: A1
+          - sheet_name: "昨日课量备份"
+            range: E1
             name: "test_webhook1"
         send_file_enable: 1  # 可选，未配置默认为0
 
@@ -42,8 +42,8 @@ tasks:
         name: "学员明细自动播报"
         times: ["08:40","10:40", "12:40", "14:40", "16:40", "18:40", "20:40", "22:05"]
         capture_configs:
-          - sheet_name: "sheet2"
-            range: A1
+          - sheet_name: "昨日课量备份"
+            range: E1
             name: "test_webhook2"
         send_file_enable: 0  # 可选，未配置默认为0
 
@@ -83,3 +83,4 @@ tasks:
 #命令行任务列表与完成情况展示，任务列表。命令行发送测试参数
 # 刷新失败后将表格恢复到100%大小
 # 截取的临时图片统一存到程序目录下的指定文件夹中
+# 检测文件大小，配置了发送文件但大于20M的发送通知

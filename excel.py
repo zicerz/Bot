@@ -204,19 +204,22 @@ class ExcelProcessor:
         button_images_dir = os.path.join(os.path.dirname(__file__), 'button_images')
         os.makedirs(button_images_dir, exist_ok=True)
         
-        button_images = ['view_all_content.png', 'continue.png', 'ok.png']
+        # 自动扫描目录下所有图片文件
+        button_images = []
+        for filename in os.listdir(button_images_dir):
+            if filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp')):
+                button_images.append(filename)
         
         for button_image in button_images:
             button_path = os.path.join(button_images_dir, button_image)
-            if os.path.exists(button_path):
-                try:
-                    location = pyautogui.locateCenterOnScreen(button_path)
-                    if location:
-                        pyautogui.click(location)
-                        logger.info(f"检测到弹窗，已点击按钮：{button_image}")
-                        return True
-                except Exception as e:
-                    logger.debug(f"未检测到按钮 {button_image} ：{e}")
+            try:
+                location = pyautogui.locateCenterOnScreen(button_path)
+                if location:
+                    pyautogui.click(location)
+                    logger.info(f"检测到弹窗，已点击按钮：{button_image}")
+                    return True
+            except Exception as e:
+                logger.debug(f"未检测到按钮 {button_image} ：{e}")
         
         return False
 
