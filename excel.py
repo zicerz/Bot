@@ -607,19 +607,23 @@ class ReportTask:
             logger.warning(f"构建上传URL失败：{str(e)}")
             return ""
 
-    def execute(self, debug_mode=False, webhook_config=None):
+    def execute(self, debug_mode=False, webhook_configs=None):
         """
         执行任务流程
         :param debug_mode: 是否调试模式
-        :param webhook_config: 特定的webhook配置（None表示执行所有webhook）
+        :param webhook_configs: 特定的webhook配置（单个dict或列表，None表示执行所有webhook）
         """
         separator = "=" * 100
         logger.info(separator)
         logger.info(f"启动任务：{os.path.basename(self.config['excel_path'])}")
         
-        if webhook_config:
-            webhook_key = webhook_config["webhook"].split("key=")[-1][:8] + "..."
-            logger.info(f"Webhook：{webhook_key}")
+        if webhook_configs:
+            if isinstance(webhook_configs, list):
+                webhook_keys = [wh["webhook"].split("key=")[-1][:8] + "..." for wh in webhook_configs]
+                logger.info(f"Webhooks：{', '.join(webhook_keys)}")
+            else:
+                webhook_key = webhook_configs["webhook"].split("key=")[-1][:8] + "..."
+                logger.info(f"Webhook：{webhook_key}")
         logger.info(separator)
         
         start_time = time.time()
@@ -663,8 +667,11 @@ class ReportTask:
                 
                 # 确定要执行的webhook配置
                 target_webhooks = []
-                if webhook_config:
-                    target_webhooks = [webhook_config]
+                if webhook_configs:
+                    if isinstance(webhook_configs, list):
+                        target_webhooks = webhook_configs
+                    else:
+                        target_webhooks = [webhook_configs]
                 else:
                     target_webhooks = self.config["webhooks"]
                 
@@ -942,27 +949,54 @@ class TaskScheduler:
             logger.info("正在关闭调度器...")
 
     def _schedule_tasks(self):
-        """配置定时任务，为每个webhook独立调度"""
+        """配置定时任务，相同时间点的多个webhook合并为一个任务，只刷新一次"""
+        time_tasks = {}
+        
         for task_idx, task in enumerate(self.tasks):
             task_name = task.config.get("name", os.path.basename(task.config["excel_path"]))
             
             for webhook_idx, webhook_config in enumerate(task.config["webhooks"]):
                 webhook_key = webhook_config["webhook"].split("key=")[-1][:8]
                 for trigger_time in webhook_config["times"]:
-                    schedule.every().day.at(trigger_time).do(
-                        self._run_task, task, webhook_config
-                    )
-                    logger.info(f"已安排任务：{trigger_time} → [{task_idx}] {task_name} → webhook[{task_idx}-{webhook_idx}][{webhook_key}]")
+                    key = (task_idx, trigger_time)
+                    if key not in time_tasks:
+                        time_tasks[key] = {
+                            "task": task,
+                            "task_name": task_name,
+                            "trigger_time": trigger_time,
+                            "webhook_configs": []
+                        }
+                    time_tasks[key]["webhook_configs"].append({
+                        "idx": webhook_idx,
+                        "config": webhook_config,
+                        "key": webhook_key
+                    })
+        
+        for key, info in time_tasks.items():
+            task_idx, trigger_time = key
+            task = info["task"]
+            task_name = info["task_name"]
+            webhook_configs = [wh["config"] for wh in info["webhook_configs"]]
+            webhook_keys = [f"[{wh['idx']}][{wh['key']}]" for wh in info["webhook_configs"]]
+            
+            schedule.every().day.at(trigger_time).do(
+                self._run_task, task, webhook_configs
+            )
+            logger.info(f"已安排任务：{trigger_time} → [{task_idx}] {task_name} → webhooks:{','.join(webhook_keys)}")
 
-    def _run_task(self, task: ReportTask, webhook_config: dict):
-        """串行执行任务（针对特定webhook配置）"""
+    def _run_task(self, task: ReportTask, webhook_configs: list):
+        """串行执行任务（支持多个webhook配置共享一次刷新）"""
         pythoncom.CoInitialize()
         try:
             separator = "=" * 100
             logger.info("")
             logger.info(f"定时任务触发 - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
             logger.info(separator)
-            task.execute(self.debug_mode, webhook_config)
+            
+            webhook_keys = [wh["webhook"].split("key=")[-1][:8] for wh in webhook_configs]
+            logger.info(f"本次任务将发送到 {len(webhook_configs)} 个 webhook: {','.join(webhook_keys)}")
+            
+            task.execute(self.debug_mode, webhook_configs)
         finally:
             pythoncom.CoUninitialize()
 
