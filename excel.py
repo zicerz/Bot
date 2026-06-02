@@ -1008,7 +1008,8 @@ class TaskScheduler:
 
     def start(self):
         """启动调度服务"""
-        scheduler_lock_path = "scheduler.lock"
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        scheduler_lock_path = os.path.join(base_dir, "scheduler.lock")
         self._scheduler_lock = FileLock(scheduler_lock_path)
         
         if not self._scheduler_lock.acquire(timeout=5):
