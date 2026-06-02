@@ -12,6 +12,7 @@ import argparse
 import pythoncom
 import io
 import threading
+import portalocker
 
 # ---------------------------- 自动安装依赖 ----------------------------
 def install_missing_dependencies():
@@ -104,6 +105,61 @@ def setup_logging():
 
 logger = setup_logging()
 
+# ---------------------------- 文件锁工具类 ----------------------------
+class FileLock:
+    """文件锁工具类，用于防止并发访问"""
+    
+    def __init__(self, lock_file_path):
+        self.lock_file_path = lock_file_path
+        self.lock_file = None
+    
+    def acquire(self, timeout=300, poll_interval=2):
+        """获取文件锁
+        
+        :param timeout: 最大等待时间（秒），默认300秒
+        :param poll_interval: 轮询间隔（秒），默认2秒
+        :return: True表示获取锁成功，False表示超时
+        """
+        start_time = time.time()
+        
+        while time.time() - start_time < timeout:
+            try:
+                self.lock_file = open(self.lock_file_path, 'w')
+                portalocker.lock(self.lock_file, portalocker.LOCK_EX | portalocker.LOCK_NB)
+                logger.info(f"成功获取文件锁：{self.lock_file_path}")
+                return True
+            except (IOError, BlockingIOError, portalocker.LockException):
+                if self.lock_file:
+                    try:
+                        self.lock_file.close()
+                    except Exception:
+                        pass
+                    self.lock_file = None
+                remaining = int(timeout - (time.time() - start_time))
+                logger.info(f"文件锁被占用，等待中...（剩余 {remaining} 秒）")
+                time.sleep(poll_interval)
+        
+        logger.error(f"获取文件锁超时（{timeout}秒）：{self.lock_file_path}")
+        return False
+    
+    def release(self):
+        """释放文件锁"""
+        if self.lock_file:
+            try:
+                portalocker.unlock(self.lock_file)
+                self.lock_file.close()
+                logger.info(f"成功释放文件锁：{self.lock_file_path}")
+            except Exception as e:
+                logger.warning(f"释放文件锁异常：{str(e)}")
+            finally:
+                self.lock_file = None
+    
+    def __enter__(self):
+        return self
+    
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.release()
+
 try:
     import pyautogui
     logger.info("成功导入 pyautogui")
@@ -122,8 +178,15 @@ class ExcelProcessor:
         self.workbook = None
         self._refresh_timeout = 500
         self._dialog_watchdog_stop = threading.Event()
+        self._file_lock = None
 
     def __enter__(self):
+        lock_file_path = self.file_path + ".lock"
+        self._file_lock = FileLock(lock_file_path)
+        
+        if not self._file_lock.acquire(timeout=300):
+            raise RuntimeError(f"无法获取文件锁，超时退出：{self.file_path}")
+        
         max_retries = 3
         retry_delay = 2
         
@@ -246,6 +309,10 @@ class ExcelProcessor:
             pythoncom.CoUninitialize()
         except Exception as e:
             logger.debug(f"COM 反初始化异常：{str(e)}")
+
+        if self._file_lock:
+            self._file_lock.release()
+            self._file_lock = None
 
         logger.debug("Excel 进程已释放")
 
@@ -916,6 +983,7 @@ class TaskScheduler:
     def __init__(self, config_path: str, debug=False, test_webhook=None, error_webhook=None):
         self.tasks = self._load_tasks(config_path, test_webhook, error_webhook)
         self.debug_mode = debug
+        self._scheduler_lock = None
         logger.setLevel(logging.DEBUG if debug else logging.INFO)
 
     def _load_tasks(self, config_path: str, test_webhook=None, error_webhook=None) -> list:
@@ -940,6 +1008,13 @@ class TaskScheduler:
 
     def start(self):
         """启动调度服务"""
+        scheduler_lock_path = "scheduler.lock"
+        self._scheduler_lock = FileLock(scheduler_lock_path)
+        
+        if not self._scheduler_lock.acquire(timeout=5):
+            logger.error("检测到已有调度器实例在运行，退出...")
+            return
+        
         logger.info("启动任务调度器...")
         self._schedule_tasks()
         
@@ -949,6 +1024,10 @@ class TaskScheduler:
                 time.sleep(1)
         except KeyboardInterrupt:
             logger.info("正在关闭调度器...")
+        finally:
+            if self._scheduler_lock:
+                self._scheduler_lock.release()
+                self._scheduler_lock = None
 
     def _schedule_tasks(self):
         """配置定时任务，相同时间点的多个webhook合并为一个任务，只刷新一次"""
