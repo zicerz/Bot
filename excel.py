@@ -819,7 +819,7 @@ class ReportTask:
             logger.info(f"正在上传文件：{file_obj.name}")
             filename = os.path.basename(file_obj.name)
             name, ext = os.path.splitext(filename)
-            filename_with_time = f"{name}_{datetime.now().strftime('%Y-%m-%d')}{ext}"
+            filename_with_time = f"{name}_{datetime.now().strftime('%Y-%m-%d_%H%M%S')}{ext}"
             logger.info(f"上传文件名：{filename_with_time}")
             
             response = requests.post(
