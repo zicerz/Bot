@@ -688,6 +688,12 @@ class ReportTask:
             self.logger.warning(f"构建上传URL失败：{str(e)}")
             return ""
 
+    def _get_task_id_str(self, wh_idx: int = None) -> str:
+        """获取任务序号字符串（用于消息内容）"""
+        if wh_idx is not None and wh_idx >= 0:
+            return f"[任务{self.task_id}-{wh_idx}]"
+        return f"[任务{self.task_id}]"
+
     def execute(self, debug_mode=False, webhook_configs=None):
         """
         执行任务流程
@@ -718,11 +724,12 @@ class ReportTask:
             ) as excel:
                 # 刷新数据（所有webhook共享一次刷新）
                 if not excel.refresh_data():
-                    self.logger.warning("数据刷新失败，发送通知并终止任务")
+                    task_id_str = self._get_task_id_str()
+                    self.logger.warning(f"{task_id_str}数据刷新失败，发送通知并终止任务")
                     self._send_wechat(
                         type="text",
                         data={
-                            "content": f"数据刷新失败（超时或重试3次后仍有表格未刷新成功），请检查文件：{os.path.basename(self.config['excel_path'])}",
+                            "content": f"{task_id_str}数据刷新失败（超时或重试3次后仍有表格未刷新成功），请检查文件：{os.path.basename(self.config['excel_path'])}",
                             "mentioned_list": ["zhufuzhe"]
                         },
                         description="数据刷新失败通知",
@@ -736,10 +743,11 @@ class ReportTask:
                     check_range = self.config["data_check"]["check_range"]
                     check_frequency = self.config["data_check"]["check_frequency"]
                     if not excel.validate_date(check_sheet, check_range, check_frequency):
-                        self.logger.warning("数据校验未通过，发送通知并终止任务")
+                        task_id_str = self._get_task_id_str()
+                        self.logger.warning(f"{task_id_str}数据校验未通过，发送通知并终止任务")
                         self._send_wechat(
                             type="text",
-                            data={"content": self.config["data_check"]["notify_message"], 
+                            data={"content": f"{task_id_str}{self.config['data_check']['notify_message']}", 
                                 "mentioned_list": self.config["data_check"]["notify_users"]
                             },
                             description="数据校验失败通知",
@@ -802,17 +810,18 @@ class ReportTask:
                                 for item in failed_capture_configs
                             ]
                         )
+                        task_id_str = self._get_task_id_str(wh_idx)
                         wh_logger.error(
-                            f"截图在重试 3 次后仍失败，共 {len(failed_capture_configs)} 个区域：{failed_regions_text}"
+                            f"{task_id_str}截图在重试 3 次后仍失败，共 {len(failed_capture_configs)} 个区域：{failed_regions_text}"
                         )
 
                         if screenshots:
-                            self._cleanup(screenshots)
+                            self._cleanup(screenshots, wh_logger)
                         self._send_wechat(
                             type="text",
                             data={
                                 "content": (
-                                    f"截图失败：重试3次后仍有 {len(failed_capture_configs)} 个区域未成功截图，"
+                                    f"{task_id_str}截图失败：重试3次后仍有 {len(failed_capture_configs)} 个区域未成功截图，"
                                     f"任务已终止。文件：{os.path.basename(self.config['excel_path'])}。"
                                     f"失败区域：{failed_regions_text}"
                                 )
@@ -844,13 +853,14 @@ class ReportTask:
 
         except Exception as e:
             error_text = str(e)
-            self.logger.error(f"任务异常：{error_text}", exc_info=debug_mode)
+            task_id_str = self._get_task_id_str()
+            self.logger.error(f"{task_id_str}任务异常：{error_text}", exc_info=debug_mode)
             if "Excel 启动失败" in error_text:
                 self._send_wechat(
                     type="text",
                     data={
                         "content": (
-                            f"任务启动失败：{os.path.basename(self.config['excel_path'])}\n"
+                            f"{task_id_str}任务启动失败：{os.path.basename(self.config['excel_path'])}\n"
                             f"错误信息：{error_text}"
                         ),
                         "mentioned_list": ["zhufuzhe"]
