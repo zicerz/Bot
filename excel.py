@@ -533,8 +533,10 @@ class ExcelProcessor:
     def _generate_path(self, prefix: str) -> str:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
         task_tag = os.path.splitext(os.path.basename(self.file_path))[0]
+        screenshots_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "screenshots_temp")
+        os.makedirs(screenshots_dir, exist_ok=True)
         return os.path.join(
-            os.path.dirname(self.file_path),
+            screenshots_dir,
             f"{task_tag}_{prefix}_{timestamp}.png"
         )
 
