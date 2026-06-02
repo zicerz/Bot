@@ -12,7 +12,6 @@ import argparse
 import pythoncom
 import io
 import threading
-import portalocker
 
 # ---------------------------- 自动安装依赖 ----------------------------
 def install_missing_dependencies():
@@ -28,7 +27,8 @@ def install_missing_dependencies():
         'pygetwindow': 'pygetwindow',
         'pyrect': 'pyrect',
         'mouseinfo': 'mouseinfo',
-        'pytweening': 'pytweening'
+        'pytweening': 'pytweening',
+        'portalocker': 'portalocker'
     }
     
     installed = []
@@ -70,6 +70,7 @@ def install_missing_dependencies():
 install_missing_dependencies()
 
 from PIL import Image
+import portalocker
 
 # ---------------------------- 日志配置 ----------------------------
 def setup_logging():
