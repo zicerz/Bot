@@ -1082,8 +1082,10 @@ class TaskScheduler:
         finally:
             pythoncom.CoUninitialize()
 
-    def run_now(self, task_id: int = None, webhook_id: int = None):
-        """立即执行任务（调试）"""
+    def run_now(self, task_specs: list = None):
+        """立即执行任务（调试）
+        :param task_specs: 任务规格列表，每个元素为 (task_id, webhook_id) 元组
+        """
         logger.info("进入调试模式...")
         
         # 显示任务配置信息
@@ -1095,12 +1097,19 @@ class TaskScheduler:
                 wh_key = wh_config["webhook"].split("key=")[-1][:10]
                 logger.info(f"    - [{wh_idx}] webhook: {wh_key}..., times: {wh_config['times']}")
         
-        if task_id is not None and webhook_id is not None:
-            logger.info(f"将执行任务 {task_id} 的 webhook {webhook_id}")
+        # 确定要执行的任务列表
+        if not task_specs:
+            # 没有指定任务，执行所有任务
+            targets = [(task, None) for task in self.tasks]
+        else:
+            # 解析任务规格列表
+            targets = []
+            for task_id, webhook_id in task_specs:
+                task = self.tasks[task_id]
+                targets.append((task, webhook_id))
         
-        targets = self.tasks if task_id is None else [self.tasks[task_id]]
-        
-        for idx, task in enumerate(targets, 1):
+        # 执行任务
+        for idx, (task, webhook_id) in enumerate(targets, 1):
             pythoncom.CoInitialize()
             try:
                 if len(targets) > 1:
@@ -1110,12 +1119,15 @@ class TaskScheduler:
                     logger.info(separator)
                 
                 # 确定要执行的webhook
-                if task_id is not None and webhook_id is not None and len(targets) == 1:
+                if webhook_id is not None:
                     webhook_config = task.config["webhooks"][webhook_id]
-                    logger.info(f"执行指定的 webhook: {webhook_config['webhook'].split('key=')[-1][:10]}...")
+                    logger.info(f"执行任务 {task_specs[idx-1][0]} 的 webhook {webhook_id}: {webhook_config['webhook'].split('key=')[-1][:10]}...")
                     task.execute(self.debug_mode, webhook_config)
                 else:
                     # 执行所有webhook配置
+                    task_name = os.path.basename(task.config["excel_path"])
+                    if task_specs:
+                        logger.info(f"执行任务 {task_specs[idx-1][0]}: {task_name}")
                     task.execute(self.debug_mode)
             except Exception as e:
                 logger.error(f"执行异常：{str(e)}")
@@ -1127,7 +1139,7 @@ def main():
     """命令行入口"""
     parser = argparse.ArgumentParser(description="Excel 自动化")
     parser.add_argument("--run-all", action="store_true", help="立即执行所有任务")
-    parser.add_argument("--task", type=str, help="执行指定序号的任务，格式：任务索引 或 任务索引-webhook索引")
+    parser.add_argument("--task", type=str, nargs='*', help="执行指定序号的任务，格式：任务索引 或 任务索引-webhook索引，可指定多个")
     parser.add_argument("--list", action="store_true", help="列出所有已配置的任务")
     parser.add_argument("--debug", action="store_true", help="开启调试模式")
     parser.add_argument("--test", action="store_true", help="启用测试webhook，发送到测试群")
@@ -1146,20 +1158,22 @@ def main():
             print_task_list()
             return
         
-        task_id = None
-        webhook_id = None
+        task_specs = []
         if args.task:
-            if "-" in args.task:
-                task_id_str, webhook_id_str = args.task.split("-", 1)
-                task_id = int(task_id_str)
-                webhook_id = int(webhook_id_str)
-            else:
-                task_id = int(args.task)
+            for task_str in args.task:
+                if "-" in task_str:
+                    task_id_str, webhook_id_str = task_str.split("-", 1)
+                    task_id = int(task_id_str)
+                    webhook_id = int(webhook_id_str)
+                    task_specs.append((task_id, webhook_id))
+                else:
+                    task_id = int(task_str)
+                    task_specs.append((task_id, None))
         
         scheduler = TaskScheduler("config.yml", debug=args.debug, test_webhook=test_webhook)
 
         if args.run_all or args.task is not None:
-            scheduler.run_now(task_id, webhook_id)
+            scheduler.run_now(task_specs)
         else:
             scheduler.start()
     except Exception as e:
