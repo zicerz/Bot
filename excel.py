@@ -153,7 +153,7 @@ class FileLock:
         return False
     
     def release(self):
-        """释放文件锁"""
+        """释放文件锁并删除lock文件"""
         if self.lock_file:
             try:
                 portalocker.unlock(self.lock_file)
@@ -163,6 +163,14 @@ class FileLock:
                 logger.warning(f"释放文件锁异常：{str(e)}")
             finally:
                 self.lock_file = None
+        
+        # 删除lock文件，避免文件累积
+        if self.lock_file_path and os.path.exists(self.lock_file_path):
+            try:
+                os.remove(self.lock_file_path)
+                logger.debug(f"已删除lock文件：{self.lock_file_path}")
+            except Exception as e:
+                logger.warning(f"删除lock文件失败：{str(e)}")
     
     def __enter__(self):
         return self
@@ -192,7 +200,12 @@ class ExcelProcessor:
         self.logger = task_logger or logger
 
     def __enter__(self):
-        lock_file_path = self.file_path + ".lock"
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        locks_dir = os.path.join(base_dir, "locks")
+        os.makedirs(locks_dir, exist_ok=True)
+        
+        file_name = os.path.basename(self.file_path)
+        lock_file_path = os.path.join(locks_dir, file_name + ".lock")
         self._file_lock = FileLock(lock_file_path)
         
         if not self._file_lock.acquire(timeout=300):
@@ -1093,7 +1106,9 @@ class TaskScheduler:
     def start(self):
         """启动调度服务"""
         base_dir = os.path.dirname(os.path.abspath(__file__))
-        scheduler_lock_path = os.path.join(base_dir, "scheduler.lock")
+        locks_dir = os.path.join(base_dir, "locks")
+        os.makedirs(locks_dir, exist_ok=True)
+        scheduler_lock_path = os.path.join(locks_dir, "scheduler.lock")
         self._scheduler_lock = FileLock(scheduler_lock_path)
         
         if not self._scheduler_lock.acquire(timeout=5):
