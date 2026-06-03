@@ -231,8 +231,13 @@ class ExcelProcessor:
                 except Exception as e:
                     self.logger.warning(f"设置 DisplayAlerts 失败: {e}")
                 self.workbook = self.excel.Workbooks.Open(self.file_path)
+
+                self.logger.debug(f"等待5秒")
+                time.sleep(5)
                 
-                time.sleep(1)
+                if pyautogui:
+                    self.logger.debug(f"按下Esc键")
+                    pyautogui.press('esc')
                 
                 for sheet in self._iter_worksheets():
                     try:
