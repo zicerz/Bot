@@ -939,7 +939,7 @@ class ReportTask:
         self._cleanup(screenshots, task_logger)
 
     def _send_attachment(self, webhook: str, task_logger=None):
-        """发送关联文件"""
+        """发送关联文件（带重试）"""
         if task_logger is None:
             task_logger = self.logger
         file_path = self.config.get("file_path") or self.config.get("excel_path")
@@ -953,58 +953,78 @@ class ReportTask:
             task_logger.warning(f"文件不存在：{file_path}，跳过发送")
             return
         
-        task_logger.info(f"开始上传文件：{os.path.basename(file_path)}")
-        try:
-            with open(file_path, "rb") as f:
-                media_id = self._upload_file(f, webhook, task_logger)
-                if media_id:
-                    task_logger.info(f"文件上传成功，media_id: {media_id}")
-                    self._send_wechat(
-                        type="file",
-                        data={"media_id": media_id},
-                        description=f"文件 {os.path.basename(file_path)}",
-                        webhook=webhook,
-                        task_logger=task_logger
-                    )
-                else:
-                    task_logger.warning("文件上传失败，未获取到media_id")
-        except Exception as e:
-            task_logger.error(f"文件发送异常：{str(e)}")
+        max_retries = 3
+        for attempt in range(1, max_retries + 1):
+            task_logger.info(f"开始发送文件（第 {attempt}/{max_retries} 次尝试）：{os.path.basename(file_path)}")
+            try:
+                with open(file_path, "rb") as f:
+                    media_id = self._upload_file(f, webhook, task_logger)
+                    if media_id:
+                        task_logger.info(f"文件上传成功，media_id: {media_id}")
+                        self._send_wechat(
+                            type="file",
+                            data={"media_id": media_id},
+                            description=f"文件 {os.path.basename(file_path)}",
+                            webhook=webhook,
+                            task_logger=task_logger
+                        )
+                        task_logger.info(f"文件发送成功（第 {attempt}/{max_retries} 次尝试）")
+                        return
+                    else:
+                        task_logger.warning(f"文件上传失败，未获取到media_id（第 {attempt}/{max_retries} 次尝试）")
+            except Exception as e:
+                task_logger.error(f"文件发送异常（第 {attempt}/{max_retries} 次尝试）：{str(e)}")
+            
+            if attempt < max_retries:
+                task_logger.info(f"文件发送失败，{2 ** attempt}秒后重试...")
+                time.sleep(2 ** attempt)
+        
+        task_logger.error(f"文件发送最终失败，已重试 {max_retries} 次")
 
     def _upload_file(self, file_obj, webhook: str, task_logger=None) -> str:
-        """上传文件到临时素材"""
+        """上传文件到临时素材（带重试）"""
         if task_logger is None:
             task_logger = self.logger
-        try:
-            upload_url = self._get_upload_url(webhook)
-            task_logger.info(f"上传URL: {upload_url}")
-            
-            if not upload_url:
-                task_logger.warning("无效的上传上传，跳过文件上传")
-                return None
-                
-            task_logger.info(f"正在上传文件：{file_obj.name}")
-            filename = os.path.basename(file_obj.name)
-            name, ext = os.path.splitext(filename)
-            filename_with_time = f"{name}_{datetime.now().strftime('%Y-%m-%d_%H%M%S')}{ext}"
-            task_logger.info(f"上传文件名：{filename_with_time}")
-            
-            response = requests.post(
-                upload_url,
-                files={"media": (filename_with_time, file_obj)},
-                timeout=15
-            )
-            
-            task_logger.info(f"上传响应状态码: {response.status_code}")
-            task_logger.info(f"上传响应内容: {response.text}")
-            
-            response.raise_for_status()
-            result = response.json()
-            task_logger.info(f"上传结果: {result}")
-            return result.get("media_id")
-        except Exception as e:
-            task_logger.error(f"文件上传异常：{str(e)}")
+        
+        upload_url = self._get_upload_url(webhook)
+        task_logger.info(f"上传URL: {upload_url}")
+        
+        if not upload_url:
+            task_logger.warning("无效的上传URL，跳过文件上传")
             return None
+            
+        filename = os.path.basename(file_obj.name)
+        name, ext = os.path.splitext(filename)
+        filename_with_time = f"{name}_{datetime.now().strftime('%Y-%m-%d_%H%M%S')}{ext}"
+        task_logger.info(f"上传文件名：{filename_with_time}")
+        
+        max_retries = 3
+        for attempt in range(1, max_retries + 1):
+            try:
+                file_obj.seek(0)
+                task_logger.info(f"正在上传文件（第 {attempt}/{max_retries} 次尝试）：{file_obj.name}")
+                
+                response = requests.post(
+                    upload_url,
+                    files={"media": (filename_with_time, file_obj)},
+                    timeout=15
+                )
+                
+                task_logger.info(f"上传响应状态码: {response.status_code}")
+                task_logger.info(f"上传响应内容: {response.text}")
+                
+                response.raise_for_status()
+                result = response.json()
+                task_logger.info(f"上传结果: {result}")
+                return result.get("media_id")
+            except Exception as e:
+                task_logger.warning(f"文件上传失败（第 {attempt}/{max_retries} 次尝试）：{str(e)}")
+                if attempt < max_retries:
+                    time.sleep(2 ** attempt)
+                else:
+                    task_logger.error(f"文件上传最终失败：{str(e)}")
+        
+        return None
 
     def _prepare_image(self, img_path: str) -> dict:
         """准备图片数据"""
