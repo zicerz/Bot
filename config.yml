@@ -9,6 +9,12 @@ backup:
   enable: 0                       # 是否启用备份功能
   backup_dir: "./backups"         # 备份根目录路径（支持相对路径和绝对路径）
 
+# 重试配置（全局设置）
+retry:
+  enabled: 1                      # 是否启用任务级重试（1启用，0禁用）
+  delay_minutes: 10               # 重试间隔时间（分钟），默认10分钟
+  max_attempts: 3                 # 最大重试次数，默认3次
+
 # 机器人配置列表
 webhooks:
   奖励池名单发布:    "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=338f6d2c-3457-4b48-b7d2-fd60f4db98f4"
@@ -36,7 +42,7 @@ tasks:
     webhooks:
       - webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=833b098e-d8b8-43ea-bfdf-cade0d040fb6"
         name: "学员明细"
-        times: ["08:35","10:35", "12:35", "14:35", "16:35", "18:35", "20:35", "22:00"]
+        times: ["07:02", "09:02", "11:02", "13:02", "15:02", "17:02", "19:02", "21:02", "23:52"]
         capture_configs:
           - sheet_name: "昨日课量备份"
             range: E1
@@ -45,7 +51,7 @@ tasks:
 
       - webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=ee57f939-0e4e-4707-beba-422dae91538e"
         name: "学员明细自动播报"
-        times: ["08:40","10:40", "12:40", "14:40", "16:40", "18:40", "20:40", "22:05"]
+        times: ["07:30", "09:30", "11:30", "13:30", "15:30", "17:02", "19:02", "21:02", "23:52"]
         capture_configs:
           - sheet_name: "昨日课量备份"
             range: E1
@@ -88,7 +94,7 @@ tasks:
 
 
 
-# 每发送一次都将文件备份一次，文件名称为：文件名_日期_时间.xlsx
+
 # 每次刷新失败重试时都发发送通知，三次刷新失败后发送通知，并在10分钟后再次开始此任务，并发送通知，时间可配置   高优先级
 #命令行任务列表与完成情况展示，任务列表。
 # 检测文件大小，配置了发送文件但大于20M的发送通知

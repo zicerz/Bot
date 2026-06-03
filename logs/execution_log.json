@@ -1,0 +1,21 @@
+{
+  "2026-06-03": {
+    "tasks": {
+      "0": {
+        "name": "学员明细自动播报",
+        "executions": {
+          "17:15": "success",
+          "17:18": "success",
+          "17:22": {
+            "status": "success",
+            "manual": true
+          },
+          "17:23": {
+            "status": "success",
+            "manual": true
+          }
+        }
+      }
+    }
+  }
+}

@@ -6,13 +6,65 @@ import schedule
 import requests
 import base64
 import hashlib
-from datetime import datetime
+from datetime import datetime, timedelta
 import logging
 import argparse
 import pythoncom
 import io
 import threading
 import shutil
+import json
+
+# ---------------------------- 颜色输出常量 ----------------------------
+COLOR_GREEN = "\033[32m"
+COLOR_RED = "\033[91m"
+COLOR_GRAY = "\033[90m"
+COLOR_BLUE = "\033[34m"
+COLOR_RESET = "\033[0m"
+
+# ---------------------------- 执行记录管理 ----------------------------
+def get_execution_log_path():
+    """获取执行记录文件路径"""
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    log_dir = os.path.join(base_dir, "logs")
+    os.makedirs(log_dir, exist_ok=True)
+    return os.path.join(log_dir, "execution_log.json")
+
+def load_execution_log():
+    """加载执行记录"""
+    log_path = get_execution_log_path()
+    if os.path.exists(log_path):
+        try:
+            with open(log_path, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            return {}
+    return {}
+
+def save_execution_log(log_data):
+    """保存执行记录"""
+    log_path = get_execution_log_path()
+    with open(log_path, "w", encoding="utf-8") as f:
+        json.dump(log_data, f, indent=2, ensure_ascii=False)
+
+def record_execution(task_id: int, task_name: str, trigger_time: str, success: bool, manual=False):
+    """记录任务执行结果"""
+    log_data = load_execution_log()
+    today = datetime.now().strftime("%Y-%m-%d")
+    
+    if today not in log_data:
+        log_data[today] = {"tasks": {}}
+    
+    if str(task_id) not in log_data[today]["tasks"]:
+        log_data[today]["tasks"][str(task_id)] = {"name": task_name, "executions": {}}
+    
+    status = "success" if success else "failed"
+    log_data[today]["tasks"][str(task_id)]["executions"][trigger_time] = {
+        "status": status,
+        "manual": manual
+    }
+    
+    save_execution_log(log_data)
 
 # ---------------------------- 自动安装依赖 ----------------------------
 def install_missing_dependencies():
@@ -111,6 +163,9 @@ def setup_logging():
         handlers=handlers,
         force=True
     )
+    
+    logging.getLogger("PIL").setLevel(logging.WARNING)
+    logging.getLogger("PIL.PngImagePlugin").setLevel(logging.WARNING)
     
     logger = logging.getLogger("ExcelBot")
     logger = logging.LoggerAdapter(logger, {"task_id": "-"})
@@ -665,7 +720,7 @@ class ExcelProcessor:
 class ReportTask:
     """报表任务实例"""
 
-    def __init__(self, config: dict, test_webhook: str = None, error_webhook: str = None, upload_url_template: str = None, task_id: int = 0):
+    def __init__(self, config: dict, test_webhook: str = None, error_webhook: str = None, upload_url_template: str = None, task_id: int = 0, retry_config: dict = None):
         self.config = self._validate_config(config)
         self.retry_limit = 3
         self.error_webhook = error_webhook or "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=833b098e-d8b8-43ea-bfdf-cade0d040fb6"
@@ -673,6 +728,15 @@ class ReportTask:
         self.upload_url_template = upload_url_template
         self.task_id = task_id
         self.logger = get_task_logger(task_id)
+        
+        # 重试配置
+        self.retry_config = retry_config or {}
+        self.retry_enabled = self.retry_config.get("enabled", False)
+        self.retry_delay_minutes = self.retry_config.get("delay_minutes", 10)
+        self.retry_max_attempts = self.retry_config.get("max_attempts", 3)
+        self.retry_count = 0
+        # Webhook级别重试记录 {wh_idx: retry_count}
+        self.webhook_retry_counts = {}
 
     def _validate_config(self, config: dict) -> dict:
         """配置完整性检查，支持新的多webhook配置和旧的单webhook配置"""
@@ -743,22 +807,16 @@ class ReportTask:
         执行任务流程
         :param debug_mode: 是否调试模式
         :param webhook_configs: 特定的webhook配置（单个dict或列表，None表示执行所有webhook）
+        :return: True表示成功，False表示失败
         """
         separator = "=" * 100
         self.logger.info(separator)
         self.logger.info(f"启动任务：{os.path.basename(self.config['excel_path'])}")
-        
-        if webhook_configs:
-            if isinstance(webhook_configs, list):
-                webhook_keys = [wh["webhook"].split("key=")[-1][:8] + "..." for wh in webhook_configs]
-                self.logger.info(f"Webhooks：{', '.join(webhook_keys)}")
-            else:
-                webhook_key = webhook_configs["webhook"].split("key=")[-1][:8] + "..."
-                self.logger.info(f"Webhook：{webhook_key}")
         self.logger.info(separator)
         
         start_time = time.time()
         results_to_deliver = []
+        success = True
         
         try:
             with ExcelProcessor(
@@ -779,7 +837,8 @@ class ReportTask:
                         description="数据刷新失败通知",
                         webhook="https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=833b098e-d8b8-43ea-bfdf-cade0d040fb6"
                     )
-                    return
+                    success = False
+                    return success
 
                 # 数据校验（任务级别）
                 if self.config.get("data_check_enable", False):
@@ -797,7 +856,8 @@ class ReportTask:
                             description="数据校验失败通知",
                             webhook = self.config["data_check"]["warning_webhook"]
                         )
-                        return
+                        success = False
+                        return success
                 
                 # 确定要执行的webhook配置
                 target_webhooks = []
@@ -830,6 +890,7 @@ class ReportTask:
                         target_webhooks_with_indices.append((wh_config, wh_idx))
                 
                 # 为每个webhook执行截图
+                failed_webhooks = []  # 记录失败的webhook
                 for wh_config, wh_idx in target_webhooks_with_indices:
                     # 获取带主任务-子任务序号的logger
                     if wh_idx == -1:
@@ -874,6 +935,8 @@ class ReportTask:
                             webhook=wh_config["webhook"],
                             task_logger=wh_logger
                         )
+                        # 记录失败的webhook用于重试
+                        failed_webhooks.append((wh_config, wh_idx))
                         continue
 
                     results_to_deliver.append({
@@ -893,12 +956,13 @@ class ReportTask:
                     wh_logger = self.logger
                 else:
                     wh_logger = get_task_logger(f"{self.task_id}-{wh_idx}")
-                self._deliver_results(result["screenshots"], result["webhook_config"], wh_logger)
+                self.deliver_results(result["screenshots"], result["webhook_config"], wh_logger)
 
         except Exception as e:
             error_text = str(e)
             task_id_str = self._get_task_id_str()
             self.logger.error(f"{task_id_str}任务异常：{error_text}", exc_info=debug_mode)
+            success = False
             if "Excel 启动失败" in error_text:
                 self._send_wechat(
                     type="text",
@@ -921,8 +985,11 @@ class ReportTask:
             separator = "=" * 100
             self.logger.info(separator)
             print(separator)
+        
+        # 返回任务结果和失败的webhook列表
+        return success, failed_webhooks
 
-    def _deliver_results(self, screenshots: list, webhook_config: dict, task_logger=None):
+    def deliver_results(self, screenshots: list, webhook_config: dict, task_logger=None):
         """根据webhook配置交付结果"""
         if task_logger is None:
             task_logger = self.logger
@@ -1104,6 +1171,27 @@ class ReportTask:
                     task_logger.error(f"最终发送失败：{str(e)}")
                 time.sleep(2 ** attempt)
 
+    def send_final_failure_notification(self):
+        """发送最终失败通知（仅在第三次重试失败后发送）"""
+        task_id_str = self._get_task_id_str()
+        task_name = self.config.get("name", os.path.basename(self.config["excel_path"]))
+        
+        self._send_wechat(
+            type="text",
+            data={
+                "content": (
+                    f"{task_id_str}任务最终失败通知\n"
+                    f"任务名称：{task_name}\n"
+                    f"重试次数：{self.retry_count}次\n"
+                    f"文件路径：{self.config['excel_path']}\n"
+                    f"任务已达到最大重试次数（{self.retry_max_attempts}次），请检查文件或相关配置。"
+                ),
+                "mentioned_list": ["zhufuzhe"]
+            },
+            description="任务最终失败通知",
+            webhook=self.error_webhook
+        )
+
     def _cleanup(self, files: list, task_logger=None):
         """清理临时文件"""
         if task_logger is None:
@@ -1127,7 +1215,7 @@ class ReportTask:
         """
         backup_config = self.config.get("backup", {})
         if not backup_config.get("enable", False):
-            self.logger.debug("备份功能未启用")
+            self.logger.info("备份功能未启用")
             return
         
         source_path = self.config.get("file_path") or self.config.get("excel_path")
@@ -1189,15 +1277,19 @@ class TaskScheduler:
     """多任务调度引擎"""
 
     def __init__(self, config_path: str, debug=False, test_webhook=None, error_webhook=None):
-        self.tasks = self._load_tasks(config_path, test_webhook, error_webhook)
+        self.config_path = config_path
+        self.tasks = []
+        self.retry_config = {}
+        self._load_config(test_webhook, error_webhook)
         self.debug_mode = debug
         self._scheduler_lock = None
+        self._retry_jobs = {}  # 存储重试任务 {task_id: job}
         logger.setLevel(logging.DEBUG if debug else logging.INFO)
 
-    def _load_tasks(self, config_path: str, test_webhook=None, error_webhook=None) -> list:
+    def _load_config(self, test_webhook=None, error_webhook=None):
         """加载配置文件"""
         try:
-            with open(config_path, "r", encoding="utf-8") as f:
+            with open(self.config_path, "r", encoding="utf-8") as f:
                 config = yaml.safe_load(f)
 
             if not isinstance(config.get("tasks"), list):
@@ -1222,13 +1314,19 @@ class TaskScheduler:
                     print("请先创建备份目录或修改配置文件中的 backup_dir 路径")
                     exit(1)
             
-            tasks = []
+            # 加载重试配置
+            self.retry_config = config.get("retry", {})
+            if self.retry_config.get("enabled", 0) == 1:
+                logger.info(f"重试机制已启用，延迟时间：{self.retry_config.get('delay_minutes', 10)}分钟，最大重试次数：{self.retry_config.get('max_attempts', 3)}次")
+            else:
+                logger.info("重试机制已禁用")
+            
+            # 加载任务
             for idx, task in enumerate(config["tasks"]):
                 task["backup"] = backup_config
-                tasks.append(ReportTask(task, test_webhook, error_webhook, upload_url_template, idx))
+                self.tasks.append(ReportTask(task, test_webhook, error_webhook, upload_url_template, idx, self.retry_config))
             
-            logger.info(f"成功加载 {len(tasks)} 个任务")
-            return tasks
+            logger.info(f"成功加载 {len(self.tasks)} 个任务")
         except Exception as e:
             logger.error(f"配置加载失败：{str(e)}")
             raise
@@ -1295,36 +1393,226 @@ class TaskScheduler:
             )
             logger.info(f"已安排任务：{trigger_time} → [{task_idx}] {task_name} → webhooks:{','.join(webhook_keys)}")
 
-    def _run_task(self, task: ReportTask, webhook_configs: list):
+    def _run_task(self, task: ReportTask, webhook_configs: list, is_retry=False, retry_webhook_idx=None):
         """串行执行任务（支持多个webhook配置共享一次刷新）"""
         pythoncom.CoInitialize()
         try:
             separator = "=" * 100
             logger.info("")
-            logger.info(f"定时任务触发 - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+            if is_retry:
+                if retry_webhook_idx is not None:
+                    logger.info(f"Webhook重试任务触发 - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+                else:
+                    logger.info(f"重试任务触发 - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+            else:
+                logger.info(f"定时任务触发 - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
             logger.info(separator)
             
             webhook_keys = [wh["webhook"].split("key=")[-1][:8] for wh in webhook_configs]
             logger.info(f"本次任务将发送到 {len(webhook_configs)} 个 webhook: {','.join(webhook_keys)}")
             
-            task.execute(self.debug_mode, webhook_configs)
+            trigger_time = datetime.now().strftime("%H:%M")
+            
+            success, failed_webhooks = task.execute(self.debug_mode, webhook_configs)
+            
+            task_name = task.config.get("name", os.path.basename(task.config["excel_path"]))
+            record_execution(task.task_id, task_name, trigger_time, success, manual=False)
+            
+            # 如果是重试任务，成功后清除重试记录
+            if is_retry and success:
+                task.retry_count = 0
+                if retry_webhook_idx is not None and retry_webhook_idx in task.webhook_retry_counts:
+                    task.webhook_retry_counts[retry_webhook_idx] = 0
+                if task.task_id in self._retry_jobs:
+                    del self._retry_jobs[task.task_id]
+            
+            # 处理Webhook级重试（文件成功但部分Webhook失败）
+            if task.retry_enabled and failed_webhooks:
+                for wh_config, wh_idx in failed_webhooks:
+                    self._schedule_webhook_retry(task, wh_config, wh_idx)
+                # 如果有Webhook级重试，任务不算完全失败
+                if success is False:
+                    success = True  # 标记为部分成功，避免触发文件级重试
+            
+            # 如果是重试任务且有Webhook失败，重新调度这些Webhook的重试
+            if is_retry and retry_webhook_idx is not None and success:
+                # 清理该Webhook的重试计数
+                if retry_webhook_idx in task.webhook_retry_counts:
+                    task.webhook_retry_counts[retry_webhook_idx] = 0
+            
+            # 如果任务失败（文件级失败）且启用了重试机制，触发文件级重试
+            if not success and task.retry_enabled and not is_retry:
+                self._schedule_retry(task, webhook_configs)
+            
+        except Exception as e:
+            logger.error(f"任务执行异常：{str(e)}")
+            # 如果异常导致失败且启用了重试机制，触发重试
+            if task.retry_enabled and not is_retry:
+                self._schedule_retry(task, webhook_configs)
         finally:
             pythoncom.CoUninitialize()
+
+    def _schedule_retry(self, task: ReportTask, webhook_configs: list):
+        """调度重试任务"""
+        if not task.retry_enabled:
+            return
+        
+        task.retry_count += 1
+        max_attempts = task.retry_max_attempts
+        
+        if task.retry_count > max_attempts:
+            logger.info(f"任务 [{task.task_id}] 已达到最大重试次数 ({max_attempts}次)，不再重试")
+            task.send_final_failure_notification()
+            return
+        
+        # 计算重试时间
+        retry_delay_seconds = task.retry_delay_minutes * 60
+        retry_time = datetime.now() + timedelta(seconds=retry_delay_seconds)
+        retry_time_str = retry_time.strftime("%H:%M")
+        
+        # 检查重试时间是否与其他配置任务时间冲突
+        conflict_time = self._check_time_conflict(task, retry_time_str)
+        if conflict_time:
+            # 如果冲突，将重试时间延迟到配置任务执行时间之后（+1分钟）
+            logger.info(f"重试时间 {retry_time_str} 与配置任务时间 {conflict_time} 冲突，延迟到 {conflict_time} 之后")
+            # 解析冲突时间并延迟1分钟
+            conflict_hour, conflict_minute = map(int, conflict_time.split(":"))
+            retry_datetime = datetime.now().replace(hour=conflict_hour, minute=conflict_minute, second=0)
+            # 如果冲突时间已过，设置为下一天
+            if retry_datetime <= datetime.now():
+                retry_datetime += timedelta(days=1)
+            # 延迟1分钟
+            retry_datetime += timedelta(minutes=1)
+            retry_time_str = retry_datetime.strftime("%H:%M")
+            # 重新计算延迟时间
+            retry_delay_seconds = (retry_datetime - datetime.now()).total_seconds()
+            if retry_delay_seconds < 0:
+                retry_delay_seconds = 60  # 至少延迟1分钟
+        
+        task_name = task.config.get("name", os.path.basename(task.config["excel_path"]))
+        logger.info(f"任务 [{task.task_id}] {task_name} 失败，第 {task.retry_count}/{max_attempts} 次重试将在 {retry_time_str} 执行（延迟 {retry_delay_seconds/60:.1f} 分钟）")
+        
+        # 如果存在未执行的重试任务，先取消
+        if task.task_id in self._retry_jobs:
+            schedule.cancel_job(self._retry_jobs[task.task_id])
+            del self._retry_jobs[task.task_id]
+        
+        # 调度重试任务
+        job = schedule.every().day.at(retry_time_str).do(
+            self._run_task, task, webhook_configs, True
+        )
+        self._retry_jobs[task.task_id] = job
+
+    def _schedule_webhook_retry(self, task: ReportTask, wh_config: dict, wh_idx: int):
+        """调度Webhook级重试任务"""
+        if not task.retry_enabled:
+            return
+        
+        # 获取或初始化该Webhook的重试计数
+        if wh_idx not in task.webhook_retry_counts:
+            task.webhook_retry_counts[wh_idx] = 0
+        
+        task.webhook_retry_counts[wh_idx] += 1
+        max_attempts = task.retry_max_attempts
+        current_retry = task.webhook_retry_counts[wh_idx]
+        
+        if current_retry > max_attempts:
+            wh_key = wh_config["webhook"].split("key=")[-1][:8]
+            logger.info(f"任务 [{task.task_id}] Webhook[{wh_idx}]({wh_key}...) 已达到最大重试次数 ({max_attempts}次)，不再重试")
+            task.send_final_failure_notification()
+            return
+        
+        # 计算重试时间
+        retry_delay_seconds = task.retry_delay_minutes * 60
+        retry_time = datetime.now() + timedelta(seconds=retry_delay_seconds)
+        retry_time_str = retry_time.strftime("%H:%M")
+        
+        # 检查重试时间是否与其他配置任务时间冲突
+        conflict_time = self._check_time_conflict(task, retry_time_str)
+        if conflict_time:
+            logger.info(f"Webhook重试时间 {retry_time_str} 与配置任务时间 {conflict_time} 冲突，延迟到 {conflict_time} 之后")
+            conflict_hour, conflict_minute = map(int, conflict_time.split(":"))
+            retry_datetime = datetime.now().replace(hour=conflict_hour, minute=conflict_minute, second=0)
+            if retry_datetime <= datetime.now():
+                retry_datetime += timedelta(days=1)
+            retry_datetime += timedelta(minutes=1)
+            retry_time_str = retry_datetime.strftime("%H:%M")
+        
+        task_name = task.config.get("name", os.path.basename(task.config["excel_path"]))
+        wh_key = wh_config["webhook"].split("key=")[-1][:8]
+        logger.info(f"任务 [{task.task_id}] Webhook[{wh_idx}]({wh_key}...) 失败，第 {current_retry}/{max_attempts} 次重试将在 {retry_time_str} 执行（延迟 {retry_delay_seconds/60:.1f} 分钟）")
+        
+        # 使用唯一的key存储Webhook重试任务
+        webhook_retry_key = f"{task.task_id}_wh_{wh_idx}"
+        if webhook_retry_key in self._retry_jobs:
+            schedule.cancel_job(self._retry_jobs[webhook_retry_key])
+        
+        # 调度Webhook重试任务（只重试该Webhook）
+        job = schedule.every().day.at(retry_time_str).do(
+            self._run_webhook_retry, task, wh_config, wh_idx, True
+        )
+        self._retry_jobs[webhook_retry_key] = job
+
+    def _run_webhook_retry(self, task: ReportTask, wh_config: dict, wh_idx: int, is_retry=True):
+        """执行单个Webhook的重试"""
+        pythoncom.CoInitialize()
+        try:
+            wh_logger = get_task_logger(f"{task.task_id}-{wh_idx}")
+            separator = "=" * 100
+            logger.info("")
+            logger.info(f"Webhook重试任务执行 - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+            logger.info(separator)
+            
+            wh_key = wh_config["webhook"].split("key=")[-1][:8]
+            wh_logger.info(f"重试Webhook[{wh_idx}]({wh_key}...)")
+            
+            # 重新打开Excel并只刷新该Webhook的数据
+            with ExcelProcessor(task.config["excel_path"], visible=self.debug_mode, task_logger=wh_logger) as excel:
+                # 只对失败的Webhook执行截图
+                screenshots, failed_capture_configs = excel.capture_screenshots(
+                    wh_config["capture_configs"],
+                    retry_times=3
+                )
+                
+                if failed_capture_configs:
+                    # 截图仍然失败，触发下次重试
+                    wh_logger.error(f"Webhook[{wh_idx}] 重试截图仍失败，{len(failed_capture_configs)} 个区域未成功")
+                    self._schedule_webhook_retry(task, wh_config, wh_idx)
+                else:
+                    # 截图成功，发送结果
+                    wh_logger.info(f"Webhook[{wh_idx}] 重试截图成功")
+                    task.deliver_results(screenshots, wh_config, wh_logger)
+                    # 清理该Webhook的重试计数
+                    if wh_idx in task.webhook_retry_counts:
+                        task.webhook_retry_counts[wh_idx] = 0
+                    
+        except Exception as e:
+            wh_logger.error(f"Webhook[{wh_idx}] 重试异常：{str(e)}")
+            self._schedule_webhook_retry(task, wh_config, wh_idx)
+        finally:
+            pythoncom.CoUninitialize()
+
+    def _check_time_conflict(self, task: ReportTask, retry_time: str) -> str:
+        """检查重试时间是否与其他配置任务时间冲突"""
+        # 收集所有已配置的任务时间点
+        configured_times = set()
+        
+        for t in self.tasks:
+            for webhook_config in t.config["webhooks"]:
+                for time_str in webhook_config["times"]:
+                    configured_times.add(time_str)
+        
+        # 检查重试时间是否与配置时间冲突
+        if retry_time in configured_times:
+            return retry_time
+        
+        return ""
 
     def run_now(self, task_specs: list = None):
         """立即执行任务（调试）
         :param task_specs: 任务规格列表，每个元素为 (task_id, webhook_id) 元组
         """
         logger.info("进入调试模式...")
-        
-        # 显示任务配置信息
-        logger.info("当前任务配置：")
-        for idx, task in enumerate(self.tasks):
-            task_name = os.path.basename(task.config["excel_path"])
-            logger.info(f"  [{idx}] {task_name}")
-            for wh_idx, wh_config in enumerate(task.config["webhooks"]):
-                wh_key = wh_config["webhook"].split("key=")[-1][:10]
-                logger.info(f"    - [{wh_idx}] webhook: {wh_key}..., times: {wh_config['times']}")
         
         # 确定要执行的任务列表
         if not task_specs:
@@ -1347,19 +1635,26 @@ class TaskScheduler:
                     logger.info(f"任务 {idx}/{len(targets)}")
                     logger.info(separator)
                 
+                trigger_time = datetime.now().strftime("%H:%M")
+                task_name = task.config.get("name", os.path.basename(task.config["excel_path"]))
+                
                 # 确定要执行的webhook
                 if webhook_id is not None:
                     webhook_config = task.config["webhooks"][webhook_id]
                     logger.info(f"执行任务 {task_specs[idx-1][0]} 的 webhook {webhook_id}: {webhook_config['webhook'].split('key=')[-1][:10]}...")
-                    task.execute(self.debug_mode, webhook_config)
+                    success = task.execute(self.debug_mode, webhook_config)
                 else:
                     # 执行所有webhook配置
-                    task_name = os.path.basename(task.config["excel_path"])
                     if task_specs:
                         logger.info(f"执行任务 {task_specs[idx-1][0]}: {task_name}")
-                    task.execute(self.debug_mode)
+                    success = task.execute(self.debug_mode)
+                
+                record_execution(task.task_id, task_name, trigger_time, success, manual=True)
             except Exception as e:
                 logger.error(f"执行异常：{str(e)}")
+                if task_specs:
+                    task_name = task.config.get("name", os.path.basename(task.config["excel_path"]))
+                    record_execution(task.task_id, task_name, datetime.now().strftime("%H:%M"), False, manual=True)
             finally:
                 pythoncom.CoUninitialize()
 
@@ -1410,34 +1705,169 @@ def main():
         exit(1)
 
 def print_task_list():
-    """打印所有已配置的任务列表"""
+    """打印所有已配置的任务列表及当日执行情况"""
     try:
-        with open("config.yml", "r", encoding="utf-8") as f:
+        config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.yml")
+        with open(config_path, "r", encoding="utf-8") as f:
             config = yaml.safe_load(f)
         
+        backup_config = config.get("backup", {})
+        backup_enable = backup_config.get("enable", False)
+        backup_dir = backup_config.get("backup_dir", "./backups")
+        
+        execution_log = load_execution_log()
+        today = datetime.now().strftime("%Y-%m-%d")
+        current_time = datetime.now().strftime("%H:%M")
+        
+        today_executions = execution_log.get(today, {}).get("tasks", {})
+        
         tasks = config.get("tasks", [])
-        print("已配置的任务列表：")
-        print("-" * 100)
+        
+        print(f"{COLOR_BLUE}═══════════════════════════════════════════════════════════════════════════════════{COLOR_RESET}")
+        print(f"{COLOR_BLUE}                    任务列表 - {today} {current_time}{COLOR_RESET}")
+        print(f"{COLOR_BLUE}═══════════════════════════════════════════════════════════════════════════════════{COLOR_RESET}")
+        print()
+        
+        print(f"备份配置: enable={backup_enable}, backup_dir={backup_dir}")
+        print()
+        
+        total_success = 0
+        total_failed = 0
+        total_pending = 0
         
         for idx, task in enumerate(tasks):
             task_name = task.get("name", os.path.basename(task["excel_path"]))
             webhooks = task.get("webhooks", [])
             
-            if webhooks:
-                for wh_idx, wh_config in enumerate(webhooks):
-                    times = wh_config.get("times", [])
-                    times_str = str(times).replace("'", '"')
-                    if wh_idx == 0:
-                        print(f"[{idx}] {task_name}")
-                        print(f"      webhook[{wh_idx}]: times={times_str}")
+            all_times = []
+            for wh_config in webhooks:
+                all_times.extend(wh_config.get("times", []))
+            
+            all_times_set = set(all_times)
+            all_times = sorted(all_times_set)
+            
+            task_executions = today_executions.get(str(idx), {}).get("executions", {})
+            
+            success_count = 0
+            failed_count = 0
+            pending_count = 0
+            
+            manual_executions = []
+            
+            for t, execution in task_executions.items():
+                if t not in all_times_set:
+                    if isinstance(execution, dict):
+                        status = execution.get("status")
+                        manual = execution.get("manual", False)
                     else:
-                        print(f"      webhook[{wh_idx}]: times={times_str}")
-            else:
-                print(f"[{idx}] {task_name}")
-                print("      (无webhook配置)")
+                        status = execution
+                        manual = True
+                    
+                    if manual:
+                        status_icon = f"{COLOR_GREEN}✓{COLOR_RESET}" if status == "success" else f"{COLOR_RED}✗{COLOR_RESET}"
+                        manual_executions.append(f"{status_icon} {t}")
+            
+            import re
+            def get_display_length(s):
+                return len(re.sub(r'\x1b\[[0-9;]*m', '', s))
+            
+            all_lines = []
+            
+            for wh_idx, wh_config in enumerate(webhooks):
+                wh_name = wh_config.get("name", "")
+                wh_times = wh_config.get("times", [])
+                wh_times = sorted(wh_times)
+                
+                wh_line_parts = []
+                for t in wh_times:
+                    execution = task_executions.get(t)
+                    if isinstance(execution, dict):
+                        status = execution.get("status")
+                    else:
+                        status = execution
+                    
+                    if status == "success":
+                        wh_line_parts.append(f"{COLOR_GREEN}✓{COLOR_RESET} {t}")
+                        success_count += 1
+                    elif status == "failed":
+                        wh_line_parts.append(f"{COLOR_RED}✗{COLOR_RESET} {t}")
+                        failed_count += 1
+                    else:
+                        wh_line_parts.append(f"{COLOR_GRAY}○{COLOR_RESET} {t}")
+                        pending_count += 1
+                
+                prefix = f"Webhook[{wh_idx}]({wh_name}):" if wh_name else f"Webhook[{wh_idx}]:"
+                all_lines.append(prefix)
+                
+                for i in range(0, len(wh_line_parts), 5):
+                    chunk = wh_line_parts[i:i+5]
+                    line = "         " + ", ".join(chunk)
+                    all_lines.append(line)
+            
+            total_success += success_count
+            total_failed += failed_count
+            total_pending += pending_count
+            
+            total_count = len(all_times)
+            progress = success_count + failed_count
+            progress_percent = int(progress / total_count * 100) if total_count > 0 else 0
+            
+            progress_bar_length = 20
+            progress_bar = "█" * int(progress_percent / (100 / progress_bar_length)) + "░" * (progress_bar_length - int(progress_percent / (100 / progress_bar_length)))
+            
+            progress_line = f"进度: [{progress_bar}] {progress}/{total_count} ({progress_percent}%)"
+            
+            manual_parts = []
+            if manual_executions:
+                manual_parts.append("手动执行:")
+                
+                for i in range(0, len(manual_executions), 5):
+                    chunk = manual_executions[i:i+5]
+                    line = "         " + ", ".join(chunk)
+                    manual_parts.append(line)
+            
+            all_lines = [progress_line] + all_lines + manual_parts
+            
+            box_width = 80
+            content_width = box_width - 4
+            
+            print(f"[{idx}] {task_name}")
+            print("    ┌" + "─" * content_width + "┐")
+            
+            for line in all_lines:
+                display_len = get_display_length(line)
+                if display_len <= content_width:
+                    padding = " " * (content_width - display_len)
+                    print(f"    │{line}{padding}│")
+                else:
+                    current_line = line
+                    current_display_len = display_len
+                    while current_display_len > content_width:
+                        split_idx = content_width
+                        part_line = current_line[:split_idx]
+                        part_display_len = get_display_length(part_line)
+                        while part_display_len > content_width:
+                            split_idx -= 1
+                            part_line = current_line[:split_idx]
+                            part_display_len = get_display_length(part_line)
+                        padding = " " * (content_width - part_display_len)
+                        print(f"    │{part_line}{padding}│")
+                        current_line = current_line[split_idx:]
+                        current_display_len = get_display_length(current_line)
+                    if current_display_len > 0:
+                        padding = " " * (content_width - current_display_len)
+                        print(f"    │{current_line}{padding}│")
+            
+            print("    └" + "─" * content_width + "┘")
+            print()
         
-        print("-" * 100)
-        print(f"共 {len(tasks)} 个任务")
+        print(f"{COLOR_BLUE}═══════════════════════════════════════════════════════════════════════════════════{COLOR_RESET}")
+        
+        total_executed = total_success + total_failed
+        total_all = total_executed + total_pending
+        overall_rate = (total_executed / total_all * 100) if total_all > 0 else 0
+        
+        print(f"总任务: {len(tasks)}  │  总时间点: {total_all}  │  {COLOR_GREEN}✓{COLOR_RESET} 成功: {total_success}  │  {COLOR_RED}✗{COLOR_RESET} 失败: {total_failed}  │  {COLOR_GRAY}○{COLOR_RESET} 未执行: {total_pending}  │  执行率: {overall_rate:.1f}%")
         
     except Exception as e:
         logger.error(f"读取任务列表失败：{str(e)}")
