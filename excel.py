@@ -12,6 +12,7 @@ import argparse
 import pythoncom
 import io
 import threading
+import shutil
 
 # ---------------------------- 自动安装依赖 ----------------------------
 def install_missing_dependencies():
@@ -73,6 +74,13 @@ from PIL import Image
 import portalocker
 
 # ---------------------------- 日志配置 ----------------------------
+class TaskIDFilter(logging.Filter):
+    """日志过滤器：确保task_id始终存在"""
+    def filter(self, record):
+        if not hasattr(record, 'task_id'):
+            record.task_id = '-'
+        return True
+
 def setup_logging():
     """配置日志系统：按年/月分级目录，每日独立日志文件"""
     base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -96,9 +104,10 @@ def setup_logging():
     
     for handler in handlers:
         handler.setFormatter(formatter)
+        handler.addFilter(TaskIDFilter())
     
     logging.basicConfig(
-        level=logging.INFO,
+        level=logging.DEBUG,
         handlers=handlers,
         force=True
     )
@@ -906,6 +915,9 @@ class ReportTask:
         finally:
             elapsed_time = time.time() - start_time
             self.logger.info(f"任务耗时：{elapsed_time:.2f}s")
+            
+            self._backup_file()
+            
             separator = "=" * 100
             self.logger.info(separator)
             print(separator)
@@ -1103,6 +1115,75 @@ class ReportTask:
             except Exception as e:
                 task_logger.warning(f"文件清理失败：{str(e)}")
 
+    def _backup_file(self):
+        """
+        在任务结束后备份文件
+        目录结构：backup_dir/YYYY-MM/文件名_扩展名/文件名_YYYYMMDD_HHMMSS.扩展名
+        
+        设计说明：
+        - 年月目录：按 YYYY-MM 格式组织，便于按时间查找
+        - 文件目录：采用 文件名_扩展名 格式，避免同文件名不同扩展名冲突
+        - 备份文件名：文件名_日期时间.扩展名，确保唯一性
+        """
+        backup_config = self.config.get("backup", {})
+        if not backup_config.get("enable", False):
+            self.logger.debug("备份功能未启用")
+            return
+        
+        source_path = self.config.get("file_path") or self.config.get("excel_path")
+        if not source_path or not os.path.exists(source_path):
+            self.logger.warning(f"源文件不存在，跳过备份：{source_path}")
+            return
+        
+        backup_dir = backup_config.get("backup_dir", "./backups")
+        if not os.path.isabs(backup_dir):
+            backup_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), backup_dir))
+        
+        now = datetime.now()
+        year_month = now.strftime("%Y-%m")
+        file_name = os.path.basename(source_path)
+        file_base, file_ext = os.path.splitext(file_name)
+        ext_without_dot = file_ext[1:].lower() if file_ext else ""
+        
+        month_dir = os.path.join(backup_dir, year_month)
+        file_dir = os.path.join(month_dir, f"{file_base}_{ext_without_dot}")
+        
+        try:
+            os.makedirs(file_dir)
+            
+            timestamp = now.strftime("%Y%m%d_%H%M%S")
+            backup_filename = f"{file_base}_{timestamp}{file_ext}"
+            backup_path = os.path.join(file_dir, backup_filename)
+            
+            shutil.copy2(source_path, backup_path)
+            
+            self.logger.info(f"文件备份成功：{backup_path}")
+            return backup_path
+        except FileExistsError:
+            timestamp = now.strftime("%Y%m%d_%H%M%S")
+            backup_filename = f"{file_base}_{timestamp}{file_ext}"
+            backup_path = os.path.join(file_dir, backup_filename)
+            
+            shutil.copy2(source_path, backup_path)
+            
+            self.logger.info(f"文件备份成功：{backup_path}")
+            return backup_path
+        except Exception as e:
+            error_msg = f"文件备份失败：{str(e)}"
+            self.logger.error(error_msg)
+            
+            self._send_wechat(
+                type="text",
+                data={
+                    "content": f"[{self.task_id}]文件备份失败\n文件：{file_name}\n错误：{str(e)}",
+                    "mentioned_list": ["zhufuzhe"]
+                },
+                description="文件备份失败通知",
+                webhook=self.error_webhook
+            )
+            
+            return None
+
 # ---------------------------- 任务调度器 ----------------------------
 class TaskScheduler:
     """多任务调度引擎"""
@@ -1126,9 +1207,28 @@ class TaskScheduler:
                 error_webhook = config["error_webhook"]
 
             upload_url_template = config.get("upload_url_template", "")
-
-            logger.info(f"成功加载 {len(config['tasks'])} 个任务")
-            return [ReportTask(task, test_webhook, error_webhook, upload_url_template, idx) for idx, task in enumerate(config["tasks"])]
+            
+            backup_config = config.get("backup", {})
+            
+            if backup_config.get("enable", False):
+                backup_dir = backup_config.get("backup_dir", "./backups")
+                if not os.path.isabs(backup_dir):
+                    backup_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), backup_dir))
+                
+                if not os.path.exists(backup_dir):
+                    error_msg = f"备份目录不存在：{backup_dir}"
+                    logger.error(error_msg)
+                    print(f"错误：{error_msg}")
+                    print("请先创建备份目录或修改配置文件中的 backup_dir 路径")
+                    exit(1)
+            
+            tasks = []
+            for idx, task in enumerate(config["tasks"]):
+                task["backup"] = backup_config
+                tasks.append(ReportTask(task, test_webhook, error_webhook, upload_url_template, idx))
+            
+            logger.info(f"成功加载 {len(tasks)} 个任务")
+            return tasks
         except Exception as e:
             logger.error(f"配置加载失败：{str(e)}")
             raise
