@@ -13,6 +13,10 @@
           "17:23": {
             "status": "success",
             "manual": true
+          },
+          "18:33": {
+            "status": "success",
+            "manual": true
           }
         }
       }

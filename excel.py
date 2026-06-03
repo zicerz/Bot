@@ -956,7 +956,6 @@ class ReportTask:
                     wh_logger = self.logger
                 else:
                     wh_logger = get_task_logger(f"{self.task_id}-{wh_idx}")
-                self.deliver_results(result["screenshots"], result["webhook_config"], wh_logger)
 
         except Exception as e:
             error_text = str(e)
