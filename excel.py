@@ -320,6 +320,11 @@ class ExcelProcessor:
 
         if self.workbook is not None:
             try:
+                self.workbook.Worksheets(1).Activate()
+            except Exception as e:
+                self.logger.debug(f"激活第一个工作表失败：{str(e)}")
+            
+            try:
                 self.workbook.Close(SaveChanges=True)
             except Exception as e:
                 self.logger.warning(f"关闭工作簿异常：{str(e)}")
