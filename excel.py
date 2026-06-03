@@ -460,9 +460,9 @@ class ExcelProcessor:
                             try:
                                 if sheet.AutoFilter is not None:
                                     sheet.AutoFilter.ApplyFilter()
-                                    self.logger.debug(f"重新应用筛选：{sheet.Name}")
+                                    self.logger.info(f"重新应用筛选：{sheet.Name}")
                             except Exception as e:
-                                self.logger.debug(f"应用筛选/排序失败：{sheet.Name} - {e}")
+                                self.logger.warning(f"应用筛选/排序失败：{sheet.Name} - {e}")
                         self._stop_dialog_watchdog()
                         for sheet in self._iter_worksheets():
                             try:
@@ -470,10 +470,10 @@ class ExcelProcessor:
                                     for i in range(1, sheet.PivotTables().Count + 1):
                                         pt = sheet.PivotTables(i)
                                         pt.RefreshTable()
-                                        self.logger.debug(f"刷新数据透视表：{sheet.Name} - {pt.Name}")
+                                        self.logger.info(f"刷新数据透视表：{sheet.Name} - {pt.Name}")
                                         time.sleep(1)
                             except Exception as e:
-                                self.logger.debug(f"刷新数据透视表失败：{sheet.Name} - {e}")
+                                self.logger.warning(f"刷新数据透视表失败：{sheet.Name} - {e}")
 
                         return True
                     else:
@@ -492,9 +492,20 @@ class ExcelProcessor:
                         try:
                             if sheet.AutoFilter is not None:
                                 sheet.AutoFilter.ApplyFilter()
-                                self.logger.debug(f"重新应用筛选：{sheet.Name}")
+                                self.logger.info(f"重新应用筛选：{sheet.Name}")
                         except Exception as e:
-                            self.logger.debug(f"应用筛选/排序失败：{sheet.Name} - {e}")
+                            self.logger.warning(f"应用筛选/排序失败：{sheet.Name} - {e}")
+                    self._stop_dialog_watchdog()
+                    for sheet in self._iter_worksheets():
+                        try:
+                            if hasattr(sheet, "PivotTables"):
+                                for i in range(1, sheet.PivotTables().Count + 1):
+                                    pt = sheet.PivotTables(i)
+                                    pt.RefreshTable()
+                                    self.logger.info(f"刷新数据透视表：{sheet.Name} - {pt.Name}")
+                                    time.sleep(1)
+                        except Exception as e:
+                            self.logger.warning(f"刷新数据透视表失败：{sheet.Name} - {e}")
                     return True
             
             self.logger.warning("刷新循环异常结束")
