@@ -838,7 +838,7 @@ class ReportTask:
                         webhook="https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=833b098e-d8b8-43ea-bfdf-cade0d040fb6"
                     )
                     success = False
-                    return success
+                    return success, []
 
                 # 数据校验（任务级别）
                 if self.config.get("data_check_enable", False):
@@ -857,7 +857,7 @@ class ReportTask:
                             webhook = self.config["data_check"]["warning_webhook"]
                         )
                         success = False
-                        return success
+                        return success, []
                 
                 # 确定要执行的webhook配置
                 target_webhooks = []
