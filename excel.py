@@ -963,6 +963,13 @@ class ReportTask:
             task_id_str = self._get_task_id_str()
             self.logger.error(f"{task_id_str}任务异常：{error_text}", exc_info=debug_mode)
             success = False
+            
+            # 清理已生成的截图文件
+            if results_to_deliver:
+                for result in results_to_deliver:
+                    if result.get("screenshots"):
+                        self._cleanup(result["screenshots"], self.logger)
+            
             if "Excel 启动失败" in error_text:
                 self._send_wechat(
                     type="text",
