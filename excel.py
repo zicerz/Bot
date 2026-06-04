@@ -802,11 +802,12 @@ class ReportTask:
             return f"[任务{self.task_id}-{wh_idx}]"
         return f"[任务{self.task_id}]"
 
-    def execute(self, debug_mode=False, webhook_configs=None):
+    def execute(self, debug_mode=False, webhook_configs=None, is_manual=False):
         """
         执行任务流程
         :param debug_mode: 是否调试模式
         :param webhook_configs: 特定的webhook配置（单个dict或列表，None表示执行所有webhook）
+        :param is_manual: 是否手动执行（用于决定是否立即发送失败通知）
         :return: True表示成功，False表示失败
         """
         separator = "=" * 100
@@ -827,16 +828,23 @@ class ReportTask:
                 # 刷新数据（所有webhook共享一次刷新）
                 if not excel.refresh_data():
                     task_id_str = self._get_task_id_str()
-                    self.logger.warning(f"{task_id_str}数据刷新失败，发送通知并终止任务")
-                    self._send_wechat(
-                        type="text",
-                        data={
-                            "content": f"{task_id_str}数据刷新失败（超时或重试3次后仍有表格未刷新成功），请检查文件：{os.path.basename(self.config['excel_path'])}",
-                            "mentioned_list": ["zhufuzhe"]
-                        },
-                        description="数据刷新失败通知",
-                        webhook="https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=833b098e-d8b8-43ea-bfdf-cade0d040fb6"
-                    )
+                    self.logger.warning(f"{task_id_str}数据刷新失败")
+                    
+                    # 判断是否需要立即发送通知
+                    # 条件：(重试未启用) 或 (手动执行)
+                    should_notify = not self.retry_enabled or is_manual
+                    
+                    if should_notify:
+                        self._send_wechat(
+                            type="text",
+                            data={
+                                "content": f"{task_id_str}数据刷新失败（超时或重试3次后仍有表格未刷新成功），请检查文件：{os.path.basename(self.config['excel_path'])}",
+                                "mentioned_list": ["zhufuzhe"]
+                            },
+                            description="数据刷新失败通知",
+                            webhook="https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=833b098e-d8b8-43ea-bfdf-cade0d040fb6"
+                        )
+                    
                     success = False
                     return success, []
 
@@ -1650,12 +1658,12 @@ class TaskScheduler:
                 if webhook_id is not None:
                     webhook_config = task.config["webhooks"][webhook_id]
                     logger.info(f"执行任务 {task_specs[idx-1][0]} 的 webhook {webhook_id}: {webhook_config['webhook'].split('key=')[-1][:10]}...")
-                    success = task.execute(self.debug_mode, webhook_config)
+                    success = task.execute(self.debug_mode, webhook_config, is_manual=True)
                 else:
                     # 执行所有webhook配置
                     if task_specs:
                         logger.info(f"执行任务 {task_specs[idx-1][0]}: {task_name}")
-                    success = task.execute(self.debug_mode)
+                    success = task.execute(self.debug_mode, is_manual=True)
                 
                 record_execution(task.task_id, task_name, trigger_time, success, manual=True)
             except Exception as e:

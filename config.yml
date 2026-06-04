@@ -12,7 +12,7 @@ backup:
 # 重试配置（全局设置）
 retry:
   enabled: 1                      # 是否启用任务级重试（1启用，0禁用）
-  delay_minutes: 10               # 重试间隔时间（分钟），默认10分钟
+  delay_minutes: 5               # 重试间隔时间（分钟），默认10分钟
   max_attempts: 3                 # 最大重试次数，默认3次
 
 # 机器人配置列表
