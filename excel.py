@@ -956,6 +956,7 @@ class ReportTask:
                     wh_logger = self.logger
                 else:
                     wh_logger = get_task_logger(f"{self.task_id}-{wh_idx}")
+                self.deliver_results(result["screenshots"], result["webhook_config"], wh_logger)
 
         except Exception as e:
             error_text = str(e)
@@ -979,7 +980,8 @@ class ReportTask:
             elapsed_time = time.time() - start_time
             self.logger.info(f"任务耗时：{elapsed_time:.2f}s")
             
-            self._backup_file()
+            if success:
+                self._backup_file()
             
             separator = "=" * 100
             self.logger.info(separator)
@@ -1694,6 +1696,17 @@ def main():
                     task_specs.append((task_id, None))
         
         scheduler = TaskScheduler("config.yml", debug=args.debug, test_webhook=test_webhook)
+        
+        with open("config.yml", "r", encoding="utf-8") as f:
+            config = yaml.safe_load(f)
+            backup_config = config.get("backup", {})
+            backup_enable = backup_config.get("enable", 0)
+            backup_dir = backup_config.get("backup_dir", "./backups")
+            if not os.path.isabs(backup_dir):
+                backup_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), backup_dir))
+            
+            print(f"备份配置: enable={backup_enable}, backup_dir={backup_dir}")
+            print()
 
         if args.run_all or args.task is not None:
             scheduler.run_now(task_specs)

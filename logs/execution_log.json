@@ -17,6 +17,44 @@
           "18:33": {
             "status": "success",
             "manual": true
+          },
+          "18:46": {
+            "status": "success",
+            "manual": true
+          },
+          "18:49": {
+            "status": "success",
+            "manual": true
+          }
+        }
+      },
+      "1": {
+        "name": "往期顺次",
+        "executions": {
+          "18:46": {
+            "status": "success",
+            "manual": true
+          },
+          "18:49": {
+            "status": "failed",
+            "manual": true
+          }
+        }
+      }
+    }
+  },
+  "2026-06-04": {
+    "tasks": {
+      "0": {
+        "name": "学员明细自动播报",
+        "executions": {
+          "10:12": {
+            "status": "success",
+            "manual": true
+          },
+          "10:18": {
+            "status": "success",
+            "manual": true
           }
         }
       }
