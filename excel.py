@@ -302,6 +302,9 @@ class ExcelProcessor:
                 if pyautogui:
                     self.logger.debug(f"按下Esc键")
                     pyautogui.press('esc')
+
+                self.logger.debug(f"等待3秒")
+                time.sleep(3)
                 
                 for sheet in self._iter_worksheets():
                     try:
