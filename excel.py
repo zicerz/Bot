@@ -1045,9 +1045,12 @@ class ReportTask:
         """发送关联文件（带重试）"""
         if task_logger is None:
             task_logger = self.logger
+        
+        target_webhook = self.test_webhook if self.test_webhook else webhook
+        
         file_path = self.config.get("file_path") or self.config.get("excel_path")
         task_logger.info(f"准备发送文件，file_path: {file_path}")
-        task_logger.info(f"send_file_enable 检查，webhook: {webhook.split('key=')[-1][:8]}...")
+        task_logger.info(f"send_file_enable 检查，webhook: {target_webhook.split('key=')[-1][:8]}...")
         
         if not file_path:
             task_logger.warning("文件路径为空，跳过发送")
@@ -1061,14 +1064,14 @@ class ReportTask:
             task_logger.info(f"开始发送文件（第 {attempt}/{max_retries} 次尝试）：{os.path.basename(file_path)}")
             try:
                 with open(file_path, "rb") as f:
-                    media_id = self._upload_file(f, webhook, task_logger)
+                    media_id = self._upload_file(f, target_webhook, task_logger)
                     if media_id:
                         task_logger.info(f"文件上传成功，media_id: {media_id}")
                         self._send_wechat(
                             type="file",
                             data={"media_id": media_id},
                             description=f"文件 {os.path.basename(file_path)}",
-                            webhook=webhook,
+                            webhook=target_webhook,
                             task_logger=task_logger
                         )
                         task_logger.info(f"文件发送成功（第 {attempt}/{max_retries} 次尝试）")
@@ -1443,6 +1446,7 @@ class TaskScheduler:
                 if retry_webhook_idx is not None and retry_webhook_idx in task.webhook_retry_counts:
                     task.webhook_retry_counts[retry_webhook_idx] = 0
                 if task.task_id in self._retry_jobs:
+                    schedule.cancel_job(self._retry_jobs[task.task_id])
                     del self._retry_jobs[task.task_id]
             
             # 处理Webhook级重试（文件成功但部分Webhook失败）
@@ -1460,13 +1464,13 @@ class TaskScheduler:
                     task.webhook_retry_counts[retry_webhook_idx] = 0
             
             # 如果任务失败（文件级失败）且启用了重试机制，触发文件级重试
-            if not success and task.retry_enabled and not is_retry:
+            if not success and task.retry_enabled:
                 self._schedule_retry(task, webhook_configs)
             
         except Exception as e:
             logger.error(f"任务执行异常：{str(e)}")
             # 如果异常导致失败且启用了重试机制，触发重试
-            if task.retry_enabled and not is_retry:
+            if task.retry_enabled:
                 self._schedule_retry(task, webhook_configs)
         finally:
             pythoncom.CoUninitialize()
@@ -1474,6 +1478,13 @@ class TaskScheduler:
     def _schedule_retry(self, task: ReportTask, webhook_configs: list):
         """调度重试任务"""
         if not task.retry_enabled:
+            return
+        
+        # 检查是否已过午夜0点，如果是则取消重试
+        now = datetime.now()
+        if now.hour < 6:
+            logger.info(f"任务 [{task.task_id}] 当前时间为午夜0点后，取消重试")
+            task.send_final_failure_notification()
             return
         
         task.retry_count += 1
@@ -1516,8 +1527,8 @@ class TaskScheduler:
             schedule.cancel_job(self._retry_jobs[task.task_id])
             del self._retry_jobs[task.task_id]
         
-        # 调度重试任务
-        job = schedule.every().day.at(retry_time_str).do(
+        # 调度重试任务（使用延迟调度，只执行一次）
+        job = schedule.every(retry_delay_seconds).seconds.do(
             self._run_task, task, webhook_configs, True
         )
         self._retry_jobs[task.task_id] = job
@@ -1525,6 +1536,14 @@ class TaskScheduler:
     def _schedule_webhook_retry(self, task: ReportTask, wh_config: dict, wh_idx: int):
         """调度Webhook级重试任务"""
         if not task.retry_enabled:
+            return
+        
+        # 检查是否已过午夜0点，如果是则取消重试
+        now = datetime.now()
+        if now.hour < 6:
+            wh_key = wh_config["webhook"].split("key=")[-1][:8]
+            logger.info(f"任务 [{task.task_id}] Webhook[{wh_idx}]({wh_key}...) 当前时间为午夜0点后，取消重试")
+            task.send_final_failure_notification()
             return
         
         # 获取或初始化该Webhook的重试计数
@@ -1566,8 +1585,8 @@ class TaskScheduler:
         if webhook_retry_key in self._retry_jobs:
             schedule.cancel_job(self._retry_jobs[webhook_retry_key])
         
-        # 调度Webhook重试任务（只重试该Webhook）
-        job = schedule.every().day.at(retry_time_str).do(
+        # 调度Webhook重试任务（只重试该Webhook，使用延迟调度，只执行一次）
+        job = schedule.every(retry_delay_seconds).seconds.do(
             self._run_webhook_retry, task, wh_config, wh_idx, True
         )
         self._retry_jobs[webhook_retry_key] = job

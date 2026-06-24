@@ -1,32 +1,30 @@
 ## 配置文件
 
 
-# "C:/Users/z/OneDrive - PPLINGO PTE LTD/自动播报文件/"  文件地址
-# "C:/Users/z/Desktop/BOT/excel文件"  文件地址
 
 # 备份配置
 backup:
-  enable: 0                       # 是否启用备份功能
+  enable: 0                       # 是否启用备份
   backup_dir: "./backups"         # 备份根目录路径（支持相对路径和绝对路径）
 
 # 重试配置（全局设置）
 retry:
   enabled: 1                      # 是否启用任务级重试（1启用，0禁用）
-  delay_minutes: 5               # 重试间隔时间（分钟），默认10分钟
+  delay_minutes: 3               # 重试间隔时间（分钟），默认10分钟
   max_attempts: 3                 # 最大重试次数，默认3次
 
 # 机器人配置列表
-webhooks:
-  奖励池名单发布:    "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=338f6d2c-3457-4b48-b7d2-fd60f4db98f4"
-  看板自动发布:      "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=a9d5a3ce-9091-4f99-94f1-c80832238c1a"
-  运营转化数据播报:   "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=fa2847ba-1291-49c9-ae5d-0acd9712c220"
-  激励播报（内部）:   "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=3b052688-8964-446a-bd5f-12c5716ca152"
-  激励播报:          "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=7ad929e6-8953-43fd-bead-c13d90d32740"
-  续航组看板播报:     "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=a6cb134d-7167-4dfa-b49b-04fb4e77d544"
-  澳新数据看板:       "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=57b436ca-c037-4b8d-9136-5f7580efdc7f"
-  澳新激励发布:       "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=778808a4-2ffc-44ad-aed2-0bfee021bd80"
-  AP&研学数据播报:    "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=686ad22f-8943-462c-8be8-4a1160df0af5"
-  约课数据看板:      "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=3afd2ff7-8d7c-42c8-8a47-1bfe86c68a2d"
+# webhooks:
+#   奖励池名单发布:    "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=338f6d2c-3457-4b48-b7d2-fd60f4db98f4"
+#   看板自动发布:      "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=a9d5a3ce-9091-4f99-94f1-c80832238c1a"
+#   运营转化数据播报:   "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=fa2847ba-1291-49c9-ae5d-0acd9712c220"
+#   激励播报（内部）:   "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=3b052688-8964-446a-bd5f-12c5716ca152"
+#   激励播报:          "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=7ad929e6-8953-43fd-bead-c13d90d32740"
+#   续航组看板播报:     "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=a6cb134d-7167-4dfa-b49b-04fb4e77d544"
+#   澳新数据看板:       "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=57b436ca-c037-4b8d-9136-5f7580efdc7f"
+#   澳新激励发布:       "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=778808a4-2ffc-44ad-aed2-0bfee021bd80"
+#   AP&研学数据播报:    "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=686ad22f-8943-462c-8be8-4a1160df0af5"
+#   约课数据看板:      "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=3afd2ff7-8d7c-42c8-8a47-1bfe86c68a2d"
 
 
 test_webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=ee57f939-0e4e-4707-beba-422dae91538e"
