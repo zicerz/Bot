@@ -8,6 +8,7 @@ import base64
 import hashlib
 from datetime import datetime, timedelta
 import logging
+from logging.handlers import TimedRotatingFileHandler
 import argparse
 import pythoncom
 import io
@@ -137,16 +138,34 @@ class TaskIDFilter(logging.Filter):
             record.task_id = '-'
         return True
 
+class DateRotatingFileHandler(logging.FileHandler):
+    """自定义日志处理器：按日期自动切换日志文件，支持年/月分级目录"""
+    
+    def __init__(self, base_dir, encoding='utf-8'):
+        self.base_dir = base_dir
+        self.current_date = datetime.now().date()
+        log_path = self._get_log_path()
+        super().__init__(log_path, mode='a', encoding=encoding)
+    
+    def _get_log_path(self):
+        now = datetime.now()
+        log_dir = os.path.join(self.base_dir, "logs", str(now.year), f"{now.month:02d}")
+        os.makedirs(log_dir, exist_ok=True)
+        log_filename = now.strftime("%Y-%m-%d.log")
+        return os.path.join(log_dir, log_filename)
+    
+    def emit(self, record):
+        today = datetime.now().date()
+        if today != self.current_date:
+            self.close()
+            self.current_date = today
+            self.baseFilename = self._get_log_path()
+            self.stream = self._open()
+        super().emit(record)
+
 def setup_logging():
-    """配置日志系统：按年/月分级目录，每日独立日志文件"""
+    """配置日志系统：按年/月分级目录，每日独立日志文件（支持跨天自动切换）"""
     base_dir = os.path.dirname(os.path.abspath(__file__))
-    
-    now = datetime.now()
-    log_dir = os.path.join(base_dir, "logs", str(now.year), f"{now.month:02d}")
-    os.makedirs(log_dir, exist_ok=True)
-    
-    log_filename = now.strftime("%Y-%m-%d.log")
-    log_path = os.path.join(log_dir, log_filename)
     
     log_format = "%(asctime)s [%(levelname)s] [任务%(task_id)s] %(message)s"
     date_format = "%Y-%m-%d %H:%M:%S"
@@ -155,7 +174,7 @@ def setup_logging():
     
     handlers = [
         logging.StreamHandler(),
-        logging.FileHandler(log_path, mode='a', encoding='utf-8')
+        DateRotatingFileHandler(base_dir, encoding='utf-8')
     ]
     
     for handler in handlers:
@@ -173,7 +192,9 @@ def setup_logging():
     
     logger = logging.getLogger("ExcelBot")
     logger = logging.LoggerAdapter(logger, {"task_id": "-"})
-    logger.info(f"日志系统已初始化，日志文件：{log_path}")
+    
+    current_log_path = handlers[1].baseFilename
+    logger.info(f"日志系统已初始化，日志文件：{current_log_path}")
     return logger
 
 logger = setup_logging()
