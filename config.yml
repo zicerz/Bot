@@ -12,6 +12,7 @@ retry:
   enabled: 1                      # 是否启用任务级重试（1启用，0禁用）
   delay_minutes: 3               # 重试间隔时间（分钟），默认10分钟
   max_attempts: 3                 # 最大重试次数，默认3次
+  task_timeout_minutes: 15        # 任务超时时间（分钟），超时后自动终止任务并触发重试
 
 # 机器人配置列表
 # webhooks:

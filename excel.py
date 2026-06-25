@@ -183,9 +183,11 @@ def get_task_logger(task_id: int):
 class FileLock:
     """文件锁工具类，用于防止并发访问"""
     
-    def __init__(self, lock_file_path):
+    def __init__(self, lock_file_path, lock_name=""):
         self.lock_file_path = lock_file_path
         self.lock_file = None
+        self.lock_name = lock_name or os.path.basename(lock_file_path)
+        self._first_wait_logged = False
     
     def acquire(self, timeout=300, poll_interval=2):
         """获取文件锁
@@ -195,12 +197,17 @@ class FileLock:
         :return: True表示获取锁成功，False表示超时
         """
         start_time = time.time()
+        self._first_wait_logged = False
         
         while time.time() - start_time < timeout:
             try:
                 self.lock_file = open(self.lock_file_path, 'w')
                 portalocker.lock(self.lock_file, portalocker.LOCK_EX | portalocker.LOCK_NB)
-                logger.info(f"成功获取文件锁：{self.lock_file_path}")
+                waited_ms = int((time.time() - start_time) * 1000)
+                if waited_ms > 0:
+                    logger.info(f"[{self.lock_name}] 成功获取文件锁，等待耗时 {waited_ms}ms")
+                else:
+                    logger.info(f"[{self.lock_name}] 成功获取文件锁")
                 return True
             except (IOError, BlockingIOError, portalocker.LockException):
                 if self.lock_file:
@@ -209,11 +216,17 @@ class FileLock:
                     except Exception:
                         pass
                     self.lock_file = None
-                remaining = int(timeout - (time.time() - start_time))
-                logger.info(f"文件锁被占用，等待中...（剩余 {remaining} 秒）")
+                
+                elapsed_ms = int((time.time() - start_time) * 1000)
+                if not self._first_wait_logged:
+                    self._first_wait_logged = True
+                    remaining = int(timeout - (time.time() - start_time))
+                    logger.warning(f"[{self.lock_name}] 锁被占用，开始等待（超时时间 {timeout}秒）")
+                
                 time.sleep(poll_interval)
         
-        logger.error(f"获取文件锁超时（{timeout}秒）：{self.lock_file_path}")
+        waited_ms = int((time.time() - start_time) * 1000)
+        logger.error(f"[{self.lock_name}] 获取文件锁超时，等待耗时 {waited_ms}ms")
         return False
     
     def release(self):
@@ -416,6 +429,69 @@ class ExcelProcessor:
             self._file_lock = None
 
         self.logger.debug("Excel 进程已释放")
+
+    def force_terminate(self):
+        """强制终止Excel进程（用于任务超时场景）"""
+        self.logger.warning("强制终止Excel进程开始")
+        
+        self._stop_dialog_watchdog()
+
+        # 先尝试安全关闭
+        if self.workbook is not None:
+            try:
+                self.workbook.Close(SaveChanges=True)
+                self.logger.info("成功关闭工作簿")
+            except Exception as e:
+                self.logger.warning(f"安全关闭工作簿失败：{str(e)}")
+            finally:
+                self.workbook = None
+
+        # 尝试正常退出Excel
+        if self.excel is not None:
+            try:
+                self.excel.Quit()
+                self.logger.info("成功退出Excel进程")
+            except Exception as e:
+                self.logger.warning(f"正常退出Excel失败：{str(e)}")
+            finally:
+                self.excel = None
+
+        # 强制终止所有Excel进程（作为最后的手段）
+        try:
+            import subprocess
+            subprocess.run(
+                ["taskkill", "/f", "/im", "EXCEL.EXE"],
+                capture_output=True,
+                timeout=10
+            )
+            self.logger.info("已强制终止所有Excel进程")
+        except Exception as e:
+            self.logger.warning(f"强制终止Excel进程异常：{str(e)}")
+
+        # 反初始化COM
+        try:
+            pythoncom.CoUninitialize()
+        except Exception as e:
+            self.logger.debug(f"COM 反初始化异常：{str(e)}")
+
+        # 强制释放文件锁
+        if self._file_lock:
+            try:
+                # 先尝试正常释放
+                self._file_lock.release()
+            except Exception as e:
+                self.logger.warning(f"正常释放锁失败，尝试强制删除锁文件：{str(e)}")
+                # 强制删除锁文件
+                if self._file_lock.lock_file_path and os.path.exists(self._file_lock.lock_file_path):
+                    try:
+                        os.remove(self._file_lock.lock_file_path)
+                        self.logger.info("已强制删除锁文件")
+                    except Exception as ex:
+                        self.logger.error(f"强制删除锁文件失败：{str(ex)}")
+            finally:
+                self._file_lock = None
+
+        self.logger.warning("Excel进程强制终止完成")
 
     def refresh_data(self) -> bool:
         self.logger.info("开始刷新数据...")
@@ -740,6 +816,11 @@ class ReportTask:
         self.retry_count = 0
         # Webhook级别重试记录 {wh_idx: retry_count}
         self.webhook_retry_counts = {}
+        
+        # 任务超时配置（默认15分钟）
+        self.task_timeout_minutes = self.retry_config.get("task_timeout_minutes", 15)
+        # 当前执行的excel实例（用于超时终止）
+        self.current_excel = None
 
     def _validate_config(self, config: dict) -> dict:
         """配置完整性检查，支持新的多webhook配置和旧的单webhook配置"""
@@ -828,6 +909,8 @@ class ReportTask:
                 visible=debug_mode,
                 task_logger=self.logger
             ) as excel:
+                # 保存当前excel实例供超时终止使用
+                self.current_excel = excel
                 # 刷新数据（所有webhook共享一次刷新）
                 if not excel.refresh_data():
                     task_id_str = self._get_task_id_str()
@@ -995,6 +1078,9 @@ class ReportTask:
                     webhook=self.error_webhook
                 )
         finally:
+            # 清理当前excel实例引用
+            self.current_excel = None
+            
             elapsed_time = time.time() - start_time
             self.logger.info(f"任务耗时：{elapsed_time:.2f}s")
             
@@ -1339,7 +1425,8 @@ class TaskScheduler:
             # 加载重试配置
             self.retry_config = config.get("retry", {})
             if self.retry_config.get("enabled", 0) == 1:
-                logger.info(f"重试机制已启用，延迟时间：{self.retry_config.get('delay_minutes', 10)}分钟，最大重试次数：{self.retry_config.get('max_attempts', 3)}次")
+                timeout_minutes = self.retry_config.get("task_timeout_minutes", 15)
+                logger.info(f"重试机制已启用，延迟时间：{self.retry_config.get('delay_minutes', 10)}分钟，最大重试次数：{self.retry_config.get('max_attempts', 3)}次，任务超时时间：{timeout_minutes}分钟")
             else:
                 logger.info("重试机制已禁用")
             
@@ -1379,6 +1466,14 @@ class TaskScheduler:
                 self._scheduler_lock.release()
                 self._scheduler_lock = None
 
+    def _get_task_execution_lock(self):
+        """获取全局任务执行锁，确保同一时间只有一个任务在执行"""
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        locks_dir = os.path.join(base_dir, "locks")
+        os.makedirs(locks_dir, exist_ok=True)
+        lock_file_path = os.path.join(locks_dir, "task_execution.lock")
+        return FileLock(lock_file_path)
+
     def _schedule_tasks(self):
         """配置定时任务，相同时间点的多个webhook合并为一个任务，只刷新一次"""
         time_tasks = {}
@@ -1416,32 +1511,130 @@ class TaskScheduler:
             logger.info(f"已安排任务：{trigger_time} → [{task_idx}] {task_name} → webhooks:{','.join(webhook_keys)}")
 
     def _run_task(self, task: ReportTask, webhook_configs: list, is_retry=False, retry_webhook_idx=None):
-        """串行执行任务（支持多个webhook配置共享一次刷新）"""
-        pythoncom.CoInitialize()
-        try:
-            separator = "=" * 100
-            logger.info("")
-            if is_retry:
-                if retry_webhook_idx is not None:
-                    logger.info(f"Webhook重试任务触发 - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-                else:
-                    logger.info(f"重试任务触发 - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-            else:
-                logger.info(f"定时任务触发 - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-            logger.info(separator)
+        """串行执行任务（支持多个webhook配置共享一次刷新，带超时控制）"""
+        task_lock = self._get_task_execution_lock()
+        if not task_lock.acquire(timeout=300):
+            task_name = task.config.get("name", os.path.basename(task.config["excel_path"]))
+            error_msg = f"任务 [{task.task_id}] {task_name} 获取全局任务执行锁超时，跳过本次执行"
+            logger.error(error_msg)
             
-            webhook_keys = [wh["webhook"].split("key=")[-1][:8] for wh in webhook_configs]
-            logger.info(f"本次任务将发送到 {len(webhook_configs)} 个 webhook: {','.join(webhook_keys)}")
+            try:
+                task._send_wechat(
+                    type="text",
+                    data={
+                        "content": (
+                            f"⚠️ 任务锁获取失败通知\n"
+                            f"任务ID：{task.task_id}\n"
+                            f"任务名称：{task_name}\n"
+                            f"时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+                            f"原因：获取全局任务执行锁超时（300秒）\n"
+                            f"可能原因：另一个任务正在执行或锁文件被异常占用"
+                        ),
+                        "mentioned_list": ["zhufuzhe"]
+                    },
+                    description="任务锁获取失败通知",
+                    webhook=task.error_webhook
+                )
+            except Exception as e:
+                logger.error(f"发送锁获取失败通知异常：{str(e)}")
+            
+            return
+        
+        # 任务执行结果
+        execution_result = {
+            "success": False,
+            "failed_webhooks": [],
+            "exception": None
+        }
+        
+        def task_executor():
+            """任务执行器（在子线程中运行）"""
+            try:
+                pythoncom.CoInitialize()
+                separator = "=" * 100
+                logger.info("")
+                if is_retry:
+                    if retry_webhook_idx is not None:
+                        logger.info(f"Webhook重试任务触发 - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+                    else:
+                        logger.info(f"重试任务触发 - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+                else:
+                    logger.info(f"定时任务触发 - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+                logger.info(separator)
+                
+                webhook_keys = [wh["webhook"].split("key=")[-1][:8] for wh in webhook_configs]
+                logger.info(f"本次任务将发送到 {len(webhook_configs)} 个 webhook: {','.join(webhook_keys)}")
+                
+                success, failed_webhooks = task.execute(self.debug_mode, webhook_configs)
+                execution_result["success"] = success
+                execution_result["failed_webhooks"] = failed_webhooks
+            except Exception as e:
+                execution_result["exception"] = e
+                logger.error(f"任务执行异常：{str(e)}")
+            finally:
+                try:
+                    pythoncom.CoUninitialize()
+                except Exception:
+                    pass
+        
+        try:
+            # 获取超时时间（分钟转秒）
+            timeout_seconds = task.task_timeout_minutes * 60
+            task_name = task.config.get("name", os.path.basename(task.config["excel_path"]))
+            logger.info(f"任务 [{task.task_id}] {task_name} 执行开始，超时时间：{task.task_timeout_minutes}分钟")
+            
+            # 在子线程中执行任务
+            exec_thread = threading.Thread(target=task_executor, daemon=True)
+            exec_thread.start()
+            
+            # 等待任务完成或超时
+            exec_thread.join(timeout=timeout_seconds)
+            
+            if exec_thread.is_alive():
+                # 任务超时，强制终止
+                logger.error(f"任务 [{task.task_id}] {task_name} 执行超时（{task.task_timeout_minutes}分钟），开始强制终止")
+                
+                # 发送超时通知
+                try:
+                    task._send_wechat(
+                        type="text",
+                        data={
+                            "content": (
+                                f"⚠️ 任务执行超时通知\n"
+                                f"任务ID：{task.task_id}\n"
+                                f"任务名称：{task_name}\n"
+                                f"时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+                                f"原因：任务执行时间超过 {task.task_timeout_minutes} 分钟，已强制终止\n"
+                                f"文件：{os.path.basename(task.config['excel_path'])}\n"
+                                f"任务将在 {task.retry_delay_minutes} 分钟后重试"
+                            ),
+                            "mentioned_list": ["zhufuzhe"]
+                        },
+                        description="任务执行超时通知",
+                        webhook=task.error_webhook
+                    )
+                except Exception as e:
+                    logger.error(f"发送超时通知异常：{str(e)}")
+                
+                # 强制终止Excel进程
+                if task.current_excel:
+                    try:
+                        task.current_excel.force_terminate()
+                    except Exception as e:
+                        logger.error(f"强制终止Excel进程异常：{str(e)}")
+                
+                # 标记任务失败，触发重试
+                execution_result["success"] = False
+                execution_result["failed_webhooks"] = []
+            else:
+                # 任务正常完成
+                logger.info(f"任务 [{task.task_id}] {task_name} 执行完成")
             
             trigger_time = datetime.now().strftime("%H:%M")
-            
-            success, failed_webhooks = task.execute(self.debug_mode, webhook_configs)
-            
-            task_name = task.config.get("name", os.path.basename(task.config["excel_path"]))
-            record_execution(task.task_id, task_name, trigger_time, success, manual=False)
+            record_execution(task.task_id, task_name, trigger_time, execution_result["success"], manual=False)
             
             # 如果是重试任务，成功后清除重试记录
-            if is_retry and success:
+            if is_retry and execution_result["success"]:
                 task.retry_count = 0
                 if retry_webhook_idx is not None and retry_webhook_idx in task.webhook_retry_counts:
                     task.webhook_retry_counts[retry_webhook_idx] = 0
@@ -1450,30 +1643,30 @@ class TaskScheduler:
                     del self._retry_jobs[task.task_id]
             
             # 处理Webhook级重试（文件成功但部分Webhook失败）
-            if task.retry_enabled and failed_webhooks:
-                for wh_config, wh_idx in failed_webhooks:
+            if task.retry_enabled and execution_result["failed_webhooks"]:
+                for wh_config, wh_idx in execution_result["failed_webhooks"]:
                     self._schedule_webhook_retry(task, wh_config, wh_idx)
                 # 如果有Webhook级重试，任务不算完全失败
-                if success is False:
-                    success = True  # 标记为部分成功，避免触发文件级重试
+                if execution_result["success"] is False:
+                    execution_result["success"] = True  # 标记为部分成功，避免触发文件级重试
             
             # 如果是重试任务且有Webhook失败，重新调度这些Webhook的重试
-            if is_retry and retry_webhook_idx is not None and success:
+            if is_retry and retry_webhook_idx is not None and execution_result["success"]:
                 # 清理该Webhook的重试计数
                 if retry_webhook_idx in task.webhook_retry_counts:
                     task.webhook_retry_counts[retry_webhook_idx] = 0
             
             # 如果任务失败（文件级失败）且启用了重试机制，触发文件级重试
-            if not success and task.retry_enabled:
+            if not execution_result["success"] and task.retry_enabled:
                 self._schedule_retry(task, webhook_configs)
             
-        except Exception as e:
-            logger.error(f"任务执行异常：{str(e)}")
-            # 如果异常导致失败且启用了重试机制，触发重试
-            if task.retry_enabled:
-                self._schedule_retry(task, webhook_configs)
+            # 处理执行异常
+            if execution_result["exception"]:
+                # 如果异常导致失败且启用了重试机制，触发重试
+                if task.retry_enabled:
+                    self._schedule_retry(task, webhook_configs)
         finally:
-            pythoncom.CoUninitialize()
+            task_lock.release()
 
     def _schedule_retry(self, task: ReportTask, webhook_configs: list):
         """调度重试任务"""
@@ -1665,36 +1858,67 @@ class TaskScheduler:
         
         # 执行任务
         for idx, (task, webhook_id) in enumerate(targets, 1):
-            pythoncom.CoInitialize()
-            try:
-                if len(targets) > 1:
-                    separator = "=" * 100
-                    logger.info("")
-                    logger.info(f"任务 {idx}/{len(targets)}")
-                    logger.info(separator)
-                
-                trigger_time = datetime.now().strftime("%H:%M")
+            task_lock = self._get_task_execution_lock()
+            if not task_lock.acquire(timeout=300):
                 task_name = task.config.get("name", os.path.basename(task.config["excel_path"]))
+                error_msg = f"任务 [{task.task_id}] {task_name} 获取全局任务执行锁超时，跳过执行"
+                logger.error(error_msg)
                 
-                # 确定要执行的webhook
-                if webhook_id is not None:
-                    webhook_config = task.config["webhooks"][webhook_id]
-                    logger.info(f"执行任务 {task_specs[idx-1][0]} 的 webhook {webhook_id}: {webhook_config['webhook'].split('key=')[-1][:10]}...")
-                    success = task.execute(self.debug_mode, webhook_config, is_manual=True)
-                else:
-                    # 执行所有webhook配置
-                    if task_specs:
-                        logger.info(f"执行任务 {task_specs[idx-1][0]}: {task_name}")
-                    success = task.execute(self.debug_mode, is_manual=True)
+                try:
+                    task._send_wechat(
+                        type="text",
+                        data={
+                            "content": (
+                                f"⚠️ 任务锁获取失败通知（手动执行）\n"
+                                f"任务ID：{task.task_id}\n"
+                                f"任务名称：{task_name}\n"
+                                f"时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+                                f"原因：获取全局任务执行锁超时（300秒）\n"
+                                f"可能原因：另一个任务正在执行或锁文件被异常占用"
+                            ),
+                            "mentioned_list": ["zhufuzhe"]
+                        },
+                        description="任务锁获取失败通知（手动执行）",
+                        webhook=task.error_webhook
+                    )
+                except Exception as e:
+                    logger.error(f"发送锁获取失败通知异常：{str(e)}")
                 
-                record_execution(task.task_id, task_name, trigger_time, success, manual=True)
-            except Exception as e:
-                logger.error(f"执行异常：{str(e)}")
-                if task_specs:
+                continue
+            
+            try:
+                pythoncom.CoInitialize()
+                try:
+                    if len(targets) > 1:
+                        separator = "=" * 100
+                        logger.info("")
+                        logger.info(f"任务 {idx}/{len(targets)}")
+                        logger.info(separator)
+                    
+                    trigger_time = datetime.now().strftime("%H:%M")
                     task_name = task.config.get("name", os.path.basename(task.config["excel_path"]))
-                    record_execution(task.task_id, task_name, datetime.now().strftime("%H:%M"), False, manual=True)
+                    
+                    # 确定要执行的webhook
+                    if webhook_id is not None:
+                        webhook_config = task.config["webhooks"][webhook_id]
+                        logger.info(f"执行任务 {task_specs[idx-1][0]} 的 webhook {webhook_id}: {webhook_config['webhook'].split('key=')[-1][:10]}...")
+                        success = task.execute(self.debug_mode, webhook_config, is_manual=True)
+                    else:
+                        # 执行所有webhook配置
+                        if task_specs:
+                            logger.info(f"执行任务 {task_specs[idx-1][0]}: {task_name}")
+                        success = task.execute(self.debug_mode, is_manual=True)
+                    
+                    record_execution(task.task_id, task_name, trigger_time, success, manual=True)
+                except Exception as e:
+                    logger.error(f"执行异常：{str(e)}")
+                    if task_specs:
+                        task_name = task.config.get("name", os.path.basename(task.config["excel_path"]))
+                        record_execution(task.task_id, task_name, datetime.now().strftime("%H:%M"), False, manual=True)
+                finally:
+                    pythoncom.CoUninitialize()
             finally:
-                pythoncom.CoUninitialize()
+                task_lock.release()
 
 # ---------------------------- 主程序 ----------------------------
 def main():
