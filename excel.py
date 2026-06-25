@@ -791,7 +791,7 @@ class ExcelProcessor:
         return False
 
     def capture_screenshots(self, configs: list, retry_times: int = 3):
-        screenshots = []
+        screenshots_dict = {}
         pending_configs = list(configs)
         total_attempts = retry_times + 1
 
@@ -814,7 +814,8 @@ class ExcelProcessor:
                         output_path = self._generate_path(cfg["name"])
 
                         if self._capture_range(sheet, cfg["range"], output_path):
-                            screenshots.append(output_path)
+                            cfg_idx = configs.index(cfg)
+                            screenshots_dict[cfg_idx] = output_path
                             self.logger.info(
                                 f"截图成功：[{cfg['name']}] 工作表[{cfg['sheet_name']}] 区域[{cfg['range']}]"
                             )
@@ -839,6 +840,7 @@ class ExcelProcessor:
             except Exception as e:
                 self.logger.warning(f"恢复缩放比例失败：{str(e)}")
 
+        screenshots = [screenshots_dict[i] for i in range(len(configs)) if i in screenshots_dict]
         return screenshots, pending_configs
     
 
@@ -1364,10 +1366,13 @@ class ReportTask:
                     timeout=10
                 )
                 response.raise_for_status()
+                result = response.json()
+                if result.get("errcode", 0) != 0:
+                    raise Exception(f"企业微信API返回错误：errcode={result.get('errcode')}, errmsg={result.get('errmsg')}")
                 task_logger.info(f"发送成功：{description}")
                 return
             except Exception as e:
-                task_logger.warning(f"发送失败（{attempt}/{self.retry_limit}）：{description}")
+                task_logger.warning(f"发送失败（{attempt}/{self.retry_limit}）：{description} - {str(e)}")
                 if attempt == self.retry_limit:
                     task_logger.error(f"最终发送失败：{str(e)}")
                 time.sleep(2 ** attempt)
