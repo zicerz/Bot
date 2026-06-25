@@ -20,6 +20,10 @@ COLOR_GREEN = "\033[32m"
 COLOR_RED = "\033[91m"
 COLOR_GRAY = "\033[90m"
 COLOR_BLUE = "\033[34m"
+COLOR_YELLOW = "\033[33m"
+COLOR_CYAN = "\033[36m"
+COLOR_MAGENTA = "\033[35m"
+COLOR_BOLD = "\033[1m"
 COLOR_RESET = "\033[0m"
 
 # ---------------------------- 执行记录管理 ----------------------------
@@ -178,6 +182,72 @@ def get_task_logger(task_id: int):
     """获取带任务序号的日志记录器"""
     base_logger = logging.getLogger("ExcelBot")
     return logging.LoggerAdapter(base_logger, {"task_id": task_id})
+
+# ---------------------------- 任务日志分隔工具 ----------------------------
+def _get_display_length(s):
+    """计算字符串的显示长度（去除ANSI颜色转义码）"""
+    import re
+    return len(re.sub(r'\x1b\[[0-9;]*m', '', s))
+
+def print_task_header(task_id, task_name, target_logger=None):
+    """打印任务开始分隔框"""
+    log = target_logger or logger
+    box_width = 80
+    content_width = box_width - 4
+    
+    title = f"[任务{task_id}] {task_name} - 开始执行"
+    display_len = _get_display_length(title)
+    if display_len > content_width:
+        title = title[:content_width]
+        display_len = content_width
+    padding = " " * ((content_width - display_len) // 2)
+    title_line = f"{padding}{title}{padding}"
+    if _get_display_length(title_line) < content_width:
+        title_line += " " * (content_width - _get_display_length(title_line))
+    
+    log.info(f"{COLOR_CYAN}{COLOR_BOLD}╔{'═' * content_width}╗{COLOR_RESET}")
+    log.info(f"{COLOR_CYAN}{COLOR_BOLD}║{COLOR_RESET} {title_line} {COLOR_CYAN}{COLOR_BOLD}║{COLOR_RESET}")
+    log.info(f"{COLOR_CYAN}{COLOR_BOLD}╚{'═' * content_width}╝{COLOR_RESET}")
+
+def print_task_footer(task_id, task_name, success, elapsed_time, target_logger=None):
+    """打印任务结束分隔框"""
+    log = target_logger or logger
+    box_width = 80
+    content_width = box_width - 4
+    
+    status_icon = f"{COLOR_GREEN}✓{COLOR_RESET}" if success else f"{COLOR_RED}✗{COLOR_RESET}"
+    status_text = "完成" if success else "失败"
+    time_text = f"耗时: {elapsed_time:.2f}s"
+    
+    title = f"[任务{task_id}] {task_name} - {status_text} {status_icon} | {time_text}"
+    display_len = _get_display_length(title)
+    if display_len > content_width:
+        title = title[:content_width]
+        display_len = content_width
+    padding = " " * ((content_width - display_len) // 2)
+    title_line = f"{padding}{title}{padding}"
+    if _get_display_length(title_line) < content_width:
+        title_line += " " * (content_width - _get_display_length(title_line))
+    
+    border_color = COLOR_GREEN if success else COLOR_RED
+    log.info(f"{border_color}{COLOR_BOLD}╔{'═' * content_width}╗{COLOR_RESET}")
+    log.info(f"{border_color}{COLOR_BOLD}║{COLOR_RESET} {title_line} {border_color}{COLOR_BOLD}║{COLOR_RESET}")
+    log.info(f"{border_color}{COLOR_BOLD}╚{'═' * content_width}╝{COLOR_RESET}")
+
+def print_subtask_header(task_id, subtask_idx, subtask_name="", target_logger=None):
+    """打印子任务开始分隔线"""
+    log = target_logger or logger
+    name_part = f" {subtask_name}" if subtask_name else ""
+    line = f"  ── [子任务{task_id}-{subtask_idx}]{name_part} ──"
+    log.info(f"{COLOR_YELLOW}{line}{COLOR_RESET}")
+
+def print_subtask_footer(task_id, subtask_idx, success, target_logger=None):
+    """打印子任务结束分隔线"""
+    log = target_logger or logger
+    status_icon = f"{COLOR_GREEN}✓{COLOR_RESET}" if success else f"{COLOR_RED}✗{COLOR_RESET}"
+    status_text = "完成" if success else "失败"
+    line = f"  ── [子任务{task_id}-{subtask_idx}] {status_text} {status_icon} ──"
+    log.info(f"{COLOR_YELLOW}{line}{COLOR_RESET}")
 
 # ---------------------------- 文件锁工具类 ----------------------------
 class FileLock:
@@ -894,10 +964,8 @@ class ReportTask:
         :param is_manual: 是否手动执行（用于决定是否立即发送失败通知）
         :return: True表示成功，False表示失败
         """
-        separator = "=" * 100
-        self.logger.info(separator)
-        self.logger.info(f"启动任务：{os.path.basename(self.config['excel_path'])}")
-        self.logger.info(separator)
+        task_name = os.path.basename(self.config['excel_path'])
+        print_task_header(self.task_id, task_name, target_logger=self.logger)
         
         start_time = time.time()
         results_to_deliver = []
@@ -993,6 +1061,9 @@ class ReportTask:
                     else:
                         wh_logger = get_task_logger(f"{self.task_id}-{wh_idx}")
                     
+                    subtask_name = wh_config.get("name", "")
+                    print_subtask_header(self.task_id, wh_idx if wh_idx >= 0 else 0, subtask_name, target_logger=wh_logger)
+                    
                     wh_logger.info(f"处理Webhook：{wh_config['webhook'].split('key=')[-1][:8]}...")
                     
                     # 更新excel的logger为带子任务序号的logger
@@ -1032,6 +1103,7 @@ class ReportTask:
                         )
                         # 记录失败的webhook用于重试
                         failed_webhooks.append((wh_config, wh_idx))
+                        print_subtask_footer(self.task_id, wh_idx if wh_idx >= 0 else 0, False, target_logger=wh_logger)
                         continue
 
                     results_to_deliver.append({
@@ -1039,6 +1111,7 @@ class ReportTask:
                         "webhook_config": wh_config,
                         "wh_idx": wh_idx
                     })
+                    print_subtask_footer(self.task_id, wh_idx if wh_idx >= 0 else 0, True, target_logger=wh_logger)
                 
                 # 退出Excel上下文，释放文件
                 excel = None
@@ -1083,14 +1156,12 @@ class ReportTask:
             self.current_excel = None
             
             elapsed_time = time.time() - start_time
-            self.logger.info(f"任务耗时：{elapsed_time:.2f}s")
             
             if success:
                 self._backup_file()
             
-            separator = "=" * 100
-            self.logger.info(separator)
-            print(separator)
+            task_name = os.path.basename(self.config['excel_path'])
+            print_task_footer(self.task_id, task_name, success, elapsed_time, target_logger=self.logger)
         
         # 返回任务结果和失败的webhook列表
         return success, failed_webhooks
