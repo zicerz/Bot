@@ -901,6 +901,7 @@ class ReportTask:
         
         start_time = time.time()
         results_to_deliver = []
+        failed_webhooks = []
         success = True
         
         try:
@@ -1570,6 +1571,7 @@ class TaskScheduler:
                 execution_result["failed_webhooks"] = failed_webhooks
             except Exception as e:
                 execution_result["exception"] = e
+                execution_result["success"] = False
                 logger.error(f"任务执行异常：{str(e)}")
             finally:
                 try:
@@ -1659,12 +1661,6 @@ class TaskScheduler:
             # 如果任务失败（文件级失败）且启用了重试机制，触发文件级重试
             if not execution_result["success"] and task.retry_enabled:
                 self._schedule_retry(task, webhook_configs)
-            
-            # 处理执行异常
-            if execution_result["exception"]:
-                # 如果异常导致失败且启用了重试机制，触发重试
-                if task.retry_enabled:
-                    self._schedule_retry(task, webhook_configs)
         finally:
             task_lock.release()
 
