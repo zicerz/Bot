@@ -204,6 +204,60 @@ def get_task_logger(task_id: int):
     base_logger = logging.getLogger("ExcelBot")
     return logging.LoggerAdapter(base_logger, {"task_id": task_id})
 
+def is_in_monthly_range(start_day: int, end_day: int, config_name: str = "") -> bool:
+    """
+    检查今天是否在指定的每月日期范围内
+    
+    :param start_day: 开始日期（1-31，负数表示倒数第几天）
+    :param end_day: 结束日期（1-31，负数表示倒数第几天，0表示最后一天）
+    :param config_name: 配置名称（用于日志输出）
+    :return: True表示在范围内，False表示不在范围内
+    """
+    today = datetime.now().day
+    current_month = datetime.now().month
+    current_year = datetime.now().year
+    
+    if current_month == 12:
+        next_month = datetime(current_year + 1, 1, 1)
+    else:
+        next_month = datetime(current_year, current_month + 1, 1)
+    days_in_month = (next_month - datetime(current_year, current_month, 1)).days
+    
+    original_start_day = start_day
+    original_end_day = end_day
+    
+    if start_day <= 0:
+        start_day = days_in_month + start_day + 1
+    if end_day <= 0:
+        end_day = days_in_month + end_day
+    
+    adjusted = False
+    if start_day > days_in_month:
+        start_day = days_in_month
+        adjusted = True
+    elif start_day < 1:
+        start_day = 1
+        adjusted = True
+    
+    if end_day > days_in_month:
+        end_day = days_in_month
+        adjusted = True
+    elif end_day < 1:
+        end_day = 1
+        adjusted = True
+    
+    if adjusted and config_name:
+        logger.warning(
+            f"[{config_name}] 日期范围配置被调整："
+            f"原始({original_start_day}-{original_end_day}) -> "
+            f"调整后({start_day}-{end_day})，当月天数：{days_in_month}"
+        )
+    
+    if start_day <= end_day:
+        return start_day <= today <= end_day
+    else:
+        return today >= start_day or today <= end_day
+
 # ---------------------------- 任务日志分隔工具 ----------------------------
 def _get_display_length(s):
     """计算字符串的显示长度（去除ANSI颜色转义码）"""
@@ -809,6 +863,16 @@ class ExcelProcessor:
 
                 next_pending = []
                 for cfg in pending_configs:
+                    start_day = cfg.get("start_day", 1)
+                    end_day = cfg.get("end_day", 31)
+                    config_name = cfg.get("name", "")
+                    
+                    if not is_in_monthly_range(start_day, end_day, config_name):
+                        self.logger.info(
+                            f"跳过截图 [{config_name}]：当前日期不在播报范围内（{start_day}-{end_day}）"
+                        )
+                        continue
+                    
                     try:
                         sheet = self.workbook.Worksheets(cfg["sheet_name"])
                         output_path = self._generate_path(cfg["name"])
@@ -1098,15 +1162,27 @@ class ReportTask:
                     )
 
                     if failed_capture_configs:
+                        actual_failed = []
+                        for item in failed_capture_configs:
+                            start_day = item.get("start_day", 1)
+                            end_day = item.get("end_day", 31)
+                            if is_in_monthly_range(start_day, end_day):
+                                actual_failed.append(item)
+                        
+                        if not actual_failed:
+                            self.logger.info(f"{self._get_task_id_str(wh_idx)}所有失败的截图区域均为日期范围外，跳过失败通知")
+                            print_subtask_footer(self.task_id, wh_idx if wh_idx >= 0 else 0, True, target_logger=wh_logger)
+                            continue
+                        
                         failed_regions_text = "；".join(
                             [
                                 f"{item.get('name', '未命名')}({item.get('sheet_name', '未知工作表')}:{item.get('range', '未知区域')})"
-                                for item in failed_capture_configs
+                                for item in actual_failed
                             ]
                         )
                         task_id_str = self._get_task_id_str(wh_idx)
                         wh_logger.error(
-                            f"{task_id_str}截图在重试 3 次后仍失败，共 {len(failed_capture_configs)} 个区域：{failed_regions_text}"
+                            f"{task_id_str}截图在重试 3 次后仍失败，共 {len(actual_failed)} 个区域：{failed_regions_text}"
                         )
 
                         if screenshots:
@@ -1115,7 +1191,7 @@ class ReportTask:
                             type="text",
                             data={
                                 "content": (
-                                    f"{task_id_str}截图失败：重试3次后仍有 {len(failed_capture_configs)} 个区域未成功截图，"
+                                    f"{task_id_str}截图失败：重试3次后仍有 {len(actual_failed)} 个区域未成功截图，"
                                     f"任务已终止。文件：{os.path.basename(self.config['excel_path'])}。"
                                     f"失败区域：{failed_regions_text}"
                                 )

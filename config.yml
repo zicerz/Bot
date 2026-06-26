@@ -70,6 +70,10 @@ tasks:
           - sheet_name: "总览页面"
             range: AE1
             name: "总览页面"
+            start_day: 1           # 可选，每月开始播报日期（1-31，默认1）
+            end_day: 31           # 可选，每月结束播报日期（1-31，默认31）
+            # 负数表示从月底倒数：如 start_day: -5 表示倒数第5天，end_day: 0 表示最后一天
+            # start_day > end_day 表示跨月范围：如 start_day: 25, end_day: 5 表示每月25日至次月5日
         send_file_enable: 0  # 可选，未配置默认为0
 
     
