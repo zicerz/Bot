@@ -1364,13 +1364,16 @@ class ReportTask:
         max_retries = 3
         for attempt in range(1, max_retries + 1):
             try:
+                file_obj.seek(0, os.SEEK_END)
+                file_size = file_obj.tell()
                 file_obj.seek(0)
+                task_logger.info(f"文件大小: {file_size / 1024 / 1024:.2f} MB")
                 task_logger.info(f"正在上传文件（第 {attempt}/{max_retries} 次尝试）：{file_obj.name}")
                 
                 response = requests.post(
                     upload_url,
                     files={"media": (filename_with_time, file_obj)},
-                    timeout=15
+                    timeout=60
                 )
                 
                 task_logger.info(f"上传响应状态码: {response.status_code}")
@@ -1383,7 +1386,7 @@ class ReportTask:
             except Exception as e:
                 task_logger.warning(f"文件上传失败（第 {attempt}/{max_retries} 次尝试）：{str(e)}")
                 if attempt < max_retries:
-                    time.sleep(2 ** attempt)
+                    time.sleep(3 * attempt)
                 else:
                     task_logger.error(f"文件上传最终失败：{str(e)}")
         
