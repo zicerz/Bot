@@ -2301,6 +2301,7 @@ def main():
     parser.add_argument("--list", action="store_true", help="列出所有已配置的任务")
     parser.add_argument("--debug", action="store_true", help="开启调试模式")
     parser.add_argument("--test", action="store_true", help="启用测试webhook，发送到测试群")
+    parser.add_argument("--send", type=str, help="向所有配置的webhook发送消息，格式：--send \"消息内容\"")
     args = parser.parse_args()
 
     test_webhook = None
@@ -2314,6 +2315,10 @@ def main():
     try:
         if args.list:
             print_task_list()
+            return
+        
+        if args.send:
+            send_message_to_all_webhooks(args.send, test_webhook)
             return
         
         task_specs = []
@@ -2348,6 +2353,56 @@ def main():
     except Exception as e:
         logger.error(f"系统异常：{str(e)}", exc_info=args.debug)
         exit(1)
+
+def send_message_to_all_webhooks(message: str, test_webhook: str = None):
+    """向所有配置的webhook发送消息"""
+    try:
+        config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.yml")
+        with open(config_path, "r", encoding="utf-8") as f:
+            config = yaml.safe_load(f)
+        
+        all_webhooks = set()
+        
+        tasks = config.get("tasks", [])
+        for task in tasks:
+            webhooks = task.get("webhooks", [])
+            for wh_config in webhooks:
+                webhook = wh_config.get("webhook", "")
+                if webhook:
+                    all_webhooks.add(webhook)
+        
+        if not all_webhooks:
+            print("未找到任何配置的webhook")
+            return
+        
+        print(f"将向 {len(all_webhooks)} 个webhook发送消息:")
+        
+        success_count = 0
+        fail_count = 0
+        
+        for webhook in all_webhooks:
+            key = webhook.split("key=")[-1][:8] if "key=" in webhook else webhook[:8]
+            target_webhook = test_webhook if test_webhook else webhook
+            
+            payload = {"msgtype": "text", "text": {"content": message}}
+            
+            try:
+                response = requests.post(target_webhook, json=payload, timeout=10)
+                response.raise_for_status()
+                result = response.json()
+                if result.get("errcode", 0) != 0:
+                    raise Exception(f"errcode={result.get('errcode')}, errmsg={result.get('errmsg')}")
+                print(f"  {COLOR_GREEN}[成功]{COLOR_RESET} webhook: {key}...")
+                success_count += 1
+            except Exception as e:
+                print(f"  {COLOR_RED}[失败]{COLOR_RESET} webhook: {key}... - {str(e)}")
+                fail_count += 1
+        
+        print()
+        print(f"发送完成：成功 {success_count} 个，失败 {fail_count} 个")
+        
+    except Exception as e:
+        logger.error(f"发送消息时发生异常：{str(e)}")
 
 def print_task_list():
     """打印所有已配置的任务列表及当日执行情况"""
