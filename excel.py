@@ -1223,7 +1223,9 @@ class ReportTask:
                     wh_logger = self.logger
                 else:
                     wh_logger = get_task_logger(f"{self.task_id}-{wh_idx}")
-                self.deliver_results(result["screenshots"], result["webhook_config"], wh_logger)
+                deliver_result = self.deliver_results(result["screenshots"], result["webhook_config"], wh_logger)
+                if deliver_result and not deliver_result.get("success"):
+                    failed_webhooks.append((result["webhook_config"], wh_idx))
 
         except Exception as e:
             error_text = str(e)
@@ -1266,7 +1268,7 @@ class ReportTask:
         return success, failed_webhooks
 
     def deliver_results(self, screenshots: list, webhook_config: dict, task_logger=None):
-        """根据webhook配置交付结果"""
+        """根据webhook配置交付结果，所有配置的消息都发送成功才算任务成功"""
         if task_logger is None:
             task_logger = self.logger
         webhook = webhook_config["webhook"]
@@ -1278,25 +1280,65 @@ class ReportTask:
         task_logger.info(f"  screenshots数量: {len(screenshots)}")
         task_logger.info(f"  send_file_enable: {send_file_enable}")
 
+        success = True
+
+        # 先上传文件获取media_id（如果启用）
+        media_id = None
+        file_path = None
+        if send_file_enable:
+            task_logger.info("send_file_enable 为真，先上传文件")
+            media_id = self._upload_attachment_for_send(webhook, task_logger)
+            if not media_id:
+                file_path = self.config.get("file_path") or self.config.get("excel_path")
+                if file_path and os.path.exists(file_path):
+                    MAX_FILE_SIZE = 20 * 1024 * 1024
+                    file_size = os.path.getsize(file_path)
+                    if file_size <= MAX_FILE_SIZE:
+                        task_logger.error("文件上传失败")
+                        success = False
+
         # 发送截图
         for img_path in screenshots:
-            self._send_wechat(
-                type="image",
-                data=self._prepare_image(img_path),
-                description=f"截图 {os.path.basename(img_path)}",
-                webhook=webhook,
-                task_logger=task_logger
-            )
+            try:
+                self._send_wechat(
+                    type="image",
+                    data=self._prepare_image(img_path),
+                    description=f"截图 {os.path.basename(img_path)}",
+                    webhook=webhook,
+                    task_logger=task_logger
+                )
+            except Exception as e:
+                task_logger.error(f"截图发送失败：{str(e)}")
+                success = False
 
-        # 发送文件
-        if send_file_enable:
-            task_logger.info("send_file_enable 为真，准备发送文件")
-            self._send_attachment(webhook, task_logger)
-        else:
-            task_logger.info("send_file_enable 为假，跳过发送文件")
+        # 发送文件（如果上传成功）
+        if send_file_enable and media_id:
+            task_logger.info("发送文件")
+            try:
+                file_path = self.config.get("file_path") or self.config.get("excel_path")
+                self._send_wechat(
+                    type="file",
+                    data={"media_id": media_id},
+                    description=f"文件 {os.path.basename(file_path)}",
+                    webhook=webhook,
+                    task_logger=task_logger
+                )
+                task_logger.info("文件发送成功")
+            except Exception as e:
+                task_logger.error(f"文件发送失败：{str(e)}")
+                success = False
+        elif send_file_enable and not media_id:
+            task_logger.warning("文件上传失败，跳过发送文件")
         
-        # 清理临时文件
-        self._cleanup(screenshots, task_logger)
+        # 清理临时文件（仅当任务成功时）
+        if success:
+            self._cleanup(screenshots, task_logger)
+        
+        if not success:
+            task_logger.error("文件发送失败，任务失败")
+            return {"success": False, "reason": "file_send_failed"}
+        
+        return {"success": True, "reason": "success"}
 
     def _send_attachment(self, webhook: str, task_logger=None):
         """发送关联文件（带重试）"""
@@ -1315,6 +1357,20 @@ class ReportTask:
         if not os.path.exists(file_path):
             task_logger.warning(f"文件不存在：{file_path}，跳过发送")
             return
+        
+        MAX_FILE_SIZE = 20 * 1024 * 1024
+        file_size = os.path.getsize(file_path)
+        if file_size > MAX_FILE_SIZE:
+            task_logger.warning(f"文件大小 {file_size / 1024 / 1024:.2f} MB 超过企微webhook限制（20MB），取消发送文件")
+            self._send_wechat(
+                type="text",
+                data={"content": f"⚠️ 文件发送提醒：{os.path.basename(file_path)} 大小为 {file_size / 1024 / 1024:.2f} MB，超过企微webhook限制（20MB），已取消发送"},
+                description="文件大小超限提醒",
+                webhook=target_webhook,
+                task_logger=task_logger
+            )
+            return
+        task_logger.info(f"文件大小: {file_size / 1024 / 1024:.2f} MB")
         
         max_retries = 3
         for attempt in range(1, max_retries + 1):
@@ -1391,6 +1447,36 @@ class ReportTask:
                     task_logger.error(f"文件上传最终失败：{str(e)}")
         
         return None
+
+    def _upload_attachment_for_send(self, webhook: str, task_logger=None) -> str:
+        """上传文件获取media_id（用于deliver_results）"""
+        if task_logger is None:
+            task_logger = self.logger
+        
+        target_webhook = self.test_webhook if self.test_webhook else webhook
+        file_path = self.config.get("file_path") or self.config.get("excel_path")
+        
+        if not file_path or not os.path.exists(file_path):
+            task_logger.warning("文件路径无效，跳过上传")
+            return None
+        
+        MAX_FILE_SIZE = 20 * 1024 * 1024
+        file_size = os.path.getsize(file_path)
+        if file_size > MAX_FILE_SIZE:
+            task_logger.warning(f"文件大小 {file_size / 1024 / 1024:.2f} MB 超过企微webhook限制（20MB），取消上传")
+            self._send_wechat(
+                type="text",
+                data={"content": f"⚠️ 文件发送提醒：{os.path.basename(file_path)} 大小为 {file_size / 1024 / 1024:.2f} MB，超过企微webhook限制（20MB），已取消发送"},
+                description="文件大小超限提醒",
+                webhook=target_webhook,
+                task_logger=task_logger
+            )
+            return None
+        
+        task_logger.info(f"文件大小: {file_size / 1024 / 1024:.2f} MB")
+        
+        with open(file_path, "rb") as f:
+            return self._upload_file(f, target_webhook, task_logger)
 
     def _prepare_image(self, img_path: str) -> dict:
         """准备图片数据"""
@@ -1984,16 +2070,130 @@ class TaskScheduler:
                 else:
                     # 截图成功，发送结果
                     wh_logger.info(f"Webhook[{wh_idx}] 重试截图成功")
-                    task.deliver_results(screenshots, wh_config, wh_logger)
-                    # 清理该Webhook的重试计数
-                    if wh_idx in task.webhook_retry_counts:
-                        task.webhook_retry_counts[wh_idx] = 0
+                    result = task.deliver_results(screenshots, wh_config, wh_logger)
+                    if result and not result.get("success"):
+                        wh_logger.error(f"Webhook[{wh_idx}] 文件发送失败，触发文件上传级重试")
+                        file_path = task.config.get("file_path") or task.config.get("excel_path")
+                        self._schedule_file_retry(task, wh_config, screenshots, file_path)
+                    else:
+                        if wh_idx in task.webhook_retry_counts:
+                            task.webhook_retry_counts[wh_idx] = 0
                     
         except Exception as e:
             wh_logger.error(f"Webhook[{wh_idx}] 重试异常：{str(e)}")
             self._schedule_webhook_retry(task, wh_config, wh_idx)
         finally:
             pythoncom.CoUninitialize()
+
+    def _schedule_file_retry(self, task: ReportTask, wh_config: dict, screenshots: list, file_path: str):
+        """调度文件上传级重试（只重试文件上传和发送，不重新刷新Excel）"""
+        if not task.retry_enabled:
+            return
+        
+        now = datetime.now()
+        if now.hour < 6:
+            wh_key = wh_config["webhook"].split("key=")[-1][:8]
+            logger.info(f"任务 [{task.task_id}] 文件上传级重试 当前时间为午夜0点后，取消重试")
+            task.send_final_failure_notification()
+            return
+        
+        wh_idx = task.config["webhooks"].index(wh_config)
+        
+        if not hasattr(task, 'file_retry_counts'):
+            task.file_retry_counts = {}
+        if wh_idx not in task.file_retry_counts:
+            task.file_retry_counts[wh_idx] = 0
+        
+        task.file_retry_counts[wh_idx] += 1
+        max_attempts = task.retry_max_attempts
+        current_retry = task.file_retry_counts[wh_idx]
+        
+        if current_retry > max_attempts:
+            wh_key = wh_config["webhook"].split("key=")[-1][:8]
+            logger.info(f"任务 [{task.task_id}] 文件上传级重试已达到最大次数 ({max_attempts}次)，不再重试")
+            task.send_final_failure_notification()
+            return
+        
+        retry_delay_seconds = task.retry_delay_minutes * 60
+        retry_time = datetime.now() + timedelta(seconds=retry_delay_seconds)
+        retry_time_str = retry_time.strftime("%H:%M")
+        
+        conflict_time = self._check_time_conflict(task, retry_time_str)
+        if conflict_time:
+            logger.info(f"文件上传级重试时间 {retry_time_str} 与配置任务时间 {conflict_time} 冲突，延迟到 {conflict_time} 之后")
+            conflict_hour, conflict_minute = map(int, conflict_time.split(":"))
+            retry_datetime = datetime.now().replace(hour=conflict_hour, minute=conflict_minute, second=0)
+            if retry_datetime <= datetime.now():
+                retry_datetime += timedelta(days=1)
+            retry_datetime += timedelta(minutes=1)
+            retry_time_str = retry_datetime.strftime("%H:%M")
+            retry_delay_seconds = (retry_datetime - datetime.now()).total_seconds()
+            if retry_delay_seconds < 0:
+                retry_delay_seconds = 60
+        
+        task_name = task.config.get("name", os.path.basename(task.config["excel_path"]))
+        wh_key = wh_config["webhook"].split("key=")[-1][:8]
+        logger.info(f"[任务{task.task_id}] {task_name} - 调度文件上传级重试，时间：{retry_time_str}，webhook: {wh_key}...")
+        
+        file_retry_key = f"{task.task_id}_file_{wh_idx}"
+        if file_retry_key in self._retry_jobs:
+            schedule.cancel_job(self._retry_jobs[file_retry_key])
+        
+        job = schedule.every(retry_delay_seconds).seconds.do(
+            self._run_file_retry, task, wh_config, screenshots, file_path, wh_idx
+        )
+        self._retry_jobs[file_retry_key] = job
+
+    def _run_file_retry(self, task: ReportTask, wh_config: dict, screenshots: list, file_path: str, wh_idx: int):
+        """执行文件上传级重试（跳过Excel刷新和截图）"""
+        task_name = task.config.get("name", os.path.basename(task.config["excel_path"]))
+        webhook_key = wh_config["webhook"].split("key=")[-1][:8]
+        wh_logger = get_task_logger(task.task_id)
+        
+        file_retry_key = f"{task.task_id}_file_{wh_idx}"
+        
+        wh_logger.info(f"[任务{task.task_id}] {task_name} - 执行文件上传级重试，webhook: {webhook_key}...")
+        
+        try:
+            result = task.deliver_results(screenshots, wh_config, wh_logger)
+            
+            if result and result.get("success"):
+                wh_logger.info(f"[任务{task.task_id}] {task_name} - 文件上传级重试成功")
+                if hasattr(task, 'file_retry_counts') and wh_idx in task.file_retry_counts:
+                    task.file_retry_counts[wh_idx] = 0
+            else:
+                wh_logger.error(f"[任务{task.task_id}] {task_name} - 文件上传级重试失败")
+                
+                if not hasattr(task, 'file_retry_counts'):
+                    task.file_retry_counts = {}
+                max_attempts = task.retry_max_attempts
+                current_retry = task.file_retry_counts.get(wh_idx, 0)
+                
+                if current_retry < max_attempts:
+                    self._schedule_file_retry(task, wh_config, screenshots, file_path)
+                else:
+                    wh_logger.error(f"[任务{task.task_id}] {task_name} - 文件上传级重试已达最大次数({max_attempts})，放弃重试")
+                    if screenshots:
+                        task._cleanup(screenshots, wh_logger)
+        
+        except Exception as e:
+            wh_logger.error(f"[任务{task.task_id}] {task_name} - 文件上传级重试异常：{str(e)}")
+            
+            if not hasattr(task, 'file_retry_counts'):
+                task.file_retry_counts = {}
+            max_attempts = task.retry_max_attempts
+            current_retry = task.file_retry_counts.get(wh_idx, 0)
+            
+            if current_retry < max_attempts:
+                self._schedule_file_retry(task, wh_config, screenshots, file_path)
+            else:
+                wh_logger.error(f"[任务{task.task_id}] {task_name} - 文件上传级重试已达最大次数({max_attempts})，放弃重试")
+                if screenshots:
+                    task._cleanup(screenshots, wh_logger)
+        finally:
+            if file_retry_key in self._retry_jobs:
+                schedule.cancel_job(self._retry_jobs[file_retry_key])
+                del self._retry_jobs[file_retry_key]
 
     def _check_time_conflict(self, task: ReportTask, retry_time: str) -> str:
         """检查重试时间是否与其他配置任务时间冲突"""
