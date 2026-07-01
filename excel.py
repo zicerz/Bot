@@ -1197,7 +1197,7 @@ class ReportTask:
                                 )
                             },
                             description="截图失败通知",
-                            webhook=wh_config["webhook"],
+                            webhook=self.error_webhook,
                             task_logger=wh_logger
                         )
                         # 记录失败的webhook用于重试
