@@ -1903,7 +1903,7 @@ class TaskScheduler:
                 if retry_webhook_idx is not None and retry_webhook_idx in task.webhook_retry_counts:
                     task.webhook_retry_counts[retry_webhook_idx] = 0
                 if task.task_id in self._retry_jobs:
-                    schedule.cancel_job(self._retry_jobs[task.task_id])
+                    self._retry_jobs[task.task_id].cancel()
                     del self._retry_jobs[task.task_id]
             
             # 处理Webhook级重试（文件成功但部分Webhook失败）
@@ -1973,16 +1973,14 @@ class TaskScheduler:
         task_name = task.config.get("name", os.path.basename(task.config["excel_path"]))
         logger.info(f"任务 [{task.task_id}] {task_name} 失败，第 {task.retry_count}/{max_attempts} 次重试将在 {retry_time_str} 执行（延迟 {retry_delay_seconds/60:.1f} 分钟）")
         
-        # 如果存在未执行的重试任务，先取消
         if task.task_id in self._retry_jobs:
-            schedule.cancel_job(self._retry_jobs[task.task_id])
+            self._retry_jobs[task.task_id].cancel()
             del self._retry_jobs[task.task_id]
         
-        # 调度重试任务（使用延迟调度，只执行一次）
-        job = schedule.every(retry_delay_seconds).seconds.do(
-            self._run_task, task, webhook_configs, True
-        )
-        self._retry_jobs[task.task_id] = job
+        import threading
+        timer = threading.Timer(retry_delay_seconds, self._run_task, args=[task, webhook_configs, True])
+        timer.start()
+        self._retry_jobs[task.task_id] = timer
 
     def _schedule_webhook_retry(self, task: ReportTask, wh_config: dict, wh_idx: int):
         """调度Webhook级重试任务"""
@@ -2031,16 +2029,14 @@ class TaskScheduler:
         wh_key = wh_config["webhook"].split("key=")[-1][:8]
         logger.info(f"任务 [{task.task_id}] Webhook[{wh_idx}]({wh_key}...) 失败，第 {current_retry}/{max_attempts} 次重试将在 {retry_time_str} 执行（延迟 {retry_delay_seconds/60:.1f} 分钟）")
         
-        # 使用唯一的key存储Webhook重试任务
         webhook_retry_key = f"{task.task_id}_wh_{wh_idx}"
         if webhook_retry_key in self._retry_jobs:
-            schedule.cancel_job(self._retry_jobs[webhook_retry_key])
+            self._retry_jobs[webhook_retry_key].cancel()
         
-        # 调度Webhook重试任务（只重试该Webhook，使用延迟调度，只执行一次）
-        job = schedule.every(retry_delay_seconds).seconds.do(
-            self._run_webhook_retry, task, wh_config, wh_idx, True
-        )
-        self._retry_jobs[webhook_retry_key] = job
+        import threading
+        timer = threading.Timer(retry_delay_seconds, self._run_webhook_retry, args=[task, wh_config, wh_idx, True])
+        timer.start()
+        self._retry_jobs[webhook_retry_key] = timer
 
     def _run_webhook_retry(self, task: ReportTask, wh_config: dict, wh_idx: int, is_retry=True):
         """执行单个Webhook的重试"""
@@ -2137,12 +2133,12 @@ class TaskScheduler:
         
         file_retry_key = f"{task.task_id}_file_{wh_idx}"
         if file_retry_key in self._retry_jobs:
-            schedule.cancel_job(self._retry_jobs[file_retry_key])
+            self._retry_jobs[file_retry_key].cancel()
         
-        job = schedule.every(retry_delay_seconds).seconds.do(
-            self._run_file_retry, task, wh_config, screenshots, file_path, wh_idx
-        )
-        self._retry_jobs[file_retry_key] = job
+        import threading
+        timer = threading.Timer(retry_delay_seconds, self._run_file_retry, args=[task, wh_config, screenshots, file_path, wh_idx])
+        timer.start()
+        self._retry_jobs[file_retry_key] = timer
 
     def _run_file_retry(self, task: ReportTask, wh_config: dict, screenshots: list, file_path: str, wh_idx: int):
         """执行文件上传级重试（跳过Excel刷新和截图）"""
@@ -2192,7 +2188,7 @@ class TaskScheduler:
                     task._cleanup(screenshots, wh_logger)
         finally:
             if file_retry_key in self._retry_jobs:
-                schedule.cancel_job(self._retry_jobs[file_retry_key])
+                self._retry_jobs[file_retry_key].cancel()
                 del self._retry_jobs[file_retry_key]
 
     def _check_time_conflict(self, task: ReportTask, retry_time: str) -> str:
