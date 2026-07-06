@@ -1977,7 +1977,6 @@ class TaskScheduler:
             self._retry_jobs[task.task_id].cancel()
             del self._retry_jobs[task.task_id]
         
-        import threading
         timer = threading.Timer(retry_delay_seconds, self._run_task, args=[task, webhook_configs, True])
         timer.start()
         self._retry_jobs[task.task_id] = timer
@@ -2032,8 +2031,8 @@ class TaskScheduler:
         webhook_retry_key = f"{task.task_id}_wh_{wh_idx}"
         if webhook_retry_key in self._retry_jobs:
             self._retry_jobs[webhook_retry_key].cancel()
+            del self._retry_jobs[webhook_retry_key]
         
-        import threading
         timer = threading.Timer(retry_delay_seconds, self._run_webhook_retry, args=[task, wh_config, wh_idx, True])
         timer.start()
         self._retry_jobs[webhook_retry_key] = timer
@@ -2134,8 +2133,8 @@ class TaskScheduler:
         file_retry_key = f"{task.task_id}_file_{wh_idx}"
         if file_retry_key in self._retry_jobs:
             self._retry_jobs[file_retry_key].cancel()
+            del self._retry_jobs[file_retry_key]
         
-        import threading
         timer = threading.Timer(retry_delay_seconds, self._run_file_retry, args=[task, wh_config, screenshots, file_path, wh_idx])
         timer.start()
         self._retry_jobs[file_retry_key] = timer
