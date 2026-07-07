@@ -638,6 +638,33 @@ class ExcelProcessor:
 
         self.logger.warning("Excel进程强制终止完成")
 
+    def _apply_all_filters(self, sheet):
+        filters_applied = 0
+
+        try:
+            if sheet.AutoFilter is not None:
+                sheet.AutoFilter.ApplyFilter()
+                filters_applied += 1
+                self.logger.info(f"重新应用工作表筛选：{sheet.Name}")
+        except Exception as e:
+            self.logger.debug(f"应用工作表筛选失败：{sheet.Name} - {e}")
+
+        try:
+            list_objects = sheet.ListObjects
+            for i in range(1, list_objects.Count + 1):
+                table = list_objects.Item(i)
+                try:
+                    if table.AutoFilter is not None:
+                        table.AutoFilter.ApplyFilter()
+                        filters_applied += 1
+                        self.logger.info(f"重新应用表格筛选：{sheet.Name} - {table.Name}")
+                except Exception as e:
+                    self.logger.debug(f"应用表格筛选失败：{sheet.Name} - {table.Name} - {e}")
+        except Exception as e:
+            self.logger.debug(f"检查表格筛选时出错：{sheet.Name} - {e}")
+
+        return filters_applied
+
     def refresh_data(self) -> bool:
         self.logger.info("开始刷新数据...")
         start_time = time.time()
@@ -768,12 +795,9 @@ class ExcelProcessor:
                         self.logger.info("所有表格刷新成功！")
                         self._start_dialog_watchdog(timeout_s=90)
                         for sheet in self._iter_worksheets():
-                            try:
-                                if sheet.AutoFilter is not None:
-                                    sheet.AutoFilter.ApplyFilter()
-                                    self.logger.info(f"重新应用筛选：{sheet.Name}")
-                            except Exception as e:
-                                self.logger.warning(f"应用筛选/排序失败：{sheet.Name} - {e}")
+                            filters_applied = self._apply_all_filters(sheet)
+                            if filters_applied > 0:
+                                self.logger.info(f"工作表 [{sheet.Name}] 共重新应用 {filters_applied} 个筛选")
                         self._stop_dialog_watchdog()
                         for sheet in self._iter_worksheets():
                             try:
@@ -800,12 +824,9 @@ class ExcelProcessor:
                     self.logger.info("没有需要验证的表格，刷新完成")
                     self._start_dialog_watchdog(timeout_s=90)
                     for sheet in self._iter_worksheets():
-                        try:
-                            if sheet.AutoFilter is not None:
-                                sheet.AutoFilter.ApplyFilter()
-                                self.logger.info(f"重新应用筛选：{sheet.Name}")
-                        except Exception as e:
-                            self.logger.warning(f"应用筛选/排序失败：{sheet.Name} - {e}")
+                        filters_applied = self._apply_all_filters(sheet)
+                        if filters_applied > 0:
+                            self.logger.info(f"工作表 [{sheet.Name}] 共重新应用 {filters_applied} 个筛选")
                     self._stop_dialog_watchdog()
                     for sheet in self._iter_worksheets():
                         try:
