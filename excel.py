@@ -471,7 +471,7 @@ class ExcelProcessor:
                 for sheet in self._iter_worksheets():
                     try:
                         sheet.Activate()
-                        sheet.Application.ActiveWindow.Zoom = 220
+                        sheet.Application.ActiveWindow.Zoom = 210
                     except Exception as e:
                         self.logger.debug(f"设置缩放失败：{str(e)}")
                 self.logger.debug(f"成功打开文件：{os.path.basename(self.file_path)}")
@@ -1333,7 +1333,7 @@ class ReportTask:
             try:
                 self._send_wechat(
                     type="image",
-                    data=self._prepare_image(img_path),
+                    data=self._prepare_image(img_path, task_logger),
                     description=f"截图 {os.path.basename(img_path)}",
                     webhook=webhook,
                     task_logger=task_logger
@@ -1509,36 +1509,70 @@ class ReportTask:
         with open(file_path, "rb") as f:
             return self._upload_file(f, target_webhook, task_logger)
 
-    def _prepare_image(self, img_path: str) -> dict:
+    def _prepare_image(self, img_path: str, task_logger=None) -> dict:
         """准备图片数据"""
+        if task_logger is None:
+            task_logger = self.logger
+
         max_size = 2 * 1024 * 1024
-        min_width = 800
-        min_height = 600
+        min_width = 100
+        min_height = 100
 
         with open(img_path, "rb") as f:
             img_data = f.read()
+            original_size = len(img_data)
+            img = Image.open(io.BytesIO(img_data))
+            original_width, original_height = img.size
+
+            processed = False
+
             if len(img_data) > max_size:
-                img = Image.open(io.BytesIO(img_data))
+                processed = True
+                task_logger.info(f"图片文件大小 {original_size/1024:.1f} KB 超过企微限制(2MB)，需要压缩")
                 img = img.convert("RGB")
                 buf = io.BytesIO()
                 quality = 85
+                width, height = img.size
 
-                while True:
+                while len(img_data) > max_size:
                     buf.seek(0)
                     img.save(buf, format="JPEG", quality=quality)
-                    if buf.tell() <= max_size or quality <= 60:
-                        break
-                    quality -= 5
+                    img_data = buf.getvalue()
 
-                if buf.tell() > max_size:
-                    width, height = img.size
-                    while buf.tell() > max_size and width > min_width and height > min_height:
+                    if len(img_data) <= max_size:
+                        break
+
+                    if quality > 10:
+                        quality -= 5
+                        task_logger.info(f"降低质量至 {quality}%")
+                    elif width > min_width or height > min_height:
                         width = int(width * 0.9)
                         height = int(height * 0.9)
                         img = img.resize((width, height), Image.LANCZOS)
-                        buf.seek(0)
-                        img.save(buf, format="JPEG", quality=quality)
-                img_data = buf.getvalue()
+                        task_logger.info(f"缩小尺寸至 {width}x{height}")
+                    else:
+                        break
+
+                task_logger.info(f"压缩后文件大小: {len(img_data)/1024:.1f} KB")
+
+                if len(img_data) > max_size:
+                    task_logger.warning(f"图片 {os.path.basename(img_path)} 压缩后仍超过2MB限制({len(img_data)/1024:.1f} KB)")
+                    try:
+                        self._send_wechat(
+                            type="markdown",
+                            data={
+                                "content": f"<font color=\"warning\">## ⚠️ 图片压缩警告</font>\n> 文件：<font color=\"comment\">{os.path.basename(img_path)}</font>\n> 原始大小：<font color=\"warning\">{original_size/1024:.1f} KB</font>\n> 压缩后：<font color=\"warning\">{len(img_data)/1024:.1f} KB</font>\n> <font color=\"info\">图片已尽力压缩但仍超过企微2MB限制，发送可能失败</font>",
+                                "mentioned_list": ["zhufuzhe"]
+                            },
+                            description="图片压缩警告",
+                            webhook=self.error_webhook,
+                            task_logger=task_logger
+                        )
+                    except Exception as e:
+                        task_logger.error(f"发送图片压缩警告失败：{str(e)}")
+
+            if not processed:
+                task_logger.info(f"图片 {os.path.basename(img_path)} 无需处理，尺寸 {original_width}x{original_height}，大小 {original_size/1024:.1f} KB")
 
         return {
             "base64": base64.b64encode(img_data).decode(),
