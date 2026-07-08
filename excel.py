@@ -1107,9 +1107,9 @@ class ReportTask:
                     
                     if should_notify:
                         self._send_wechat(
-                            type="text",
+                            type="markdown",
                             data={
-                                "content": f"{task_id_str}数据刷新失败（超时或重试3次后仍有表格未刷新成功），请检查文件：{os.path.basename(self.config['excel_path'])}",
+                                "content": f"<font color=\"warning\">## ⚠️ {task_id_str}数据刷新失败</font>\n> 超时或重试3次后仍有表格未刷新成功\n> 文件：<font color=\"comment\">{os.path.basename(self.config['excel_path'])}</font>\n> <font color=\"info\">请及时检查</font>",
                                 "mentioned_list": ["zhufuzhe"]
                             },
                             description="数据刷新失败通知",
@@ -1128,8 +1128,8 @@ class ReportTask:
                         task_id_str = self._get_task_id_str()
                         self.logger.warning(f"{task_id_str}数据校验未通过，发送通知并终止任务")
                         self._send_wechat(
-                            type="text",
-                            data={"content": f"{task_id_str}{self.config['data_check']['notify_message']}", 
+                            type="markdown",
+                            data={"content": f"<font color=\"warning\">## ⚠️ {task_id_str}数据校验失败</font>\n> {self.config['data_check']['notify_message']}", 
                                 "mentioned_list": self.config["data_check"]["notify_users"]
                             },
                             description="数据校验失败通知",
@@ -1217,12 +1217,13 @@ class ReportTask:
                         if screenshots:
                             self._cleanup(screenshots, wh_logger)
                         self._send_wechat(
-                            type="text",
+                            type="markdown",
                             data={
                                 "content": (
-                                    f"{task_id_str}截图失败：重试3次后仍有 {len(actual_failed)} 个区域未成功截图，"
-                                    f"任务已终止。文件：{os.path.basename(self.config['excel_path'])}。"
-                                    f"失败区域：{failed_regions_text}"
+                                    f"<font color=\"warning\">## ⚠️ {task_id_str}截图失败</font>\n"
+                                    f"> 重试3次后仍有 <font color=\"warning\">{len(actual_failed)}</font> 个区域未成功截图\n"
+                                    f"> 文件：<font color=\"comment\">{os.path.basename(self.config['excel_path'])}</font>\n"
+                                    f"> 失败区域：{failed_regions_text}"
                                 )
                             },
                             description="截图失败通知",
@@ -1270,11 +1271,12 @@ class ReportTask:
             
             if "Excel 启动失败" in error_text:
                 self._send_wechat(
-                    type="text",
+                    type="markdown",
                     data={
                         "content": (
-                            f"{task_id_str}任务启动失败：{os.path.basename(self.config['excel_path'])}\n"
-                            f"错误信息：{error_text}"
+                            f"<font color=\"warning\">## ❌ {task_id_str}任务启动失败</font>\n"
+                            f"> 文件：<font color=\"comment\">{os.path.basename(self.config['excel_path'])}</font>\n"
+                            f"> 错误信息：{error_text}"
                         ),
                         "mentioned_list": ["zhufuzhe"]
                     },
@@ -1392,8 +1394,8 @@ class ReportTask:
         if file_size > MAX_FILE_SIZE:
             task_logger.warning(f"文件大小 {file_size / 1024 / 1024:.2f} MB 超过企微webhook限制（20MB），取消发送文件")
             self._send_wechat(
-                type="text",
-                data={"content": f"⚠️ 文件发送提醒：{os.path.basename(file_path)} 大小为 {file_size / 1024 / 1024:.2f} MB，超过企微webhook限制（20MB），已取消发送"},
+                type="markdown",
+                data={"content": f"<font color=\"warning\">## ⚠️ 文件大小超限提醒</font>\n> 文件：<font color=\"comment\">{os.path.basename(file_path)}</font>\n> 大小：<font color=\"warning\">{file_size / 1024 / 1024:.2f} MB</font>\n> 超过企微webhook限制（20MB），已取消发送"},
                 description="文件大小超限提醒",
                 webhook=target_webhook,
                 task_logger=task_logger
@@ -1494,8 +1496,8 @@ class ReportTask:
         if file_size > MAX_FILE_SIZE:
             task_logger.warning(f"文件大小 {file_size / 1024 / 1024:.2f} MB 超过企微webhook限制（20MB），取消上传")
             self._send_wechat(
-                type="text",
-                data={"content": f"⚠️ 文件发送提醒：{os.path.basename(file_path)} 大小为 {file_size / 1024 / 1024:.2f} MB，超过企微webhook限制（20MB），已取消发送"},
+                type="markdown",
+                data={"content": f"<font color=\"warning\">## ⚠️ 文件大小超限提醒</font>\n> 文件：<font color=\"comment\">{os.path.basename(file_path)}</font>\n> 大小：<font color=\"warning\">{file_size / 1024 / 1024:.2f} MB</font>\n> 超过企微webhook限制（20MB），已取消发送"},
                 description="文件大小超限提醒",
                 webhook=target_webhook,
                 task_logger=task_logger
@@ -1577,14 +1579,14 @@ class ReportTask:
         task_name = self.config.get("name", os.path.basename(self.config["excel_path"]))
         
         self._send_wechat(
-            type="text",
+            type="markdown",
             data={
                 "content": (
-                    f"{task_id_str}任务最终失败通知\n"
-                    f"任务名称：{task_name}\n"
-                    f"重试次数：{self.retry_count}次\n"
-                    f"文件路径：{self.config['excel_path']}\n"
-                    f"任务已达到最大重试次数（{self.retry_max_attempts}次），请检查文件或相关配置。"
+                    f"<font color=\"warning\">## ❌ {task_id_str}任务最终失败通知</font>\n"
+                    f"> 任务名称：<font color=\"comment\">{task_name}</font>\n"
+                    f"> 重试次数：<font color=\"warning\">{self.retry_count}</font>次\n"
+                    f"> 文件路径：<font color=\"comment\">{self.config['excel_path']}</font>\n"
+                    f"> <font color=\"info\">任务已达到最大重试次数（{self.retry_max_attempts}次），请检查文件或相关配置。</font>"
                 ),
                 "mentioned_list": ["zhufuzhe"]
             },
@@ -1661,9 +1663,9 @@ class ReportTask:
             self.logger.error(error_msg)
             
             self._send_wechat(
-                type="text",
+                type="markdown",
                 data={
-                    "content": f"[{self.task_id}]文件备份失败\n文件：{file_name}\n错误：{str(e)}",
+                    "content": f"<font color=\"warning\">## ❌ [{self.task_id}]文件备份失败</font>\n> 文件：<font color=\"comment\">{file_name}</font>\n> 错误：{str(e)}",
                     "mentioned_list": ["zhufuzhe"]
                 },
                 description="文件备份失败通知",
@@ -1812,15 +1814,15 @@ class TaskScheduler:
             
             try:
                 task._send_wechat(
-                    type="text",
+                    type="markdown",
                     data={
                         "content": (
-                            f"⚠️ 任务锁获取失败通知\n"
-                            f"任务ID：{task.task_id}\n"
-                            f"任务名称：{task_name}\n"
-                            f"时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
-                            f"原因：获取全局任务执行锁超时（300秒）\n"
-                            f"可能原因：另一个任务正在执行或锁文件被异常占用"
+                            f"<font color=\"warning\">## ⚠️ 任务锁获取失败通知</font>\n"
+                            f"> 任务ID：<font color=\"comment\">{task.task_id}</font>\n"
+                            f"> 任务名称：<font color=\"comment\">{task_name}</font>\n"
+                            f"> 时间：<font color=\"comment\">{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</font>\n"
+                            f"> 原因：<font color=\"warning\">获取全局任务执行锁超时（300秒）</font>\n"
+                            f"> <font color=\"info\">可能原因：另一个任务正在执行或锁文件被异常占用</font>"
                         ),
                         "mentioned_list": ["zhufuzhe"]
                     },
@@ -1890,16 +1892,16 @@ class TaskScheduler:
                 # 发送超时通知
                 try:
                     task._send_wechat(
-                        type="text",
+                        type="markdown",
                         data={
                             "content": (
-                                f"⚠️ 任务执行超时通知\n"
-                                f"任务ID：{task.task_id}\n"
-                                f"任务名称：{task_name}\n"
-                                f"时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
-                                f"原因：任务执行时间超过 {task.task_timeout_minutes} 分钟，已强制终止\n"
-                                f"文件：{os.path.basename(task.config['excel_path'])}\n"
-                                f"任务将在 {task.retry_delay_minutes} 分钟后重试"
+                                f"<font color=\"warning\">## ⏰ 任务执行超时通知</font>\n"
+                                f"> 任务ID：<font color=\"comment\">{task.task_id}</font>\n"
+                                f"> 任务名称：<font color=\"comment\">{task_name}</font>\n"
+                                f"> 时间：<font color=\"comment\">{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</font>\n"
+                                f"> 原因：<font color=\"warning\">任务执行时间超过 {task.task_timeout_minutes} 分钟，已强制终止</font>\n"
+                                f"> 文件：<font color=\"comment\">{os.path.basename(task.config['excel_path'])}</font>\n"
+                                f"> <font color=\"info\">任务将在 {task.retry_delay_minutes} 分钟后重试</font>"
                             ),
                             "mentioned_list": ["zhufuzhe"]
                         },
@@ -2262,15 +2264,15 @@ class TaskScheduler:
                 
                 try:
                     task._send_wechat(
-                        type="text",
+                        type="markdown",
                         data={
                             "content": (
-                                f"⚠️ 任务锁获取失败通知（手动执行）\n"
-                                f"任务ID：{task.task_id}\n"
-                                f"任务名称：{task_name}\n"
-                                f"时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
-                                f"原因：获取全局任务执行锁超时（300秒）\n"
-                                f"可能原因：另一个任务正在执行或锁文件被异常占用"
+                                f"<font color=\"warning\">## ⚠️ 任务锁获取失败通知（手动执行）</font>\n"
+                                f"> 任务ID：<font color=\"comment\">{task.task_id}</font>\n"
+                                f"> 任务名称：<font color=\"comment\">{task_name}</font>\n"
+                                f"> 时间：<font color=\"comment\">{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</font>\n"
+                                f"> 原因：<font color=\"warning\">获取全局任务执行锁超时（300秒）</font>\n"
+                                f"> <font color=\"info\">可能原因：另一个任务正在执行或锁文件被异常占用</font>"
                             ),
                             "mentioned_list": ["zhufuzhe"]
                         },
@@ -2408,7 +2410,7 @@ def send_message_to_all_webhooks(message: str, test_webhook: str = None):
             key = webhook.split("key=")[-1][:8] if "key=" in webhook else webhook[:8]
             target_webhook = test_webhook if test_webhook else webhook
             
-            payload = {"msgtype": "text", "text": {"content": message}}
+            payload = {"msgtype": "markdown", "markdown": {"content": f"<font color=\"info\">## 📢 系统通知</font>\n> {message}"}}
             
             try:
                 response = requests.post(target_webhook, json=payload, timeout=10)
