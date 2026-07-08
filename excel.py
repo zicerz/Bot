@@ -253,10 +253,14 @@ def is_in_monthly_range(start_day: int, end_day: int, config_name: str = "") -> 
             f"调整后({start_day}-{end_day})，当月天数：{days_in_month}"
         )
     
-    if start_day <= end_day:
-        return start_day <= today <= end_day
-    else:
-        return today >= start_day or today <= end_day
+    in_range = start_day <= today <= end_day if start_day <= end_day else today >= start_day or today <= end_day
+    
+    logger.debug(
+        f"日期范围检查：今日{today}日，配置范围({original_start_day}-{original_end_day})"
+        f"{'(已调整)' if adjusted else ''}，调整后({start_day}-{end_day})，结果：{'在范围内' if in_range else '不在范围内'}"
+    )
+    
+    return in_range
 
 # ---------------------------- 任务日志分隔工具 ----------------------------
 def _get_display_length(s):
@@ -893,6 +897,10 @@ class ExcelProcessor:
                             f"跳过截图 [{config_name}]：当前日期不在播报范围内（{start_day}-{end_day}）"
                         )
                         continue
+                    
+                    self.logger.info(
+                        f"日期在播报范围内（{start_day}-{end_day}），继续执行截图任务 [{config_name}]"
+                    )
                     
                     try:
                         sheet = self.workbook.Worksheets(cfg["sheet_name"])
