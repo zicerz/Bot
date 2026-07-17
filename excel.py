@@ -1290,7 +1290,12 @@ class ReportTask:
             elapsed_time = time.time() - start_time
             
             if success:
-                self._backup_file()
+                backup_result = self._backup_file()
+                if backup_result is None:
+                    self.logger.warning("文件备份失败（不影响任务状态）")
+                    self._backup_failed = True
+                else:
+                    self._backup_failed = False
             
             task_name = os.path.basename(self.config['excel_path'])
             print_task_footer(self.task_id, task_name, success, elapsed_time, target_logger=self.logger)
@@ -1696,15 +1701,18 @@ class ReportTask:
             error_msg = f"文件备份失败：{str(e)}"
             self.logger.error(error_msg)
             
-            self._send_wechat(
-                type="markdown",
-                data={
-                    "content": f"<font color=\"warning\">## ❌ [{self.task_id}]文件备份失败</font>\n> 文件：<font color=\"comment\">{file_name}</font>\n> 错误：{str(e)}",
-                    "mentioned_list": ["zhufuzhe"]
-                },
-                description="文件备份失败通知",
-                webhook=self.error_webhook
-            )
+            try:
+                self._send_wechat(
+                    type="markdown",
+                    data={
+                        "content": f"<font color=\"warning\">## ❌ [{self.task_id}]文件备份失败</font>\n> 文件：<font color=\"comment\">{file_name}</font>\n> 错误：{str(e)}",
+                        "mentioned_list": ["zhufuzhe"]
+                    },
+                    description="文件备份失败通知",
+                    webhook=self.error_webhook
+                )
+            except Exception:
+                self.logger.warning("发送备份失败通知失败")
             
             return None
 
@@ -1958,6 +1966,13 @@ class TaskScheduler:
             else:
                 # 任务正常完成
                 logger.info(f"任务 [{task.task_id}] {task_name} 执行完成")
+            
+            # 在任务成功后检查备份结果，触发备份重试
+            if execution_result["success"]:
+                backup_config = task.config.get("backup", {})
+                if backup_config.get("enable", False):
+                    if hasattr(task, '_backup_failed') and task._backup_failed:
+                        self._schedule_backup_retry(task)
             
             trigger_time = datetime.now().strftime("%H:%M")
             record_execution(task.task_id, task_name, trigger_time, execution_result["success"], manual=False)
@@ -2254,6 +2269,63 @@ class TaskScheduler:
             if file_retry_key in self._retry_jobs:
                 self._retry_jobs[file_retry_key].cancel()
                 del self._retry_jobs[file_retry_key]
+
+    def _schedule_backup_retry(self, task: ReportTask):
+        backup_config = task.config.get("backup", {})
+        if not backup_config.get("enable", False):
+            return
+        
+        if not hasattr(task, 'backup_retry_count'):
+            task.backup_retry_count = 0
+        
+        task.backup_retry_count += 1
+        
+        backup_max_attempts = backup_config.get("max_attempts", task.retry_max_attempts)
+        
+        if task.backup_retry_count > backup_max_attempts:
+            task_name = task.config.get("name", os.path.basename(task.config["excel_path"]))
+            logger.info(f"任务 [{task.task_id}] {task_name} 备份重试已达到最大次数 ({backup_max_attempts}次)，不再重试")
+            task.backup_retry_count = 0
+            return
+        
+        retry_delay_seconds = task.retry_delay_minutes * 60
+        retry_time = datetime.now() + timedelta(seconds=retry_delay_seconds)
+        retry_time_str = retry_time.strftime("%H:%M")
+        
+        task_name = task.config.get("name", os.path.basename(task.config["excel_path"]))
+        logger.info(f"任务 [{task.task_id}] {task_name} 备份失败，第 {task.backup_retry_count}/{backup_max_attempts} 次重试将在 {retry_time_str} 执行")
+        
+        backup_retry_key = f"{task.task_id}_backup"
+        if backup_retry_key in self._retry_jobs:
+            self._retry_jobs[backup_retry_key].cancel()
+            del self._retry_jobs[backup_retry_key]
+        
+        timer = threading.Timer(retry_delay_seconds, self._run_backup_retry, args=[task])
+        timer.start()
+        self._retry_jobs[backup_retry_key] = timer
+
+    def _run_backup_retry(self, task: ReportTask):
+        task_name = task.config.get("name", os.path.basename(task.config["excel_path"]))
+        logger.info(f"任务 [{task.task_id}] {task_name} - 执行备份重试")
+        
+        try:
+            result = task._backup_file()
+            if result:
+                logger.info(f"任务 [{task.task_id}] {task_name} - 备份重试成功")
+                task.backup_retry_count = 0
+                if hasattr(task, '_backup_failed'):
+                    task._backup_failed = False
+            else:
+                logger.error(f"任务 [{task.task_id}] {task_name} - 备份重试失败")
+                self._schedule_backup_retry(task)
+        except Exception as e:
+            logger.error(f"任务 [{task.task_id}] {task_name} - 备份重试异常：{str(e)}")
+            self._schedule_backup_retry(task)
+        finally:
+            backup_retry_key = f"{task.task_id}_backup"
+            if backup_retry_key in self._retry_jobs:
+                self._retry_jobs[backup_retry_key].cancel()
+                del self._retry_jobs[backup_retry_key]
 
     def _check_time_conflict(self, task: ReportTask, retry_time: str) -> str:
         """检查重试时间是否与其他配置任务时间冲突"""
