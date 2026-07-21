@@ -15,6 +15,7 @@ import io
 import threading
 import shutil
 import json
+import zipfile
 
 # ---------------------------- 颜色输出常量 ----------------------------
 COLOR_GREEN = "\033[32m"
@@ -1376,65 +1377,110 @@ class ReportTask:
         
         return {"success": True, "reason": "success"}
 
-    def _send_attachment(self, webhook: str, task_logger=None):
-        """发送关联文件（带重试）"""
+    def _convert_xlsx_to_xlsb(self, file_path: str, task_logger=None) -> str:
         if task_logger is None:
             task_logger = self.logger
         
-        target_webhook = self.test_webhook if self.test_webhook else webhook
+        excel = None
+        workbook = None
         
-        file_path = self.config.get("file_path") or self.config.get("excel_path")
-        task_logger.info(f"准备发送文件，file_path: {file_path}")
-        task_logger.info(f"send_file_enable 检查，webhook: {target_webhook.split('key=')[-1][:8]}...")
-        
-        if not file_path:
-            task_logger.warning("文件路径为空，跳过发送")
-            return
-        if not os.path.exists(file_path):
-            task_logger.warning(f"文件不存在：{file_path}，跳过发送")
-            return
-        
-        MAX_FILE_SIZE = 20 * 1024 * 1024
-        file_size = os.path.getsize(file_path)
-        if file_size > MAX_FILE_SIZE:
-            task_logger.warning(f"文件大小 {file_size / 1024 / 1024:.2f} MB 超过企微webhook限制（20MB），取消发送文件")
-            self._send_wechat(
-                type="markdown",
-                data={"content": f"<font color=\"warning\">## ⚠️ 文件大小超限提醒</font>\n> 文件：<font color=\"comment\">{os.path.basename(file_path)}</font>\n> 大小：<font color=\"warning\">{file_size / 1024 / 1024:.2f} MB</font>\n> 超过企微webhook限制（20MB），已取消发送"},
-                description="文件大小超限提醒",
-                webhook=target_webhook,
-                task_logger=task_logger
-            )
-            return
-        task_logger.info(f"文件大小: {file_size / 1024 / 1024:.2f} MB")
-        
-        max_retries = 3
-        for attempt in range(1, max_retries + 1):
-            task_logger.info(f"开始发送文件（第 {attempt}/{max_retries} 次尝试）：{os.path.basename(file_path)}")
-            try:
-                with open(file_path, "rb") as f:
-                    media_id = self._upload_file(f, target_webhook, task_logger)
-                    if media_id:
-                        task_logger.info(f"文件上传成功，media_id: {media_id}")
-                        self._send_wechat(
-                            type="file",
-                            data={"media_id": media_id},
-                            description=f"文件 {os.path.basename(file_path)}",
-                            webhook=target_webhook,
-                            task_logger=task_logger
-                        )
-                        task_logger.info(f"文件发送成功（第 {attempt}/{max_retries} 次尝试）")
-                        return
-                    else:
-                        task_logger.warning(f"文件上传失败，未获取到media_id（第 {attempt}/{max_retries} 次尝试）")
-            except Exception as e:
-                task_logger.error(f"文件发送异常（第 {attempt}/{max_retries} 次尝试）：{str(e)}")
+        try:
+            import urllib.parse
             
-            if attempt < max_retries:
-                task_logger.info(f"文件发送失败，{2 ** attempt}秒后重试...")
-                time.sleep(2 ** attempt)
+            file_path = urllib.parse.unquote(file_path)
+            file_path = os.path.normpath(file_path)
+            
+            if not os.path.exists(file_path):
+                task_logger.error(f"文件不存在：{file_path}")
+                return None
+            
+            dir_name = os.path.dirname(file_path)
+            file_name = os.path.basename(file_path)
+            name, ext = os.path.splitext(file_name)
+            
+            xlsb_filename = f"{name}.xlsb"
+            xlsb_path = os.path.join(dir_name, xlsb_filename)
+            xlsb_path = os.path.normpath(xlsb_path)
+            
+            task_logger.info(f"开始转换xlsx为xlsb：{file_name} -> {xlsb_filename}")
+            task_logger.info(f"源文件路径: {file_path}")
+            task_logger.info(f"目标文件路径: {xlsb_path}")
+            
+            pythoncom.CoInitialize()
+            excel = win32.DispatchEx("Excel.Application")
+            excel.Visible = False
+            excel.DisplayAlerts = False
+            
+            try:
+                workbook = excel.Workbooks.Open(file_path)
+            except Exception as open_error:
+                task_logger.warning(f"直接打开失败，尝试使用长路径前缀：{str(open_error)}")
+                long_file_path = f"\\\\?\\{os.path.abspath(file_path)}"
+                workbook = excel.Workbooks.Open(long_file_path)
+            
+            try:
+                workbook.SaveAs(xlsb_path, FileFormat=50)
+            except Exception as save_error:
+                task_logger.warning(f"直接保存失败，尝试使用长路径前缀：{str(save_error)}")
+                long_xlsb_path = f"\\\\?\\{os.path.abspath(xlsb_path)}"
+                workbook.SaveAs(long_xlsb_path, FileFormat=50)
+                xlsb_path = long_xlsb_path.replace("\\\\?\\", "")
+            
+            workbook.Close(SaveChanges=False)
+            
+            excel.Quit()
+            pythoncom.CoUninitialize()
+            
+            xlsb_size = os.path.getsize(xlsb_path)
+            task_logger.info(f"转换完成，xlsb文件大小: {xlsb_size / 1024 / 1024:.2f} MB")
+            
+            return xlsb_path
+        except Exception as e:
+            task_logger.error(f"xlsx转xlsb失败：{str(e)}")
+            if workbook:
+                try:
+                    workbook.Close(SaveChanges=False)
+                except:
+                    pass
+            if excel:
+                try:
+                    excel.Quit()
+                except:
+                    pass
+            try:
+                pythoncom.CoUninitialize()
+            except:
+                pass
+            return None
+
+    def _compress_file_with_zip(self, file_path: str, max_size: int = 20 * 1024 * 1024, task_logger=None) -> str:
+        if task_logger is None:
+            task_logger = self.logger
         
-        task_logger.error(f"文件发送最终失败，已重试 {max_retries} 次")
+        try:
+            dir_name = os.path.dirname(file_path)
+            file_name = os.path.basename(file_path)
+            name, ext = os.path.splitext(file_name)
+            zip_filename = f"{name}.zip"
+            zip_path = os.path.join(dir_name, zip_filename)
+            
+            task_logger.info(f"开始压缩文件：{file_name} -> {zip_filename}")
+            
+            with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+                zipf.write(file_path, arcname=file_name)
+            
+            zip_size = os.path.getsize(zip_path)
+            task_logger.info(f"压缩完成，压缩后大小: {zip_size / 1024 / 1024:.2f} MB")
+            
+            if zip_size <= max_size:
+                return zip_path
+            else:
+                task_logger.warning(f"压缩后大小 {zip_size / 1024 / 1024:.2f} MB 仍超过 {max_size / 1024 / 1024:.0f} MB 限制")
+                os.remove(zip_path)
+                return None
+        except Exception as e:
+            task_logger.error(f"文件压缩失败：{str(e)}")
+            return None
 
     def _upload_file(self, file_obj, webhook: str, task_logger=None) -> str:
         """上传文件到临时素材（带重试）"""
@@ -1498,21 +1544,54 @@ class ReportTask:
         
         MAX_FILE_SIZE = 20 * 1024 * 1024
         file_size = os.path.getsize(file_path)
+        original_file_path = file_path
+        temp_files = []
+        
         if file_size > MAX_FILE_SIZE:
-            task_logger.warning(f"文件大小 {file_size / 1024 / 1024:.2f} MB 超过企微webhook限制（20MB），取消上传")
-            self._send_wechat(
-                type="markdown",
-                data={"content": f"<font color=\"warning\">## ⚠️ 文件大小超限提醒</font>\n> 文件：<font color=\"comment\">{os.path.basename(file_path)}</font>\n> 大小：<font color=\"warning\">{file_size / 1024 / 1024:.2f} MB</font>\n> 超过企微webhook限制（20MB），已取消发送"},
-                description="文件大小超限提醒",
-                webhook=target_webhook,
-                task_logger=task_logger
-            )
-            return None
+            task_logger.info(f"文件大小 {file_size / 1024 / 1024:.2f} MB 超过企微webhook限制（20MB）")
+            
+            if file_path.lower().endswith('.xlsx'):
+                task_logger.info("检测到xlsx文件，尝试转换为xlsb格式")
+                xlsb_path = self._convert_xlsx_to_xlsb(file_path, task_logger)
+                if xlsb_path:
+                    file_size = os.path.getsize(xlsb_path)
+                    task_logger.info(f"转换为xlsb后大小: {file_size / 1024 / 1024:.2f} MB")
+                    file_path = xlsb_path
+                    temp_files.append(xlsb_path)
+            
+            if file_size > MAX_FILE_SIZE:
+                task_logger.info("尝试ZIP压缩")
+                compressed_path = self._compress_file_with_zip(file_path, MAX_FILE_SIZE, task_logger)
+                if compressed_path:
+                    file_size = os.path.getsize(compressed_path)
+                    task_logger.info(f"压缩后大小: {file_size / 1024 / 1024:.2f} MB")
+                    file_path = compressed_path
+                    temp_files.append(compressed_path)
+                else:
+                    task_logger.warning("文件压缩失败，仍超过20MB限制")
+                    self._send_wechat(
+                        type="markdown",
+                        data={"content": f"<font color=\"warning\">## ⚠️ 文件大小超限提醒</font>\n> 文件：<font color=\"comment\">{os.path.basename(original_file_path)}</font>\n> 大小：<font color=\"warning\">{file_size / 1024 / 1024:.2f} MB</font>\n> 超过企微webhook限制（20MB），转换并压缩后仍超限，已取消发送"},
+                        description="文件大小超限提醒",
+                        webhook=target_webhook,
+                        task_logger=task_logger
+                    )
+                    for temp_file in temp_files:
+                        if os.path.exists(temp_file):
+                            os.remove(temp_file)
+                    return None
         
         task_logger.info(f"文件大小: {file_size / 1024 / 1024:.2f} MB")
         
         with open(file_path, "rb") as f:
-            return self._upload_file(f, target_webhook, task_logger)
+            media_id = self._upload_file(f, target_webhook, task_logger)
+        
+        for temp_file in temp_files:
+            if os.path.exists(temp_file):
+                os.remove(temp_file)
+                task_logger.debug(f"清理临时文件：{temp_file}")
+        
+        return media_id
 
     def _prepare_image(self, img_path: str, task_logger=None) -> dict:
         """准备图片数据"""
