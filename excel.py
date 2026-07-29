@@ -982,6 +982,45 @@ class ExcelProcessor:
             f"{task_tag}_{prefix}_{timestamp}.png"
         )
 
+    def read_cell(self, sheet_name: str, cell_ref: str) -> dict:
+        """通过 COM 读取指定工作表中的单元格内容
+        
+        Args:
+            sheet_name: 工作表名称
+            cell_ref: 单元格坐标 (如 "B2", "A1")
+        
+        Returns:
+            {"value": str|None, "is_empty": bool, "error": str|None}
+        """
+        try:
+            if not self.workbook:
+                return {"value": None, "is_empty": True, "error": "工作簿未打开"}
+            try:
+                ws = self.workbook.Worksheets(sheet_name)
+            except Exception:
+                sheets = [str(s.Name) for s in self.workbook.Worksheets] if self.workbook else []
+                return {
+                    "value": None, "is_empty": True,
+                    "error": f"工作表 '{sheet_name}' 不存在 (可用: {', '.join(sheets[:5])})"
+                }
+            try:
+                raw = ws.Range(cell_ref).Value
+            except Exception as e:
+                return {
+                    "value": None, "is_empty": True,
+                    "error": f"读取单元格 {cell_ref} 失败: {str(e)}"
+                }
+            if raw is None:
+                return {"value": None, "is_empty": True, "error": None}
+            text = str(raw).strip()
+            return {
+                "value": text if text else None,
+                "is_empty": (text == ""),
+                "error": None
+            }
+        except Exception as e:
+            return {"value": None, "is_empty": True, "error": f"读取异常: {str(e)}"}
+
 # ---------------------------- 任务处理器 ----------------------------
 class ReportTask:
     """报表任务实例"""
@@ -1035,6 +1074,18 @@ class ReportTask:
                 # 设置默认值
                 if "send_file_enable" not in webhook_config:
                     webhook_config["send_file_enable"] = 0
+                if "send_image_enable" not in webhook_config:
+                    webhook_config["send_image_enable"] = 1
+                if "send_text_enable" not in webhook_config:
+                    webhook_config["send_text_enable"] = 0
+                # 为每个 capture_config 设置文字相关默认值
+                for cap in webhook_config.get("capture_configs", []):
+                    if "cell" not in cap:
+                        cap["cell"] = None
+                    if "label" not in cap:
+                        cap["label"] = None
+                    if "text_position" not in cap:
+                        cap["text_position"] = "down"
         elif "schedule" in config:
             # 兼容旧格式，转换为新格式
             schedule = config["schedule"]
@@ -1047,8 +1098,18 @@ class ReportTask:
                 "webhook": webhook,
                 "times": times,
                 "capture_configs": capture_configs,
-                "send_file_enable": send_file_enable
+                "send_file_enable": send_file_enable,
+                "send_image_enable": 1,
+                "send_text_enable": 0
             }]
+            # 为旧格式的 capture_configs 设置默认值
+            for cap in capture_configs:
+                if "cell" not in cap:
+                    cap["cell"] = None
+                if "label" not in cap:
+                    cap["label"] = None
+                if "text_position" not in cap:
+                    cap["text_position"] = "down"
             self.logger.warning("检测到旧版配置格式，已自动转换为多webhook格式")
         else:
             raise ValueError("任务配置必须包含webhooks或schedule字段")
@@ -1236,10 +1297,37 @@ class ReportTask:
                         print_subtask_footer(self.task_id, wh_idx if wh_idx >= 0 else 0, False, target_logger=wh_logger)
                         continue
 
+                    # 截图成功后，读取配置了 cell 的截图对应的单元格文字
+                    cells_data = []  # [{"name": "截图名", "cell": "B2", "label": "标签", "value": "...", "is_empty": False, "error": None, "text_position": "up"}, ...]
+                    if wh_config.get("send_text_enable", 0):
+                        for cap_config in wh_config.get("capture_configs", []):
+                            cell_ref = cap_config.get("cell")
+                            if cell_ref:
+                                sheet_name = cap_config.get("sheet_name", "")
+                                label = cap_config.get("label", cell_ref)
+                                name = cap_config.get("name", "")
+                                text_position = cap_config.get("text_position", "down")
+                                wh_logger.info(f"读取单元格 [{sheet_name}]{cell_ref} (标签: {label})")
+                                result = excel.read_cell(sheet_name, cell_ref)
+                                cells_data.append({
+                                    "name": name,
+                                    "cell": cell_ref,
+                                    "label": label,
+                                    "value": result["value"],
+                                    "is_empty": result["is_empty"],
+                                    "error": result["error"],
+                                    "text_position": text_position
+                                })
+                                if result["error"]:
+                                    wh_logger.warning(f"读取 [{sheet_name}]{cell_ref} 失败: {result['error']}")
+                                elif result["is_empty"]:
+                                    wh_logger.warning(f"[{sheet_name}]{cell_ref} ({label}) 为空")
+
                     results_to_deliver.append({
                         "screenshots": screenshots,
                         "webhook_config": wh_config,
-                        "wh_idx": wh_idx
+                        "wh_idx": wh_idx,
+                        "cells_data": cells_data
                     })
                     print_subtask_footer(self.task_id, wh_idx if wh_idx >= 0 else 0, True, target_logger=wh_logger)
                 
@@ -1254,7 +1342,11 @@ class ReportTask:
                     wh_logger = self.logger
                 else:
                     wh_logger = get_task_logger(f"{self.task_id}-{wh_idx}")
-                deliver_result = self.deliver_results(result["screenshots"], result["webhook_config"], wh_logger)
+                deliver_result = self.deliver_results(
+                    result["screenshots"], result["webhook_config"],
+                    cells_data=result.get("cells_data", []),
+                    task_logger=wh_logger
+                )
                 if deliver_result and not deliver_result.get("success"):
                     failed_webhooks.append((result["webhook_config"], wh_idx))
 
@@ -1304,24 +1396,38 @@ class ReportTask:
         # 返回任务结果和失败的webhook列表
         return success, failed_webhooks
 
-    def deliver_results(self, screenshots: list, webhook_config: dict, task_logger=None):
-        """根据webhook配置交付结果，所有配置的消息都发送成功才算任务成功"""
+    def deliver_results(self, screenshots: list, webhook_config: dict, cells_data: list = None, task_logger=None):
+        """根据webhook配置交付结果，支持文字(up/down)+图片+文件独立发送
+        
+        Args:
+            screenshots: 截图文件路径列表
+            webhook_config: webhook配置
+            cells_data: 单元格文字数据列表 [{"name":..., "cell":..., "label":..., "value":..., "is_empty":..., "error":..., "text_position": "up"/"down"}, ...]
+        """
         if task_logger is None:
             task_logger = self.logger
+        if cells_data is None:
+            cells_data = []
         webhook = webhook_config["webhook"]
         send_file_enable = webhook_config.get("send_file_enable", 0)
+        send_image_enable = webhook_config.get("send_image_enable", 1)
+        send_text_enable = webhook_config.get("send_text_enable", 0)
         
         webhook_key = webhook.split("key=")[-1][:8]
-        task_logger.info(f"_deliver_results 被调用")
+        task_logger.info(f"deliver_results 被调用")
         task_logger.info(f"  webhook: {webhook_key}...")
         task_logger.info(f"  screenshots数量: {len(screenshots)}")
-        task_logger.info(f"  send_file_enable: {send_file_enable}")
+        task_logger.info(f"  send_image_enable: {send_image_enable}, send_text_enable: {send_text_enable}, send_file_enable: {send_file_enable}")
+        task_logger.info(f"  cells_data数量: {len(cells_data)}")
 
         success = True
 
-        # 先上传文件获取media_id（如果启用）
+        # 分离 up/down 文字数据
+        cells_up = [c for c in cells_data if c.get("text_position") == "up"]
+        cells_down = [c for c in cells_data if c.get("text_position") != "up"]
+
+        # ---- 1. 上传文件（如果启用），提前获取media_id ----
         media_id = None
-        file_path = None
         if send_file_enable:
             task_logger.info("send_file_enable 为真，先上传文件")
             media_id = self._upload_attachment_for_send(webhook, task_logger)
@@ -1334,21 +1440,59 @@ class ReportTask:
                         task_logger.error("文件上传失败")
                         success = False
 
-        # 发送截图
-        for img_path in screenshots:
-            try:
-                self._send_wechat(
-                    type="image",
-                    data=self._prepare_image(img_path, task_logger),
-                    description=f"截图 {os.path.basename(img_path)}",
-                    webhook=webhook,
-                    task_logger=task_logger
-                )
-            except Exception as e:
-                task_logger.error(f"截图发送失败：{str(e)}")
-                success = False
+        # ---- 2. 发送 up 位置的文字 ----
+        if send_text_enable and cells_up:
+            task_logger.info(f"发送 up 位置文字 ({len(cells_up)}条)")
+            for cell_info in cells_up:
+                try:
+                    msg = self._build_cell_message_single(cell_info, webhook_config)
+                    self._send_wechat(
+                        type="markdown",
+                        data={"content": msg},
+                        description=f"文字 {cell_info.get('label', '')}({cell_info.get('cell', '')})",
+                        webhook=webhook,
+                        task_logger=task_logger
+                    )
+                except Exception as e:
+                    task_logger.error(f"up文字发送失败 [{cell_info.get('label', '')}]: {str(e)}")
+                    success = False
 
-        # 发送文件（如果上传成功）
+        # ---- 3. 发送截图 ----
+        if send_image_enable:
+            task_logger.info(f"发送 {len(screenshots)} 张截图")
+            for img_path in screenshots:
+                try:
+                    self._send_wechat(
+                        type="image",
+                        data=self._prepare_image(img_path, task_logger),
+                        description=f"截图 {os.path.basename(img_path)}",
+                        webhook=webhook,
+                        task_logger=task_logger
+                    )
+                except Exception as e:
+                    task_logger.error(f"截图发送失败：{str(e)}")
+                    success = False
+        else:
+            task_logger.info("send_image_enable=0，跳过截图发送")
+
+        # ---- 4. 发送 down 位置的文字 ----
+        if send_text_enable and cells_down:
+            task_logger.info(f"发送 down 位置文字 ({len(cells_down)}条)")
+            for cell_info in cells_down:
+                try:
+                    msg = self._build_cell_message_single(cell_info, webhook_config)
+                    self._send_wechat(
+                        type="markdown",
+                        data={"content": msg},
+                        description=f"文字 {cell_info.get('label', '')}({cell_info.get('cell', '')})",
+                        webhook=webhook,
+                        task_logger=task_logger
+                    )
+                except Exception as e:
+                    task_logger.error(f"down文字发送失败 [{cell_info.get('label', '')}]: {str(e)}")
+                    success = False
+
+        # ---- 5. 发送文件 ----
         if send_file_enable and media_id:
             task_logger.info("发送文件")
             try:
@@ -1372,10 +1516,40 @@ class ReportTask:
             self._cleanup(screenshots, task_logger)
         
         if not success:
-            task_logger.error("文件发送失败，任务失败")
-            return {"success": False, "reason": "file_send_failed"}
+            task_logger.error("交付失败")
+            return {"success": False, "reason": "deliver_failed"}
         
         return {"success": True, "reason": "success"}
+
+    def _build_cell_message_single(self, cell_info: dict, webhook_config: dict) -> str:
+        """构造单个单元格文字的 markdown 消息
+        
+        Args:
+            cell_info: {"name": "截图名", "cell": "B2", "label": "标签", "value": "内容", "is_empty": bool, "error": str|None}
+            webhook_config: webhook配置（用于获取任务名等信息）
+        
+        Returns:
+            markdown 格式的字符串
+        """
+        label = cell_info.get("label", cell_info.get("cell", ""))
+        cell_ref = cell_info.get("cell", "")
+        value = cell_info.get("value")
+        is_empty = cell_info.get("is_empty", False)
+        error = cell_info.get("error")
+        
+        # 构造显示值（不使用颜色）
+        if error:
+            display_value = f"读取失败: {error}"
+        elif is_empty or value is None:
+            display_value = "(空)"
+        else:
+            display_value = str(value)
+        
+        content = (
+            f"{label}\n"
+            f"> {display_value}"
+        )
+        return content
 
     def _convert_xlsx_to_xlsb(self, file_path: str, task_logger=None) -> str:
         if task_logger is None:

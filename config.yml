@@ -12,20 +12,11 @@ retry:
   enabled: 1                      # 是否启用任务级重试（1启用，0禁用）
   delay_minutes: 3               # 重试间隔时间（分钟），默认10分钟
   max_attempts: 3                 # 最大重试次数，默认3次
-  task_timeout_minutes: 15        # 任务超时时间（分钟），超时后自动终止任务并触发重试
+  task_timeout_minutes:  5       # 任务超时时间（分钟），超时后自动终止任务并触发重试
 
 # 机器人配置列表
 # webhooks:
-#   奖励池名单发布:    "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=338f6d2c-3457-4b48-b7d2-fd60f4db98f4"
-#   看板自动发布:      "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=a9d5a3ce-9091-4f99-94f1-c80832238c1a"
-#   运营转化数据播报:   "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=fa2847ba-1291-49c9-ae5d-0acd9712c220"
-#   激励播报（内部）:   "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=3b052688-8964-446a-bd5f-12c5716ca152"
-#   激励播报:          "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=7ad929e6-8953-43fd-bead-c13d90d32740"
-#   续航组看板播报:     "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=a6cb134d-7167-4dfa-b49b-04fb4e77d544"
-#   澳新数据看板:       "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=57b436ca-c037-4b8d-9136-5f7580efdc7f"
-#   澳新激励发布:       "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=778808a4-2ffc-44ad-aed2-0bfee021bd80"
-#   AP&研学数据播报:    "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=686ad22f-8943-462c-8be8-4a1160df0af5"
-#   约课数据看板:      "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=3afd2ff7-8d7c-42c8-8a47-1bfe86c68a2d"
+
 
 
 test_webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=ee57f939-0e4e-4707-beba-422dae91538e"
@@ -42,20 +33,40 @@ tasks:
       - webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=833b098e-d8b8-43ea-bfdf-cade0d040fb6"
         name: "学员明细"
         times: ["07:02", "09:02", "11:02", "13:02", "15:02", "17:02", "19:02", "21:02", "23:52"]
+        # --- 独立发送开关 ---
+        send_image_enable: 1     # 是否发送截图 (默认1)
+        send_text_enable: 1      # 是否发送单元格文字 (默认0)
+        send_file_enable: 0      # 是否发送源文件 (默认0)
         capture_configs:
-          - sheet_name: "昨日课量备份"
-            range: E1
+          - sheet_name: "Sheet1"
+            range: A1
             name: "test_webhook1"
-        send_file_enable: 1  # 可选，未配置默认为0
+            cell: "B2"             # 可选, 要读取文字的单元格坐标
+            label: "当日新增学员"   # 可选, 文字标签 (cell存在时生效)
+            text_position: "up"    # 可选, "up"=文字在截图上/ "down"=下方 (默认down)
+            start_day: 1           # 可选，每月开始播报日期（1-31，默认1）
+            end_day: 6           # 可选，每月结束播报日期（1-31，默认31）
+            # 负数表示从月底倒数：如 start_day: -5 表示倒数第5天，end_day: 0 表示最后一天
+            # start_day > end_day 表示跨月范围：如 start_day: 25, end_day: 5 表示每月25日至次月5日
+
+          - sheet_name: "Sheet1"
+            range: A12
+            name: "test_webhook"
+            start_day: 1           # 可选，每月开始播报日期（1-31，默认1）
+            end_day: 31           # 可选，每月结束播报日期（1-31，默认31）
+            # 负数表示从月底倒数：如 start_day: -5 表示倒数第5天，end_day: 0 表示最后一天
+            # start_day > end_day 表示跨月范围：如 start_day: 25, end_day: 5 表示每月25日至次月5日
 
       - webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=ee57f939-0e4e-4707-beba-422dae91538e"
         name: "学员明细自动播报"
         times: ["07:30", "09:30", "11:30", "13:30", "15:30", "17:02", "19:02", "21:02", "23:52"]
+        send_image_enable: 1     # 默认1, 纯截图
+        send_text_enable: 0      # 默认0, 与旧行为一致
+        send_file_enable: 0
         capture_configs:
           - sheet_name: "昨日课量备份"
             range: E1
             name: "test_webhook2"
-        send_file_enable: 0  # 可选，未配置默认为0
 
 
 #-----------------------------------------   task 0 多webhook示例  --------------------------------------     
@@ -66,6 +77,9 @@ tasks:
       - webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=833b098e-d8b8-43ea-bfdf-cade0d040fb6"
         name: "往期顺次"
         times: ["08:35","10:35", "12:35", "14:35", "16:35", "18:35", "20:35", "22:00"]
+        send_image_enable: 1     # 是否发送截图 (默认1)
+        send_text_enable: 1      # 是否发送单元格文字 (默认0)
+        send_file_enable: 1      # 是否发送源文件 (默认0)
         capture_configs:
           - sheet_name: "总览页面"
             range: AE1
@@ -76,7 +90,34 @@ tasks:
             # start_day > end_day 表示跨月范围：如 start_day: 25, end_day: 5 表示每月25日至次月5日
         send_file_enable: 0  # 可选，未配置默认为0
 
-    
+  - name: "数学日报"
+    excel_path: "C:/Users/EDY/OneDrive - PPLINGO PTE LTD/测试/数学日报.xlsb"
+    webhooks:
+      - webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=ee57f939-0e4e-4707-beba-422dae91538e"
+        name: "数学日报"
+        times: ["08:51"]
+        send_image_enable: 1     # 是否发送截图 (默认1)
+        send_text_enable: 1      # 是否发送单元格文字 (默认0)
+        send_file_enable: 1      # 是否发送源文件 (默认0)
+        capture_configs:
+          - sheet_name: "CC-新签达标数据"
+            range: A1
+            name: "CC-新签达标数据"
+            cell: "AD1"             # 可选, 要读取文字的单元格坐标
+            label: "数学日报"   # 可选, 文字标签 (cell存在时生效)
+            text_position: "up"    # 可选, "up"=文字在截图上/ "down"=下方 (默认down)
+          - sheet_name: "渠道转化-顺次与往期"
+            range: A1
+            name: "渠道转化-顺次与往期"
+          - sheet_name: "渠道转化-本月目标进度"
+            range: A1
+            name: "渠道转化-本月目标进度"
+          - sheet_name: "学管-续费达成"
+            range: A1
+            name: "学管-续费达成"
+        send_file_enable: 1  # 可选，未配置默认为0
+
+  
 
 
   #   # 发送文件
